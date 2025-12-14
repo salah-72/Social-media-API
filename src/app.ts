@@ -8,6 +8,8 @@ import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import config from './config/config';
 import { logger } from './lib/winston';
+import authRouter from '@/routes/authRouter';
+import errorHandler from './middlewares/errorHandler';
 
 const app = express();
 
@@ -54,6 +56,21 @@ app.use(helmet());
 app.get('/api/v1', (req, res) => {
   res.send('welcome to our social media api');
 });
+app.use('/api/v1/auth', authRouter);
+
+app.use(errorHandler);
 app.listen(config.PORT, () => {
   logger.info(`app is running at port ${config.PORT}`);
 });
+
+const handleServerShutdown = async () => {
+  try {
+    logger.warn('Server SHUTDOWN');
+    process.exit(0);
+  } catch (err) {
+    logger.error('Error during server shutdown', err);
+  }
+};
+
+process.on('SIGTERM', handleServerShutdown);
+process.on('SIGINT', handleServerShutdown);

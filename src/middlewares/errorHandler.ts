@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import AppError from '@/utils/appError';
-
+import { logger } from '@/lib/winston';
 interface IError extends Error {
   statusCode?: number;
   status?: string;
@@ -62,6 +62,13 @@ const errorHandler = (
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
+  logger.error(err.message, {
+    statusCode: err.statusCode,
+    status: err.status,
+    path: req.originalUrl,
+    method: req.method,
+    ip: req.ip,
+  });
   if (process.env.NODE_ENV === 'development') {
     devError(err, res);
   } else {

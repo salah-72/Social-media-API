@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import ms from 'ms';
 
 dotenv.config();
 
@@ -7,6 +8,10 @@ const config = {
   DB_CONNECTION: process.env.DB_CONNECTION,
   LOG_LEVEL: process.env.LOG_LEVEL,
   NODE_ENV: process.env.NODE_ENV,
+  JWT_REFRESH_KEY: process.env.JWT_REFRESH_KEY!,
+  JWT_ACCESS_KEY: process.env.JWT_ACCESS_KEY!,
+  JWT_REFRESH_EXPIRED_IN: process.env.JWT_REFRESH_EXPIRED_IN as ms.StringValue,
+  JWT_ACCESS_EXPIRED_IN: process.env.JWT_ACCESS_EXPIRED_IN as ms.StringValue,
 };
 
 export default config;
