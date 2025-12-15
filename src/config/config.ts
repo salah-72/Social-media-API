@@ -12,6 +12,8 @@ const config = {
   JWT_ACCESS_KEY: process.env.JWT_ACCESS_KEY!,
   JWT_REFRESH_EXPIRED_IN: process.env.JWT_REFRESH_EXPIRED_IN as ms.StringValue,
   JWT_ACCESS_EXPIRED_IN: process.env.JWT_ACCESS_EXPIRED_IN as ms.StringValue,
+  GOOGLE_PASSWORD: process.env.GOOGLE_PASSWORD,
+  GOOGLE_USER: process.env.GOOGLE_USER,
 };
 
 export default config;
