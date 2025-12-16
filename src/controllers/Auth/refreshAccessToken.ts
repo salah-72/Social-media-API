@@ -23,7 +23,6 @@ const refreshAccessToken = catchAsync(
       refreshToken,
       config.JWT_REFRESH_KEY,
     ) as JwtRefreshPayload;
-
     const accessToken = generateAccessToken(payload.userId);
 
     res.status(200).json({
