@@ -10,6 +10,7 @@ import config from './config/config';
 import { logger } from './lib/winston';
 import authRouter from '@/routes/authRouter';
 import errorHandler from './middlewares/errorHandler';
+import passport from 'passport';
 
 const app = express();
 
@@ -48,6 +49,7 @@ const limiter = rateLimit({
 
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(passport.initialize());
 app.use(urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(compression({ threshold: 1024 }));
