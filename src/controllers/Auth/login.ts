@@ -45,11 +45,13 @@ export const login = catchAsync(
       sameSite: 'strict',
     });
 
-    await Token.deleteMany({ userId: user._id });
-    await Token.create({
-      token: refreshToken,
-      userId: user._id,
-    });
+    await Token.findOneAndUpdate(
+      { userId: user._id },
+      {
+        token: refreshToken,
+        userId: user._id,
+      },
+    );
     logger.info('Refresh token created for user', {
       userId: user._id,
       token: refreshToken,
