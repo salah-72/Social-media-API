@@ -1,4 +1,5 @@
 import { emailVerification } from '@/controllers/Auth/emailVerification';
+import { forgetPassword } from '@/controllers/Auth/forgetPassword';
 import { login } from '@/controllers/Auth/login';
 import refreshAccessToken from '@/controllers/Auth/refreshAccessToken';
 import { register } from '@/controllers/Auth/register';
@@ -16,4 +17,5 @@ router.get(
   passport.authenticate('google', { scope: ['profile', 'email'] }),
 );
 router.get('/google/callback', googleAuthCallback);
+router.post('/forgetPassword', forgetPassword);
 export default router;
