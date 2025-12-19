@@ -11,7 +11,7 @@ export interface IUser {
   profilePhoto: string;
   coverPhoto: string;
   emailVerified: boolean;
-  emailVerificationToken: string;
+  emailVerificationToken?: string;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
 }

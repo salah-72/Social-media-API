@@ -19,6 +19,9 @@ export const forgetPassword = catchAsync(
     if (!user)
       return next(new appError('entered email or password not correct', 400));
 
+    if (!user.emailVerified)
+      return next(new appError('please verify your account ', 401));
+
     const plainToken = crypto.randomBytes(32).toString('hex');
     const hashedToken = await crypto
       .createHash('sha256')

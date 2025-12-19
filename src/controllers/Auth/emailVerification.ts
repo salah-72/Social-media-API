@@ -27,7 +27,7 @@ export const emailVerification = catchAsync(
       );
     }
 
-    user.emailVerificationToken = 'undefined';
+    user.emailVerificationToken = undefined;
     user.emailVerified = true;
 
     await user.save({ validateBeforeSave: false });
