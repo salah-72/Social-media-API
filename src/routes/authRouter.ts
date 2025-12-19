@@ -1,10 +1,12 @@
 import { emailVerification } from '@/controllers/Auth/emailVerification';
 import { forgetPassword } from '@/controllers/Auth/forgetPassword';
 import { login } from '@/controllers/Auth/login';
+import { logOut } from '@/controllers/Auth/logOut';
 import refreshAccessToken from '@/controllers/Auth/refreshAccessToken';
 import { register } from '@/controllers/Auth/register';
 import { resetPassword } from '@/controllers/Auth/resetPassword';
 import { googleAuthCallback } from '@/controllers/Auth/signinWithGoogle';
+import { authenticate } from '@/middlewares/authenticate';
 import { Router } from 'express';
 import passport from 'passport';
 
@@ -20,4 +22,5 @@ router.get(
 router.get('/google/callback', googleAuthCallback);
 router.post('/forgetPassword', forgetPassword);
 router.post('/reset/:token', resetPassword);
+router.post('/logout', authenticate, logOut);
 export default router;

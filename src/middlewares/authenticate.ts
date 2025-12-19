@@ -23,13 +23,14 @@ export const authenticate = catchAsync(
       config.JWT_ACCESS_KEY,
     ) as JwtRefreshPayload;
 
-    const user = await User.findById(payload.userId);
+    const user = await User.findById(payload._id);
 
     if (!user?.emailVerified)
       return next(
         new appError('Access denied, verify your email to get access', 401),
       );
 
-    req.User = user;
+    req.currentuser = user;
+    next();
   },
 );

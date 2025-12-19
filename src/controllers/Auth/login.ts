@@ -45,13 +45,11 @@ export const login = catchAsync(
       sameSite: 'strict',
     });
 
-    await Token.findOneAndUpdate(
-      { userId: user._id },
-      {
-        token: refreshToken,
-        userId: user._id,
-      },
-    );
+    await Token.deleteOne({ userId: user._id });
+    await Token.create({
+      token: refreshToken,
+      userId: user._id,
+    });
     logger.info('Refresh token created for user', {
       userId: user._id,
       token: refreshToken,
