@@ -24,7 +24,7 @@ export const updatePassword = catchAsync(
 
     await user.save();
 
-    logger.info('user changed his password');
+    logger.info('user changed his password', { id: user._id });
 
     res.status(200).json({
       status: 'success',
