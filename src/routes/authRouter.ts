@@ -6,6 +6,7 @@ import refreshAccessToken from '@/controllers/Auth/refreshAccessToken';
 import { register } from '@/controllers/Auth/register';
 import { resetPassword } from '@/controllers/Auth/resetPassword';
 import { googleAuthCallback } from '@/controllers/Auth/signinWithGoogle';
+import { updatePassword } from '@/controllers/Auth/updatePassword';
 import { authenticate } from '@/middlewares/authenticate';
 import { Router } from 'express';
 import passport from 'passport';
@@ -23,4 +24,6 @@ router.get('/google/callback', googleAuthCallback);
 router.post('/forgetPassword', forgetPassword);
 router.post('/reset/:token', resetPassword);
 router.post('/logout', authenticate, logOut);
+
+router.patch('/updatePassword', authenticate, updatePassword);
 export default router;
