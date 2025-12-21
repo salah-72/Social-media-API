@@ -1,8 +1,9 @@
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcrypt';
 
 export interface IUser {
+  _id: Types.ObjectId;
   email: string;
   username: string;
   password: string;
