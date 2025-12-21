@@ -14,6 +14,27 @@ export interface IUser {
   emailVerificationToken?: string;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
+  about?: string;
+  education?: {
+    level: string;
+    schoolName: string;
+  }[];
+  experience?: {
+    title: string;
+    company: string;
+    from: Date;
+    to: Date;
+  }[];
+  gender?: 'Male' | 'Female';
+  birthday?: Date;
+  socialLinks?: {
+    website?: string;
+    facebook?: string;
+    instagtam?: string;
+    linkedIn?: string;
+    x?: string;
+    youtube?: string;
+  };
 }
 
 const userSchema = new mongoose.Schema<IUser>(
@@ -60,6 +81,59 @@ const userSchema = new mongoose.Schema<IUser>(
     emailVerificationToken: String,
     passwordResetToken: String,
     passwordResetExpires: Date,
+
+    about: String,
+    education: [
+      {
+        level: String,
+        schoolName: String,
+      },
+    ],
+    experience: [
+      {
+        title: String,
+        company: String,
+        from: Date,
+        to: Date,
+      },
+    ],
+    gender: {
+      type: String,
+      enum: ['Male', 'Female'],
+    },
+    birthday: Date,
+    socialLinks: {
+      website: {
+        type: String,
+        validate: [validator.isURL, 'Invalid URL'],
+        maxLength: [50, 'website url musr be less than 50 char'],
+      },
+      facebook: {
+        type: String,
+        validate: [validator.isURL, 'Invalid URL'],
+        maxLength: [50, 'facebook profile url musr be less than 50 char'],
+      },
+      instagram: {
+        type: String,
+        validate: [validator.isURL, 'Invalid URL'],
+        maxLength: [50, 'instagram profile url musr be less than 50 char'],
+      },
+      linkedIn: {
+        type: String,
+        validate: [validator.isURL, 'Invalid URL'],
+        maxLength: [50, 'linkedIn profile url musr be less than 50 char'],
+      },
+      x: {
+        type: String,
+        validate: [validator.isURL, 'Invalid URL'],
+        maxLength: [50, 'x profile url musr be less than 50 char'],
+      },
+      youtube: {
+        type: String,
+        validate: [validator.isURL, 'Invalid URL'],
+        maxLength: [50, 'youtube channel url musr be less than 50 char'],
+      },
+    },
   },
   { timestamps: true },
 );
