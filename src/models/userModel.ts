@@ -14,6 +14,7 @@ export interface IUser {
   emailVerificationToken?: string;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
+  active: boolean;
   about?: string;
   education?: {
     level: string;
@@ -82,6 +83,10 @@ const userSchema = new mongoose.Schema<IUser>(
     passwordResetToken: String,
     passwordResetExpires: Date,
 
+    active: {
+      type: Boolean,
+      default: true,
+    },
     about: String,
     education: [
       {

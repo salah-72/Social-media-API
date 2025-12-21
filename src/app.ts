@@ -9,6 +9,7 @@ import { rateLimit } from 'express-rate-limit';
 import config from './config/config';
 import { logger } from './lib/winston';
 import authRouter from '@/routes/authRouter';
+import userRouter from '@/routes/userRouter';
 import errorHandler from './middlewares/errorHandler';
 import passport from 'passport';
 
@@ -59,6 +60,7 @@ app.get('/api/v1', (req, res) => {
   res.send('welcome to our social media api');
 });
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/user', userRouter);
 
 app.use(errorHandler);
 app.listen(config.PORT, () => {

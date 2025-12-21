@@ -15,7 +15,7 @@ export const updatePassword = catchAsync(
       '+password',
     );
 
-    if (!user) return next(new appError('ypur account is found', 404));
+    if (!user) return next(new appError('your account is not found', 404));
 
     if (!(await bcrypt.compare(oldPassword, user?.password)))
       return next(new appError('password is wrong', 400));
