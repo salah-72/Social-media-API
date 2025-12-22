@@ -6,6 +6,7 @@ import { isActive } from '@/middlewares/isActive';
 import { Router } from 'express';
 import { uploadCoverPhoto } from '@/controllers/User/uploadCoverPhoto';
 import { upload } from '@/middlewares/multer';
+import { uploadProfilePic } from '@/controllers/User/uploadProfilePic';
 
 const router = Router();
 router.get('/myProfile', authenticate, isActive, getMe);
@@ -17,6 +18,13 @@ router.patch(
   isActive,
   upload.single('coverPhoto'),
   uploadCoverPhoto,
+);
+router.patch(
+  '/uploadProfilePic',
+  authenticate,
+  isActive,
+  upload.single('profilePhoto'),
+  uploadProfilePic,
 );
 
 export default router;
