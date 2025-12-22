@@ -8,6 +8,7 @@ import { resetPassword } from '@/controllers/Auth/resetPassword';
 import { googleAuthCallback } from '@/controllers/Auth/signinWithGoogle';
 import { updatePassword } from '@/controllers/Auth/updatePassword';
 import { authenticate } from '@/middlewares/authenticate';
+import { isActive } from '@/middlewares/isActive';
 import { Router } from 'express';
 import passport from 'passport';
 
@@ -23,7 +24,7 @@ router.get(
 router.get('/google/callback', googleAuthCallback);
 router.post('/forgetPassword', forgetPassword);
 router.post('/reset/:token', resetPassword);
-router.post('/logout', authenticate, logOut);
+router.post('/logout', authenticate, isActive, logOut);
 
-router.patch('/updatePassword', authenticate, updatePassword);
+router.patch('/updatePassword', authenticate, isActive, updatePassword);
 export default router;

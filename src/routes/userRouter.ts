@@ -7,6 +7,7 @@ import { Router } from 'express';
 import { uploadCoverPhoto } from '@/controllers/User/uploadCoverPhoto';
 import { upload } from '@/middlewares/multer';
 import { uploadProfilePic } from '@/controllers/User/uploadProfilePic';
+import { updateProfileInfo } from '@/controllers/User/updateProfile';
 
 const router = Router();
 router.get('/myProfile', authenticate, isActive, getMe);
@@ -26,5 +27,6 @@ router.patch(
   upload.single('profilePhoto'),
   uploadProfilePic,
 );
+router.patch('/updateInfo', authenticate, isActive, updateProfileInfo);
 
 export default router;

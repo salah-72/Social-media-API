@@ -16,6 +16,9 @@ export interface IUser {
   passwordResetToken?: string;
   passwordResetExpires?: Date;
   active: boolean;
+  public: 'public' | 'private';
+  hometown?: string;
+  currentCity?: string;
   about?: string;
   education?: {
     level: string;
@@ -88,7 +91,13 @@ const userSchema = new mongoose.Schema<IUser>(
       type: Boolean,
       default: true,
     },
+    public: {
+      type: String,
+      default: 'public',
+    },
     about: String,
+    hometown: String,
+    currentCity: String,
     education: [
       {
         level: String,
