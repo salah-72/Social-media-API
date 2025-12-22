@@ -16,6 +16,9 @@ const config = {
   GOOGLE_USER: process.env.GOOGLE_USER,
   ClientID: process.env.ClientID,
   clientSecret: process.env.clientSecret,
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
+  CLOUDINARY_API_NAME: process.env.CLOUDINARY_API_NAME,
 };
 
 export default config;
