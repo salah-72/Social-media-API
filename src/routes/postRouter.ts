@@ -1,5 +1,6 @@
 import { createPost } from '@/controllers/post/createPost';
 import { deletePost } from '@/controllers/post/deletePost';
+import { updatePost } from '@/controllers/post/updatePost';
 import { authenticate } from '@/middlewares/authenticate';
 import { isActive } from '@/middlewares/isActive';
 import { upload } from '@/middlewares/multer';
@@ -15,4 +16,5 @@ router.post(
   createPost,
 );
 router.delete('/deletePost/:id', authenticate, isActive, deletePost);
+router.patch('/updatePost/:id', authenticate, isActive, updatePost);
 export default router;

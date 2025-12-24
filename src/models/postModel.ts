@@ -12,6 +12,7 @@ export interface IPost {
   whoCanSee: 'me' | 'followers' | 'public';
   likesCount: number;
   commentsCount: number;
+  publishedAt?: Date;
 }
 
 const postSchema = new Schema<IPost>(
@@ -56,13 +57,16 @@ const postSchema = new Schema<IPost>(
       type: Number,
       default: 0,
     },
+    publishedAt: Date,
   },
   {
-    timestamps: {
-      createdAt: 'publishedAt',
-    },
+    timestamps: true,
   },
 );
+
+postSchema.pre('save', function () {
+  if (this.isNew && this.status === 'published') this.publishedAt = new Date();
+});
 
 const Post = model<IPost>('Post', postSchema);
 export default Post;
