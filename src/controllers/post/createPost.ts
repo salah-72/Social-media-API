@@ -44,7 +44,7 @@ export const createPost = catchAsync(
 
     logger.info(`user: ${author} create post`);
 
-    res.status(200).json({
+    res.status(201).json({
       status: 'success',
       post,
     });
