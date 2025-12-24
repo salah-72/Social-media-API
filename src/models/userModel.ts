@@ -93,6 +93,7 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     public: {
       type: String,
+      enum: ['public', 'private'],
       default: 'public',
     },
     about: String,
