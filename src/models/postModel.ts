@@ -7,6 +7,7 @@ export interface IPost {
   images?: {
     url: string;
     publicId: string;
+    _id?: Types.ObjectId;
   }[];
   status: 'draft' | 'published';
   whoCanSee: 'me' | 'followers' | 'public';

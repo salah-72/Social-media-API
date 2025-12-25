@@ -1,5 +1,6 @@
 import { addImg } from '@/controllers/post/addImgToPost';
 import { createPost } from '@/controllers/post/createPost';
+import { deleteImg } from '@/controllers/post/deleteImgFromPost';
 import { deletePost } from '@/controllers/post/deletePost';
 import { updatePost } from '@/controllers/post/updatePost';
 import { authenticate } from '@/middlewares/authenticate';
@@ -24,5 +25,11 @@ router.post(
   isActive,
   upload.single('images'),
   addImg,
+);
+router.delete(
+  '/deleteImg/:postId/img/:imgId',
+  authenticate,
+  isActive,
+  deleteImg,
 );
 export default router;
