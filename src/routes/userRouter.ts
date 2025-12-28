@@ -8,6 +8,7 @@ import { uploadCoverPhoto } from '@/controllers/User/uploadCoverPhoto';
 import { upload } from '@/middlewares/multer';
 import { uploadProfilePic } from '@/controllers/User/uploadProfilePic';
 import { updateProfileInfo } from '@/controllers/User/updateProfile';
+import { follow } from '@/controllers/follow/follow';
 
 const router = Router();
 router.get('/myProfile', authenticate, isActive, getMe);
@@ -28,5 +29,7 @@ router.patch(
   uploadProfilePic,
 );
 router.patch('/updateInfo', authenticate, isActive, updateProfileInfo);
+
+router.post('/follow/:id', authenticate, isActive, follow);
 
 export default router;
