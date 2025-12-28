@@ -15,6 +15,8 @@ export interface IUser {
   emailVerificationToken?: string;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
+  followers: number;
+  following: number;
   active: boolean;
   public: 'public' | 'private';
   hometown?: string;
@@ -86,6 +88,15 @@ const userSchema = new mongoose.Schema<IUser>(
     emailVerificationToken: String,
     passwordResetToken: String,
     passwordResetExpires: Date,
+
+    followers: {
+      type: Number,
+      default: 0,
+    },
+    following: {
+      type: Number,
+      default: 0,
+    },
 
     active: {
       type: Boolean,
