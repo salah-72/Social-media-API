@@ -12,6 +12,7 @@ import { follow } from '@/controllers/follow/follow';
 import { accept } from '@/controllers/follow/acceptFollow';
 import { reject } from '@/controllers/follow/rejectFollow';
 import { unfollow } from '@/controllers/follow/unfollow';
+import { cancelReq } from '@/controllers/follow/cancelRequest';
 
 const router = Router();
 router.get('/myProfile', authenticate, isActive, getMe);
@@ -37,5 +38,6 @@ router.post('/follow/:id', authenticate, isActive, follow);
 router.delete('/follow/:id', authenticate, isActive, unfollow);
 router.patch('/followReq/:id', authenticate, isActive, accept);
 router.delete('/followReq/:id', authenticate, isActive, reject);
+router.delete('/cancelFollowReq/:id', authenticate, isActive, cancelReq);
 
 export default router;
