@@ -18,7 +18,7 @@ export interface IUser {
   followers: number;
   following: number;
   active: boolean;
-  public: 'public' | 'private';
+  public: boolean;
   hometown?: string;
   currentCity?: string;
   about?: string;
@@ -103,9 +103,8 @@ const userSchema = new mongoose.Schema<IUser>(
       default: true,
     },
     public: {
-      type: String,
-      enum: ['public', 'private'],
-      default: 'public',
+      type: Boolean,
+      default: true,
     },
     about: String,
     hometown: String,

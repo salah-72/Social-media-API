@@ -3,6 +3,7 @@ import { model, Schema, Types } from 'mongoose';
 export interface IFollow {
   follower: Types.ObjectId;
   following: Types.ObjectId;
+  status: 'pending' | 'accepted';
 }
 
 const followSchema = new Schema<IFollow>(
@@ -16,6 +17,10 @@ const followSchema = new Schema<IFollow>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'accepted'],
     },
   },
   { timestamps: true },

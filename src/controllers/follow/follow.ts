@@ -19,12 +19,16 @@ export const follow = catchAsync(
     if (follower?.toString() === following)
       return next(new appError('you cannot follow yourself', 400));
 
-    const follow = await Follow.create({ follower, following });
-
-    await User.findByIdAndUpdate(follower, { $inc: { following: 1 } });
-    await User.findByIdAndUpdate(following, { $inc: { followers: 1 } });
-
-    logger.info(`${follower} start following ${following}`);
+    let follow;
+    if (followingUser.public) {
+      follow = await Follow.create({ follower, following, status: 'accepted' });
+      await User.findByIdAndUpdate(follower, { $inc: { following: 1 } });
+      await User.findByIdAndUpdate(following, { $inc: { followers: 1 } });
+      logger.info(`${follower} start following ${following}`);
+    } else {
+      follow = await Follow.create({ follower, following, status: 'pending' });
+      logger.info(`${follower} requested to follow ${following}`);
+    }
 
     res.status(201).json({
       status: 'success',
