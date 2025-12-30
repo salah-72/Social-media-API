@@ -14,6 +14,7 @@ import { reject } from '@/controllers/follow/rejectFollow';
 import { unfollow } from '@/controllers/follow/unfollow';
 import { cancelReq } from '@/controllers/follow/cancelRequest';
 import { block } from '@/controllers/block/block';
+import { unblock } from '@/controllers/block/unBlock';
 
 const router = Router();
 router.get('/myProfile', authenticate, isActive, getMe);
@@ -42,5 +43,6 @@ router.delete('/followReq/:id', authenticate, isActive, reject);
 router.delete('/cancelFollowReq/:id', authenticate, isActive, cancelReq);
 
 router.post('/block/:id', authenticate, isActive, block);
+router.delete('/block/:id', authenticate, isActive, unblock);
 
 export default router;
