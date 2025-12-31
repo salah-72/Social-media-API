@@ -14,7 +14,7 @@ import { reject } from '@/controllers/follow/rejectFollow';
 import { unfollow } from '@/controllers/follow/unfollow';
 import { cancelReq } from '@/controllers/follow/cancelRequest';
 import { block } from '@/controllers/block/block';
-import { unblock } from '@/controllers/block/unBlock';
+import { unblock } from '@/controllers/block/unblock';
 
 const router = Router();
 router.get('/myProfile', authenticate, isActive, getMe);
