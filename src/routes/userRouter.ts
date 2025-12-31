@@ -15,6 +15,7 @@ import { unfollow } from '@/controllers/follow/unfollow';
 import { cancelReq } from '@/controllers/follow/cancelRequest';
 import { block } from '@/controllers/block/block';
 import { unblock } from '@/controllers/block/unblock';
+import { isTargetUserAvailable } from '@/middlewares/isTargetUserAvailable';
 
 const router = Router();
 router.get('/myProfile', authenticate, isActive, getMe);
@@ -36,9 +37,27 @@ router.patch(
 );
 router.patch('/updateInfo', authenticate, isActive, updateProfileInfo);
 
-router.post('/follow/:id', authenticate, isActive, follow);
-router.delete('/follow/:id', authenticate, isActive, unfollow);
-router.patch('/followReq/:id', authenticate, isActive, accept);
+router.post(
+  '/follow/:id',
+  authenticate,
+  isActive,
+  isTargetUserAvailable,
+  follow,
+);
+router.delete(
+  '/follow/:id',
+  authenticate,
+  isActive,
+  isTargetUserAvailable,
+  unfollow,
+);
+router.patch(
+  '/followReq/:id',
+  authenticate,
+  isActive,
+  isTargetUserAvailable,
+  accept,
+);
 router.delete('/followReq/:id', authenticate, isActive, reject);
 router.delete('/cancelFollowReq/:id', authenticate, isActive, cancelReq);
 

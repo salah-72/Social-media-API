@@ -8,7 +8,7 @@ import { Request, Response, NextFunction } from 'express';
 export const unfollow = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const follower = req.currentuser?._id;
-    const following = req.params.id;
+    const following = req.targetUser?._id;
 
     const follow = await Follow.findOne({
       follower,

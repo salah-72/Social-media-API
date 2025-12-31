@@ -8,7 +8,7 @@ import { Request, Response, NextFunction } from 'express';
 export const accept = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const following = req.currentuser?._id;
-    const follower = req.params.id;
+    const follower = req.targetUser?._id;
 
     const exist = await Follow.exists({
       follower,
