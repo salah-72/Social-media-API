@@ -4,7 +4,7 @@ import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
 
-export const getUserFollowers = catchAsync(
+export const getUserFollowings = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const followed = await Follow.exists({
       follower: req.currentuser?._id,
@@ -32,19 +32,19 @@ export const getUserFollowers = catchAsync(
       else return e.blocker;
     });
 
-    const followers = await Follow.find({
-      following: req.targetUser?._id,
-      follower: { $nin: ids },
+    const followings = await Follow.find({
+      follower: req.targetUser?._id,
+      following: { $nin: ids },
       status: 'accepted',
     })
-      .select('follower -_id')
-      .populate('follower', 'username profilePhoto');
+      .select('following -_id')
+      .populate('following', 'username profilePhoto');
 
     res.status(200).json({
       status: 'success',
       data: {
-        length: followers.length,
-        followers,
+        length: followings.length,
+        followings,
       },
     });
   },

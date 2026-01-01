@@ -18,6 +18,7 @@ import { unblock } from '@/controllers/block/unblock';
 import { isTargetUserAvailable } from '@/middlewares/isTargetUserAvailable';
 import { getUserById } from '@/controllers/User/getUserById';
 import { getUserFollowers } from '@/controllers/User/getUserFollowers';
+import { getUserFollowings } from '@/controllers/User/getUserFollowing';
 
 const router = Router();
 router.get('/myProfile', authenticate, isActive, getMe);
@@ -47,7 +48,13 @@ router.get(
   isTargetUserAvailable,
   getUserFollowers,
 );
-
+router.get(
+  '/:id/followings',
+  authenticate,
+  isActive,
+  isTargetUserAvailable,
+  getUserFollowings,
+);
 router.post(
   '/follow/:id',
   authenticate,
