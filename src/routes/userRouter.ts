@@ -19,6 +19,7 @@ import { isTargetUserAvailable } from '@/middlewares/isTargetUserAvailable';
 import { getUserById } from '@/controllers/User/getUserById';
 import { getUserFollowers } from '@/controllers/User/getUserFollowers';
 import { getUserFollowings } from '@/controllers/User/getUserFollowing';
+import { getUserByUsername } from '@/controllers/User/getUserByUsername';
 
 const router = Router();
 router.get('/myProfile', authenticate, isActive, getMe);
@@ -41,6 +42,7 @@ router.patch(
 router.patch('/updateInfo', authenticate, isActive, updateProfileInfo);
 
 router.get('/:id', authenticate, isActive, isTargetUserAvailable, getUserById);
+router.get('/username/:username', authenticate, isActive, getUserByUsername);
 router.get(
   '/:id/followers',
   authenticate,
