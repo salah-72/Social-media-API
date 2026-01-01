@@ -12,11 +12,14 @@ const purify = DOMPurify(window);
 
 export const createPost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { content, status, whoCanSee } = req.body;
+    let { content, status, whoCanSee } = req.body;
     if (!content) return next(new appError('content is required', 400));
 
     const cleanContent = purify.sanitize(content);
     const author = req.currentuser?._id;
+
+    if (!req.currentuser?.public && whoCanSee === 'public')
+      whoCanSee = 'followers';
 
     const files = req.files as Express.Multer.File[] | undefined;
     let images: { url: string; publicId: string }[] = [];

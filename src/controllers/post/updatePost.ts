@@ -28,6 +28,9 @@ export const updatePost = catchAsync(
 
     if (req.body.whoCanSee !== undefined) post.whoCanSee = req.body.whoCanSee;
 
+    if (!req.currentuser?.public && post.whoCanSee === 'public')
+      post.whoCanSee = 'followers';
+
     await post.save();
 
     logger.info(`user: ${req.currentuser?._id} update post ${id}`);
