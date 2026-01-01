@@ -17,6 +17,7 @@ import { block } from '@/controllers/block/block';
 import { unblock } from '@/controllers/block/unblock';
 import { isTargetUserAvailable } from '@/middlewares/isTargetUserAvailable';
 import { getUserById } from '@/controllers/User/getUserById';
+import { getUserFollowers } from '@/controllers/User/getUserFollowers';
 
 const router = Router();
 router.get('/myProfile', authenticate, isActive, getMe);
@@ -39,6 +40,13 @@ router.patch(
 router.patch('/updateInfo', authenticate, isActive, updateProfileInfo);
 
 router.get('/:id', authenticate, isActive, isTargetUserAvailable, getUserById);
+router.get(
+  '/:id/followers',
+  authenticate,
+  isActive,
+  isTargetUserAvailable,
+  getUserFollowers,
+);
 
 router.post(
   '/follow/:id',

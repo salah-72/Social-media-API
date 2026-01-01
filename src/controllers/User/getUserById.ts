@@ -40,15 +40,6 @@ export const getUserById = catchAsync(
       return;
     }
 
-    const followers = await Follow.find({
-      following: req.targetUser?._id,
-      status: 'accepted',
-    }).select('follower -_id');
-    const following = await Follow.find({
-      follower: req.targetUser?._id,
-      status: 'accepted',
-    }).select('following -_id');
-
     const can = [];
     if (followed) can.push('followers');
     if (req.targetUser?.public) can.push('public');
@@ -63,8 +54,6 @@ export const getUserById = catchAsync(
       status: 'success',
       data: {
         userInfo: req.targetUser,
-        followers,
-        following,
         postsCount: posts!.length,
         posts,
       },
