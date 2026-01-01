@@ -16,6 +16,7 @@ import { cancelReq } from '@/controllers/follow/cancelRequest';
 import { block } from '@/controllers/block/block';
 import { unblock } from '@/controllers/block/unblock';
 import { isTargetUserAvailable } from '@/middlewares/isTargetUserAvailable';
+import { getUserById } from '@/controllers/User/getUserById';
 
 const router = Router();
 router.get('/myProfile', authenticate, isActive, getMe);
@@ -36,6 +37,8 @@ router.patch(
   uploadProfilePic,
 );
 router.patch('/updateInfo', authenticate, isActive, updateProfileInfo);
+
+router.get('/:id', authenticate, isActive, isTargetUserAvailable, getUserById);
 
 router.post(
   '/follow/:id',

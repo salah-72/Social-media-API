@@ -8,7 +8,9 @@ export const isTargetUserAvailable = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
 
-    const targetUser = await User.findById(id);
+    const targetUser = await User.findById(id).select(
+      '-password -emailVerificationToken -passwordResetToken -passwordResetExpires -__v',
+    );
 
     if (!targetUser || !targetUser.emailVerified || !targetUser.active)
       return next(new appError('user not found', 404));
