@@ -20,6 +20,7 @@ import { getUserById } from '@/controllers/User/getUserById';
 import { getUserFollowers } from '@/controllers/User/getUserFollowers';
 import { getUserFollowings } from '@/controllers/User/getUserFollowing';
 import { getUserByUsername } from '@/controllers/User/getUserByUsername';
+import { mutualFollowers } from '@/controllers/follow/mutualFollowers';
 
 const router = Router();
 router.get('/myProfile', authenticate, isActive, getMe);
@@ -80,6 +81,13 @@ router.patch(
 );
 router.delete('/followReq/:id', authenticate, isActive, reject);
 router.delete('/cancelFollowReq/:id', authenticate, isActive, cancelReq);
+router.get(
+  '/mutualFollowers/:id',
+  authenticate,
+  isActive,
+  isTargetUserAvailable,
+  mutualFollowers,
+);
 
 router.post('/block/:id', authenticate, isActive, block);
 router.delete('/block/:id', authenticate, isActive, unblock);
