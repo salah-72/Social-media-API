@@ -21,6 +21,7 @@ import { getUserFollowers } from '@/controllers/User/getUserFollowers';
 import { getUserFollowings } from '@/controllers/User/getUserFollowing';
 import { getUserByUsername } from '@/controllers/User/getUserByUsername';
 import { mutualFollowers } from '@/controllers/follow/mutualFollowers';
+import { mutualFollowings } from '@/controllers/follow/mutualFollowings';
 
 const router = Router();
 router.get('/myProfile', authenticate, isActive, getMe);
@@ -88,7 +89,13 @@ router.get(
   isTargetUserAvailable,
   mutualFollowers,
 );
-
+router.get(
+  '/mutualFollowings/:id',
+  authenticate,
+  isActive,
+  isTargetUserAvailable,
+  mutualFollowings,
+);
 router.post('/block/:id', authenticate, isActive, block);
 router.delete('/block/:id', authenticate, isActive, unblock);
 
