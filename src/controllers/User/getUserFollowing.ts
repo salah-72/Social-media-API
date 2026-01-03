@@ -6,19 +6,6 @@ import { Request, Response, NextFunction } from 'express';
 
 export const getUserFollowings = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const followed = await Follow.exists({
-      follower: req.currentuser?._id,
-      following: req.targetUser?._id,
-      status: 'accepted',
-    });
-
-    if (
-      !req.targetUser?.public &&
-      !followed &&
-      req.currentuser?._id.toString() !== req.targetUser?._id.toString()
-    )
-      return next(new appError('private account', 403));
-
     const blocks = await Block.find({
       $or: [
         { blocked: req.currentuser?._id },

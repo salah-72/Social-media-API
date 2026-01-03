@@ -22,6 +22,7 @@ import { getUserFollowings } from '@/controllers/User/getUserFollowing';
 import { getUserByUsername } from '@/controllers/User/getUserByUsername';
 import { mutualFollowers } from '@/controllers/follow/mutualFollowers';
 import { mutualFollowings } from '@/controllers/follow/mutualFollowings';
+import { isFollower } from '@/middlewares/isFollower';
 
 const router = Router();
 router.get('/myProfile', authenticate, isActive, getMe);
@@ -45,20 +46,7 @@ router.patch('/updateInfo', authenticate, isActive, updateProfileInfo);
 
 router.get('/:id', authenticate, isActive, isTargetUserAvailable, getUserById);
 router.get('/username/:username', authenticate, isActive, getUserByUsername);
-router.get(
-  '/:id/followers',
-  authenticate,
-  isActive,
-  isTargetUserAvailable,
-  getUserFollowers,
-);
-router.get(
-  '/:id/followings',
-  authenticate,
-  isActive,
-  isTargetUserAvailable,
-  getUserFollowings,
-);
+
 router.post(
   '/follow/:id',
   authenticate,
@@ -82,11 +70,29 @@ router.patch(
 );
 router.delete('/followReq/:id', authenticate, isActive, reject);
 router.delete('/cancelFollowReq/:id', authenticate, isActive, cancelReq);
+
+router.get(
+  '/:id/followers',
+  authenticate,
+  isActive,
+  isTargetUserAvailable,
+  isFollower,
+  getUserFollowers,
+);
+router.get(
+  '/:id/followings',
+  authenticate,
+  isActive,
+  isTargetUserAvailable,
+  isFollower,
+  getUserFollowings,
+);
 router.get(
   '/mutualFollowers/:id',
   authenticate,
   isActive,
   isTargetUserAvailable,
+  isFollower,
   mutualFollowers,
 );
 router.get(
@@ -94,6 +100,7 @@ router.get(
   authenticate,
   isActive,
   isTargetUserAvailable,
+  isFollower,
   mutualFollowings,
 );
 router.post('/block/:id', authenticate, isActive, block);
