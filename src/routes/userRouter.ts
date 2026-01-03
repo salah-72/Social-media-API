@@ -23,9 +23,11 @@ import { getUserByUsername } from '@/controllers/User/getUserByUsername';
 import { mutualFollowers } from '@/controllers/follow/mutualFollowers';
 import { mutualFollowings } from '@/controllers/follow/mutualFollowings';
 import { isFollower } from '@/middlewares/isFollower';
+import { getMyFollowers } from '@/controllers/User/getMyFollowers';
 
 const router = Router();
 router.get('/myProfile', authenticate, isActive, getMe);
+router.get('/followers', authenticate, isActive, getMyFollowers);
 router.patch('/deleteMe', authenticate, isActive, deleteMe);
 router.patch('/activeMe', authenticate, activeMe);
 router.patch(
