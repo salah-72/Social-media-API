@@ -13,7 +13,7 @@ export const getMe = catchAsync(
       .lean();
 
     const posts = await Post.find({
-      author: req.targetUser?._id,
+      author: req.currentuser?._id,
       status: 'published',
     })
       .select('-_id')

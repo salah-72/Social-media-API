@@ -19,17 +19,26 @@ export const getUserFollowings = catchAsync(
       else return e.blocker;
     });
 
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
     const followings = await Follow.find({
       follower: req.targetUser?._id,
       following: { $nin: ids },
       status: 'accepted',
     })
       .select('following -_id')
-      .populate('following', 'username profilePhoto');
+      .populate('following', 'username profilePhoto')
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
     res.status(200).json({
       status: 'success',
       data: {
+        page,
+        limit,
         length: followings.length,
         followings,
       },
