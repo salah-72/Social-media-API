@@ -40,22 +40,10 @@ export const getUserById = catchAsync(
       return;
     }
 
-    const can = [];
-    if (followed) can.push('followers');
-    if (req.targetUser?.public) can.push('public');
-
-    const posts = await Post.find({
-      author: req.targetUser?._id,
-      whoCanSee: { $in: can },
-      status: 'published',
-    }).select('-_id');
-
     res.status(200).json({
       status: 'success',
       data: {
         userInfo: req.targetUser,
-        postsCount: posts!.length,
-        posts,
       },
     });
   },

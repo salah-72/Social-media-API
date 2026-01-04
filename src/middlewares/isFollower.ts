@@ -6,7 +6,7 @@ import { Request, Response, NextFunction } from 'express';
 export const isFollower = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     if (req.currentuser?._id.toString() === req.targetUser?._id.toString())
-      return next(new appError('go to /myFollowers or /myFollowings', 400));
+      return next(new appError('go to /my', 400));
 
     const isFollower = await Follow.exists({
       follower: req.currentuser?._id,
