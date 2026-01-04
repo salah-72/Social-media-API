@@ -2,6 +2,7 @@ import { addImg } from '@/controllers/post/addImgToPost';
 import { createPost } from '@/controllers/post/createPost';
 import { deleteImg } from '@/controllers/post/deleteImgFromPost';
 import { deletePost } from '@/controllers/post/deletePost';
+import { getMyPosts } from '@/controllers/post/getMyPosts';
 import { updatePost } from '@/controllers/post/updatePost';
 import { authenticate } from '@/middlewares/authenticate';
 import { isActive } from '@/middlewares/isActive';
@@ -32,4 +33,6 @@ router.delete(
   isActive,
   deleteImg,
 );
+
+router.get('/myPosts', authenticate, isActive, getMyPosts);
 export default router;
