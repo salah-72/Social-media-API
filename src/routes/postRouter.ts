@@ -4,6 +4,7 @@ import { deleteImg } from '@/controllers/post/deleteImgFromPost';
 import { deletePost } from '@/controllers/post/deletePost';
 import { getMyPosts } from '@/controllers/post/getMyPosts';
 import { getPost } from '@/controllers/post/getPost';
+import { timeLinePosts } from '@/controllers/post/getTimeLinePosts';
 import { getUserPosts } from '@/controllers/post/getUserPosts';
 import { updatePost } from '@/controllers/post/updatePost';
 import { authenticate } from '@/middlewares/authenticate';
@@ -39,6 +40,7 @@ router.delete(
 );
 
 router.get('/myPosts', authenticate, isActive, getMyPosts);
+router.get('/timeLine', authenticate, isActive, timeLinePosts);
 router.get(
   '/user/:id',
   authenticate,

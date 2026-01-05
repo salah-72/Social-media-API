@@ -25,7 +25,7 @@ export const getUserPosts = catchAsync(
       status: 'published',
     })
       .select('-__v -status')
-      .sort('-createdAt')
+      .sort('-publishedAt')
       .limit(limit)
       .skip(skip)
       .lean();

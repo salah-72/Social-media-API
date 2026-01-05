@@ -12,7 +12,7 @@ export const getMyPosts = catchAsync(
       author: req.currentuser?._id,
       status: 'published',
     })
-      .select('-__v -status')
+      .select('-__v')
       .sort('-createdAt')
       .limit(limit)
       .skip(skip)
