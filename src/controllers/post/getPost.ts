@@ -38,7 +38,9 @@ export const getPost = catchAsync(
 
     res.status(200).json({
       status: 'success',
-      post,
+      data: {
+        post,
+      },
     });
   },
 );

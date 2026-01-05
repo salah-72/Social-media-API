@@ -25,6 +25,7 @@ import { mutualFollowings } from '@/controllers/follow/mutualFollowings';
 import { isFollower } from '@/middlewares/isFollower';
 import { getMyFollowers } from '@/controllers/User/getMyFollowers';
 import { getMyFollowings } from '@/controllers/User/getMyFollowings';
+import { blockList } from '@/controllers/block/getMyBlockList';
 
 const router = Router();
 router.get('/myProfile', authenticate, isActive, getMe);
@@ -109,5 +110,6 @@ router.get(
 );
 router.post('/block/:id', authenticate, isActive, block);
 router.delete('/block/:id', authenticate, isActive, unblock);
+router.get('/block/blockList', authenticate, isActive, blockList);
 
 export default router;
