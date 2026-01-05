@@ -3,6 +3,7 @@ import { createPost } from '@/controllers/post/createPost';
 import { deleteImg } from '@/controllers/post/deleteImgFromPost';
 import { deletePost } from '@/controllers/post/deletePost';
 import { getMyPosts } from '@/controllers/post/getMyPosts';
+import { getPost } from '@/controllers/post/getPost';
 import { getUserPosts } from '@/controllers/post/getUserPosts';
 import { updatePost } from '@/controllers/post/updatePost';
 import { authenticate } from '@/middlewares/authenticate';
@@ -39,11 +40,12 @@ router.delete(
 
 router.get('/myPosts', authenticate, isActive, getMyPosts);
 router.get(
-  '/:id',
+  '/user/:id',
   authenticate,
   isActive,
   isTargetUserAvailable,
   isFollower,
   getUserPosts,
 );
+router.get('/:postId', authenticate, isActive, getPost);
 export default router;
