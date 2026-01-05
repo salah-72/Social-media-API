@@ -17,14 +17,14 @@ import { block } from '@/controllers/block/block';
 import { unblock } from '@/controllers/block/unblock';
 import { isTargetUserAvailable } from '@/middlewares/isTargetUserAvailable';
 import { getUserById } from '@/controllers/User/getUserById';
-import { getUserFollowers } from '@/controllers/User/getUserFollowers';
-import { getUserFollowings } from '@/controllers/User/getUserFollowing';
+import { getUserFollowers } from '@/controllers/follow/getUserFollowers';
+import { getUserFollowings } from '@/controllers/follow/getUserFollowing';
 import { getUserByUsername } from '@/controllers/User/getUserByUsername';
 import { mutualFollowers } from '@/controllers/follow/mutualFollowers';
 import { mutualFollowings } from '@/controllers/follow/mutualFollowings';
 import { isFollower } from '@/middlewares/isFollower';
-import { getMyFollowers } from '@/controllers/User/getMyFollowers';
-import { getMyFollowings } from '@/controllers/User/getMyFollowings';
+import { getMyFollowers } from '@/controllers/follow/getMyFollowers';
+import { getMyFollowings } from '@/controllers/follow/getMyFollowings';
 import { blockList } from '@/controllers/block/getMyBlockList';
 
 const router = Router();
