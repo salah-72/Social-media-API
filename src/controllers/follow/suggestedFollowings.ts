@@ -39,13 +39,19 @@ export const suggestedFollowings = catchAsync(
       .skip(skip)
       .lean();
 
+    const unique = Array.from(
+      new Map(
+        suggestedFollowings.map((e) => [e.following._id.toString(), e]),
+      ).values(),
+    );
+
     res.status(200).json({
       status: 'success',
       data: {
         page,
         limit,
-        length: suggestedFollowings.length,
-        suggestedFollowings,
+        length: unique.length,
+        unique,
       },
     });
   },
