@@ -12,11 +12,11 @@ export const follow = catchAsync(
 
     const followingUser = req.targetUser;
 
+    if (follower?.toString() === following?.toString())
+      return next(new appError('you cannot follow yourself', 400));
+
     const exist = await Follow.exists({ follower, following });
     if (exist) return next(new appError('you alreqdy follows this user', 400));
-
-    if (follower?.toString() === following)
-      return next(new appError('you cannot follow yourself', 400));
 
     let follow;
     if (followingUser!.public) {
