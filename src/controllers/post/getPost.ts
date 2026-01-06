@@ -8,7 +8,10 @@ import { Request, Response, NextFunction } from 'express';
 export const getPost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const postId = req.params.postId;
-    const post = await Post.findById(postId).select('-__v').lean();
+    const post = await Post.findById(postId)
+      .select('-__v')
+      .populate('author', 'username profilePhoto')
+      .lean();
 
     if (!post) return next(new appError('post not exist', 404));
 

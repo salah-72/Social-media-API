@@ -25,6 +25,7 @@ export const timeLinePosts = catchAsync(
       status: 'published',
     })
       .sort('-publishedAt')
+      .populate('author', 'username profilePhoto')
       .limit(myLimit)
       .skip(mySkip);
 
