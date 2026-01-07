@@ -27,6 +27,7 @@ import { getMyFollowers } from '@/controllers/follow/getMyFollowers';
 import { getMyFollowings } from '@/controllers/follow/getMyFollowings';
 import { blockList } from '@/controllers/block/getMyBlockList';
 import { suggestedFollowings } from '@/controllers/follow/suggestedFollowings';
+import { searchUsers } from '@/controllers/User/searchForUsers';
 
 const router = Router();
 router.get('/myProfile', authenticate, isActive, getMe);
@@ -50,6 +51,7 @@ router.patch(
 );
 router.patch('/updateInfo', authenticate, isActive, updateProfileInfo);
 
+router.get('/searchUsers', authenticate, isActive, searchUsers);
 router.get('/:id', authenticate, isActive, isTargetUserAvailable, getUserById);
 router.get('/username/:username', authenticate, isActive, getUserByUsername);
 
