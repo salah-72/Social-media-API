@@ -6,6 +6,7 @@ import { getMyPosts } from '@/controllers/post/getMyPosts';
 import { getPost } from '@/controllers/post/getPost';
 import { timeLinePosts } from '@/controllers/post/getTimeLinePosts';
 import { getUserPosts } from '@/controllers/post/getUserPosts';
+import { postsSearch } from '@/controllers/post/searchForPosts';
 import { updatePost } from '@/controllers/post/updatePost';
 import { authenticate } from '@/middlewares/authenticate';
 import { isActive } from '@/middlewares/isActive';
@@ -40,6 +41,7 @@ router.delete(
 );
 
 router.get('/myPosts', authenticate, isActive, getMyPosts);
+router.get('/searchPosts', authenticate, isActive, postsSearch);
 router.get('/timeLine', authenticate, isActive, timeLinePosts);
 router.get(
   '/user/:id',

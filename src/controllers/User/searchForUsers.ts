@@ -7,7 +7,7 @@ import { Request, Response, NextFunction, text } from 'express';
 export const searchUsers = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const input = req.query.text?.toString().trim();
-    if (!input) return next(new appError('query is required to search', 400));
+    if (!input) return next(new appError('search query is required', 400));
 
     const content = input.split(' ');
     let search;
