@@ -62,8 +62,20 @@ export const postsSearch = catchAsync(
         },
       },
       {
+        $lookup: {
+          from: 'users',
+          localField: 'author',
+          foreignField: '_id',
+          as: 'author',
+        },
+      },
+      {
+        $unwind: '$author',
+      },
+      {
         $project: {
-          author: 1,
+          'author.username': 1,
+          'author.profilePhoto': 1,
           content: 1,
           status: 1,
           whoCanSee: 1,
