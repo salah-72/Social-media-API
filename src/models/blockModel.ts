@@ -19,6 +19,8 @@ const blockSchema = new Schema<IBlock>({
 });
 
 blockSchema.index({ blocker: 1, blocked: 1 }, { unique: true });
+blockSchema.index({ blocker: 1 });
+blockSchema.index({ blocked: 1 });
 
 const Block = model('Block', blockSchema);
 export default Block;

@@ -69,5 +69,10 @@ postSchema.pre('save', function () {
   if (this.isNew && this.status === 'published') this.publishedAt = new Date();
 });
 
+postSchema.index({ author: 1, status: 1 });
+postSchema.index({ status: 1, publishedAt: -1 });
+postSchema.index({ author: 1, publishedAt: -1 });
+postSchema.index({ whoCanSee: 1 });
+
 const Post = model<IPost>('Post', postSchema);
 export default Post;
