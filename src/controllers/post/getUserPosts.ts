@@ -26,7 +26,7 @@ export const getUserPosts = catchAsync(
     })
       .select('-__v -status')
       .sort('-publishedAt')
-      .populate('author', 'username profilePhoto')
+      .populate('author', 'username profilePhoto firstName lastName')
       .limit(limit)
       .skip(skip)
       .lean();

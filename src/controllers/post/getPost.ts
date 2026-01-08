@@ -10,7 +10,7 @@ export const getPost = catchAsync(
     const postId = req.params.postId;
     const post = await Post.findById(postId)
       .select('-__v')
-      .populate('author', 'username profilePhoto')
+      .populate('author', 'username profilePhoto firstName lastName')
       .lean();
 
     if (!post) return next(new appError('post not exist', 404));

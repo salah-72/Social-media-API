@@ -25,7 +25,7 @@ export const timeLinePosts = catchAsync(
       status: 'published',
     })
       .sort('-publishedAt')
-      .populate('author', 'username profilePhoto')
+      .populate('author', 'username profilePhoto firstName lastName')
       .limit(myLimit)
       .skip(mySkip);
 
@@ -44,6 +44,7 @@ export const timeLinePosts = catchAsync(
       whoCanSee: { $in: ['public', 'followers'] },
     })
       .sort('-publishedAt')
+      .populate('author', 'username profilePhoto firstName lastName')
       .limit(followersLimit)
       .skip(followersSkip);
 
@@ -62,6 +63,7 @@ export const timeLinePosts = catchAsync(
       whoCanSee: 'public',
     })
       .sort('-publishedAt')
+      .populate('author', 'username profilePhoto firstName lastName')
       .limit(othersLimit)
       .skip(othersSkip);
 

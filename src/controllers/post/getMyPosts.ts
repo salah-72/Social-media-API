@@ -13,7 +13,7 @@ export const getMyPosts = catchAsync(
       status: 'published',
     })
       .select('-__v')
-      .populate('author', 'username profilePhoto')
+      .populate('author', 'username profilePhoto firstName lastName')
       .sort('-createdAt')
       .limit(limit)
       .skip(skip)

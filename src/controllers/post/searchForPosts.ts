@@ -76,6 +76,8 @@ export const postsSearch = catchAsync(
         $project: {
           'author.username': 1,
           'author.profilePhoto': 1,
+          'author.firstName': 1,
+          'author.lastName': 1,
           content: 1,
           status: 1,
           whoCanSee: 1,
