@@ -1,4 +1,5 @@
 import { like } from '@/controllers/like/Like&UnLike';
+import { postsLikedByMe } from '@/controllers/like/postsLikedByMe';
 import { addImg } from '@/controllers/post/addImgToPost';
 import { createPost } from '@/controllers/post/createPost';
 import { deleteImg } from '@/controllers/post/deleteImgFromPost';
@@ -52,6 +53,9 @@ router.get(
   isFollower,
   getUserPosts,
 );
+router.get('/likes', authenticate, isActive, postsLikedByMe);
 router.get('/:postId', authenticate, isActive, getPost);
+
 router.post('/:postId/like', authenticate, isActive, like);
+
 export default router;
