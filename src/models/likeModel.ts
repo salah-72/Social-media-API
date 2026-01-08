@@ -3,7 +3,7 @@ import { model, Schema, Types } from 'mongoose';
 export interface ILike {
   user: Types.ObjectId;
   post: Types.ObjectId;
-  type: string;
+  type: 'like' | 'love' | 'care' | 'sad' | 'angry' | 'haha' | 'wow';
 }
 
 const likeSchema = new Schema<ILike>(
