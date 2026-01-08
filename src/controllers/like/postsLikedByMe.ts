@@ -17,7 +17,7 @@ export const postsLikedByMe = catchAsync(
       ],
     });
     const blockIds = blocks.map((e) => {
-      if (e.blocker.toString === req.currentuser?._id.toString)
+      if (e.blocker.toString() === req.currentuser?._id.toString())
         return e.blocked;
       else return e.blocker;
     });
