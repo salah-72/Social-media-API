@@ -28,6 +28,7 @@ const likeSchema = new Schema<ILike>(
 );
 
 likeSchema.index({ author: 1, post: 1 }, { unique: true });
+likeSchema.index({ user: 1, createdAt: -1 });
 
 const Like = model<ILike>('Like', likeSchema);
 export default Like;
