@@ -7,9 +7,22 @@ import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 
-export const reactFun = (reactType: string) =>
-  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const { postId } = req.params;
+export const reaction = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { postId, type } = req.params;
+
+    const allowedTypes = [
+      'like',
+      'love',
+      'care',
+      'sad',
+      'angry',
+      'haha',
+      'wow',
+    ];
+    if (!allowedTypes.includes(type))
+      return next(new appError('invalid reaction type', 400));
+
     const post = await Post.findById(postId);
 
     if (!post || post.status === 'draft')
@@ -39,6 +52,10 @@ export const reactFun = (reactType: string) =>
         return next(new appError('post not exist', 404));
     }
 
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 40;
+    const skip = (page - 1) * limit;
+
     const blocks = await Block.find({
       $or: [
         { blocker: req.currentuser?._id },
@@ -55,7 +72,7 @@ export const reactFun = (reactType: string) =>
       {
         $match: {
           post: new Types.ObjectId(postId),
-          type: reactType,
+          type,
         },
       },
       {
@@ -85,15 +102,20 @@ export const reactFun = (reactType: string) =>
         },
       },
       { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: limit },
     ]);
 
-    const length = await Like.countDocuments({ post: postId, type: reactType });
+    const length = await Like.countDocuments({ post: postId, type });
 
     res.status(200).json({
       status: 'success',
       data: {
+        page,
+        limit,
         length,
         users,
       },
     });
-  });
+  },
+);
