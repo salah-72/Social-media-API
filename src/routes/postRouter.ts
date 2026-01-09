@@ -1,3 +1,4 @@
+import { changeReact } from '@/controllers/like/changeReact';
 import { postLikes } from '@/controllers/like/getPostLikes';
 import { reaction } from '@/controllers/like/getUsersByReact';
 import { like } from '@/controllers/like/Like&UnLike';
@@ -57,6 +58,7 @@ router.get(
 );
 router.get('/likes', authenticate, isActive, postsLikedByMe);
 router.get('/:postId/likedUsers', authenticate, isActive, postLikes);
+router.patch('/:postId/react', authenticate, isActive, changeReact);
 router.get('/:postId/react/:type', authenticate, isActive, reaction);
 router.get('/:postId', authenticate, isActive, getPost);
 
