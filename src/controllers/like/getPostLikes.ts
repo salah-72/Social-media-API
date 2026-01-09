@@ -80,6 +80,7 @@ export const postLikes = catchAsync(
       },
       {
         $project: {
+          type: 1,
           'user.username': 1,
           'user.profilePhoto': 1,
           'user.firstName': 1,
