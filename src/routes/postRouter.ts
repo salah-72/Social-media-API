@@ -16,6 +16,7 @@ import { updatePost } from '@/controllers/post/updatePost';
 import { authenticate } from '@/middlewares/authenticate';
 import { isActive } from '@/middlewares/isActive';
 import { isFollower } from '@/middlewares/isFollower';
+import { isTargetPostAvailable } from '@/middlewares/isTargetPostAvailable';
 import { isTargetUserAvailable } from '@/middlewares/isTargetUserAvailable';
 import { upload } from '@/middlewares/multer';
 import { Router } from 'express';
@@ -57,11 +58,35 @@ router.get(
   getUserPosts,
 );
 router.get('/likes', authenticate, isActive, postsLikedByMe);
-router.get('/:postId/likedUsers', authenticate, isActive, postLikes);
-router.patch('/:postId/react', authenticate, isActive, changeReact);
-router.get('/:postId/react/:type', authenticate, isActive, reaction);
+router.get(
+  '/:postId/likedUsers',
+  authenticate,
+  isActive,
+  isTargetPostAvailable,
+  postLikes,
+);
+router.patch(
+  '/:postId/react',
+  authenticate,
+  isActive,
+  isTargetPostAvailable,
+  changeReact,
+);
+router.get(
+  '/:postId/react/:type',
+  authenticate,
+  isActive,
+  isTargetPostAvailable,
+  reaction,
+);
 router.get('/:postId', authenticate, isActive, getPost);
 
-router.post('/:postId/like', authenticate, isActive, like);
+router.post(
+  '/:postId/like',
+  authenticate,
+  isActive,
+  isTargetPostAvailable,
+  like,
+);
 
 export default router;
