@@ -3,6 +3,7 @@ import { model, Schema, Types } from 'mongoose';
 export interface IComment {
   user: Types.ObjectId;
   post: Types.ObjectId;
+  parentComment: Types.ObjectId;
   content: string;
 }
 
@@ -17,6 +18,11 @@ const commentSchema = new Schema<IComment>(
       type: Types.ObjectId,
       ref: 'Post',
       required: [true, 'post is required'],
+    },
+    parentComment: {
+      type: Types.ObjectId,
+      ref: 'Comment',
+      default: null,
     },
     content: {
       type: String,
