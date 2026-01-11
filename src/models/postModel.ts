@@ -26,6 +26,8 @@ const postSchema = new Schema<IPost>(
     content: {
       type: String,
       required: [true, 'post must have content'],
+      trim: true,
+      minlength: [1, 'comment cannot be empty'],
       maxLength: [800, 'post content must be less than 800 char'],
     },
     images: [
