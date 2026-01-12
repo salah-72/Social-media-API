@@ -3,7 +3,7 @@ import { model, Schema, Types } from 'mongoose';
 export interface IComment {
   user: Types.ObjectId;
   post: Types.ObjectId;
-  parentComment: Types.ObjectId;
+  parentComment: Types.ObjectId | null;
   content: string;
 }
 
