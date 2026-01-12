@@ -1,4 +1,5 @@
 import { createComment } from '@/controllers/comment/createComment';
+import { createReply } from '@/controllers/comment/createReplyOnPost';
 import { changeReact } from '@/controllers/like/changeReact';
 import { postLikes } from '@/controllers/like/getPostLikes';
 import { reaction } from '@/controllers/like/getUsersByReact';
@@ -96,6 +97,13 @@ router.post(
   isActive,
   isTargetPostAvailable,
   createComment,
+);
+router.post(
+  '/:postId/comment/:commentId',
+  authenticate,
+  isActive,
+  isTargetPostAvailable,
+  createReply,
 );
 
 export default router;
