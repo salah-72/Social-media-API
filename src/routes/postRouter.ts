@@ -1,5 +1,6 @@
 import { createComment } from '@/controllers/comment/createComment';
 import { createReply } from '@/controllers/comment/createReplyOnPost';
+import { deleteComment } from '@/controllers/comment/deleteComment';
 import { updateComment } from '@/controllers/comment/updateCommentContent';
 import { changeReact } from '@/controllers/like/changeReact';
 import { postLikes } from '@/controllers/like/getPostLikes';
@@ -112,5 +113,12 @@ router.patch(
   isActive,
   isTargetPostAvailable,
   updateComment,
+);
+router.delete(
+  '/:postId/comment/:commentId',
+  authenticate,
+  isActive,
+  isTargetPostAvailable,
+  deleteComment,
 );
 export default router;
