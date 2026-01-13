@@ -1,6 +1,7 @@
 import Block from '@/models/blockModel';
 import Follow from '@/models/followModel';
 import Post from '@/models/postModel';
+import User from '@/models/userModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
@@ -13,6 +14,12 @@ export const isTargetPostAvailable = catchAsync(
 
     if (!post || post.status === 'draft')
       return next(new appError('post not found', 404));
+
+    const authorExist = await User.exists({
+      _id: post.author,
+      active: true,
+    });
+    if (!authorExist) return next(new appError('post not found', 404));
 
     const isOwner = req.currentuser?._id.toString() === post.author.toString();
 
