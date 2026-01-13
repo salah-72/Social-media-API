@@ -3,6 +3,7 @@ import Comment from '@/models/commentModel';
 import Post from '@/models/postModel';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
+import { Types } from 'mongoose';
 
 export const getComments = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -29,17 +30,46 @@ export const getComments = catchAsync(
       .populate('author', 'username profilePhoto firstName lastName')
       .lean();
 
-    const comments = await Comment.find({
-      post: postId,
-      user: { $nin: blocksIds },
-      parentComment: null,
-    })
-      .select('-post -parentComment -_id -__v')
-      .populate('user', 'username profilePhoto firstName lastName')
-      .sort('-createdAt')
-      .skip(skip)
-      .limit(limit)
-      .lean();
+    const comments = await Comment.aggregate([
+      {
+        $match: {
+          post: new Types.ObjectId(postId),
+          user: { $nin: blocksIds },
+          parentComment: null,
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'user',
+        },
+      },
+      {
+        $unwind: '$user',
+      },
+      {
+        $match: {
+          'user.active': true,
+        },
+      },
+      {
+        $project: {
+          'user.username': 1,
+          'user.profilePhoto': 1,
+          'user.firstName': 1,
+          'user.lastName': 1,
+          _id: 0,
+          content: 1,
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      },
+      { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+    ]);
 
     res.status(200).json({
       status: 'success',
