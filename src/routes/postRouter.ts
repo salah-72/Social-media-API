@@ -1,6 +1,7 @@
 import { createComment } from '@/controllers/comment/createComment';
 import { createReply } from '@/controllers/comment/createReplyOnPost';
 import { deleteComment } from '@/controllers/comment/deleteComment';
+import { getComments } from '@/controllers/comment/getComments';
 import { updateComment } from '@/controllers/comment/updateCommentContent';
 import { changeReact } from '@/controllers/like/changeReact';
 import { postLikes } from '@/controllers/like/getPostLikes';
@@ -120,5 +121,12 @@ router.delete(
   isActive,
   isTargetPostAvailable,
   deleteComment,
+);
+router.get(
+  '/:postId/comments',
+  authenticate,
+  isActive,
+  isTargetPostAvailable,
+  getComments,
 );
 export default router;
