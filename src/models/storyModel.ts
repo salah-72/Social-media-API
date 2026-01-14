@@ -1,4 +1,11 @@
-import { model, Schema, Types } from 'mongoose';
+import appError from '@/utils/appError';
+import { NextFunction } from 'express';
+import {
+  CallbackWithoutResultAndOptionalError,
+  model,
+  Schema,
+  Types,
+} from 'mongoose';
 
 export interface IStory {
   author: Types.ObjectId;
@@ -46,6 +53,8 @@ const storySchema = new Schema<IStory>(
     timestamps: true,
   },
 );
+
+storySchema.index({ createdAt: 1 }, { expireAfterSeconds: 86400 });
 
 const Story = model<IStory>('Story', storySchema);
 export default Story;
