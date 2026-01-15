@@ -18,7 +18,7 @@ export const createPost = catchAsync(
     const cleanContent = purify.sanitize(content);
     const author = req.currentuser?._id;
 
-    if (!req.currentuser?.public && whoCanSee === 'public')
+    if (!req.currentuser?.public && (whoCanSee === 'public' || !whoCanSee))
       whoCanSee = 'followers';
 
     const files = req.files as Express.Multer.File[] | undefined;

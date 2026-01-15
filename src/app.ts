@@ -11,6 +11,7 @@ import { logger } from './lib/winston';
 import authRouter from '@/routes/authRouter';
 import userRouter from '@/routes/userRouter';
 import postRouter from '@/routes/postRouter';
+import storyRouter from '@/routes/storyRouter';
 import errorHandler from './middlewares/errorHandler';
 import passport from 'passport';
 
@@ -63,6 +64,7 @@ app.get('/api/v1', (req, res) => {
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/post', postRouter);
+app.use('/api/v1/story', storyRouter);
 
 app.use(errorHandler);
 app.listen(config.PORT, () => {
