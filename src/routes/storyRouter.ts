@@ -1,5 +1,6 @@
 import { createStory } from '@/controllers/story/createStory';
 import { deleteStory } from '@/controllers/story/deleteStory';
+import { getMyStories } from '@/controllers/story/getMyStories';
 import { authenticate } from '@/middlewares/authenticate';
 import { isActive } from '@/middlewares/isActive';
 import { upload } from '@/middlewares/multer';
@@ -14,7 +15,7 @@ router.post(
   upload.single('img'),
   createStory,
 );
-
+router.get('/myStories', authenticate, isActive, getMyStories);
 router.delete('/:storyId', authenticate, isActive, deleteStory);
 
 export default router;
