@@ -1,5 +1,6 @@
 import cloudinary from '@/config/cloudinaryConfig';
 import { logger } from '@/lib/winston';
+import Like from '@/models/likeModel';
 import Post from '@/models/postModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
@@ -24,6 +25,8 @@ export const deletePost = catchAsync(
         }),
       );
     }
+
+    Like.deleteMany({ post: id });
 
     await deletedPost?.deleteOne();
 
