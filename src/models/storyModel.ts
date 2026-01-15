@@ -56,5 +56,14 @@ const storySchema = new Schema<IStory>(
 
 storySchema.index({ createdAt: 1 }, { expireAfterSeconds: 86400 });
 
+storySchema.pre(
+  'save' as any,
+  function (next: CallbackWithoutResultAndOptionalError) {
+    if (!this.content && !this.img?.url) {
+      return next(new appError('story must contain content or img', 400));
+    }
+    next();
+  },
+);
 const Story = model<IStory>('Story', storySchema);
 export default Story;
