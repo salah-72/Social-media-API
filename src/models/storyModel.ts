@@ -7,6 +7,7 @@ import {
 } from 'mongoose';
 
 export interface IStory {
+  _id: Types.ObjectId;
   author: Types.ObjectId;
   content?: string;
   img?: {

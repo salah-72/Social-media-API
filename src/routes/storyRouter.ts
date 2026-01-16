@@ -1,8 +1,10 @@
 import { createStory } from '@/controllers/story/createStory';
 import { deleteStory } from '@/controllers/story/deleteStory';
 import { getMyStories } from '@/controllers/story/getMyStories';
+import { getUserStory } from '@/controllers/story/getStory';
 import { authenticate } from '@/middlewares/authenticate';
 import { isActive } from '@/middlewares/isActive';
+import { isTargetStoryAvailable } from '@/middlewares/isTargetStoryAvailable';
 import { upload } from '@/middlewares/multer';
 import { Router } from 'express';
 
@@ -17,5 +19,12 @@ router.post(
 );
 router.get('/myStories', authenticate, isActive, getMyStories);
 router.delete('/:storyId', authenticate, isActive, deleteStory);
+router.get(
+  '/userStory/:storyId',
+  authenticate,
+  isActive,
+  isTargetStoryAvailable,
+  getUserStory,
+);
 
 export default router;
