@@ -1,3 +1,4 @@
+import { IStory } from '@/models/storyModel';
 import { IUser } from '@/models/userModel';
 
 declare global {
@@ -5,6 +6,7 @@ declare global {
     interface Request {
       currentuser?: IUser;
       targetUser?: IUser;
+      story?: IStory;
     }
   }
 }
