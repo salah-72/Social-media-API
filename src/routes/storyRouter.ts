@@ -37,12 +37,6 @@ router.post(
   isTargetStoryAvailable,
   likeStory,
 );
-router.get(
-  '/:storyId/likes',
-  authenticate,
-  isActive,
-  isTargetStoryAvailable,
-  storyLikes,
-);
+router.get('/:storyId/likes', authenticate, isActive, storyLikes);
 
 export default router;
