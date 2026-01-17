@@ -2,6 +2,7 @@ import { createStory } from '@/controllers/story/createStory';
 import { deleteStory } from '@/controllers/story/deleteStory';
 import { getMyStories } from '@/controllers/story/getMyStories';
 import { getStory } from '@/controllers/story/getStory';
+import { storyLikes } from '@/controllers/story/getStoryLikes';
 import { getViewers } from '@/controllers/story/getStoryViewers';
 import { likeStory } from '@/controllers/story/likeStory';
 import { authenticate } from '@/middlewares/authenticate';
@@ -35,6 +36,13 @@ router.post(
   isActive,
   isTargetStoryAvailable,
   likeStory,
+);
+router.get(
+  '/:storyId/likes',
+  authenticate,
+  isActive,
+  isTargetStoryAvailable,
+  storyLikes,
 );
 
 export default router;
