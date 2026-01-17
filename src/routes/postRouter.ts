@@ -7,7 +7,7 @@ import { updateComment } from '@/controllers/comment/updateCommentContent';
 import { changeReact } from '@/controllers/like/changeReact';
 import { postLikes } from '@/controllers/like/getPostLikes';
 import { reaction } from '@/controllers/like/getUsersByReact';
-import { like } from '@/controllers/like/Like&UnLike';
+import { likePost } from '@/controllers/like/Like&UnLikePost';
 import { postsLikedByMe } from '@/controllers/like/postsLikedByMe';
 import { addImg } from '@/controllers/post/addImgToPost';
 import { createPost } from '@/controllers/post/createPost';
@@ -92,7 +92,7 @@ router.post(
   authenticate,
   isActive,
   isTargetPostAvailable,
-  like,
+  likePost,
 );
 
 router.post(
