@@ -3,7 +3,7 @@ import View from '@/models/viewModel';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
 
-export const getUserStory = catchAsync(
+export const getStory = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const story = req.story!;
 

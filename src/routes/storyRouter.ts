@@ -1,7 +1,8 @@
 import { createStory } from '@/controllers/story/createStory';
 import { deleteStory } from '@/controllers/story/deleteStory';
 import { getMyStories } from '@/controllers/story/getMyStories';
-import { getUserStory } from '@/controllers/story/getStory';
+import { getStory } from '@/controllers/story/getStory';
+import { getViewers } from '@/controllers/story/getStoryViewers';
 import { authenticate } from '@/middlewares/authenticate';
 import { isActive } from '@/middlewares/isActive';
 import { isTargetStoryAvailable } from '@/middlewares/isTargetStoryAvailable';
@@ -20,11 +21,12 @@ router.post(
 router.get('/myStories', authenticate, isActive, getMyStories);
 router.delete('/:storyId', authenticate, isActive, deleteStory);
 router.get(
-  '/userStory/:storyId',
+  '/:storyId',
   authenticate,
   isActive,
   isTargetStoryAvailable,
-  getUserStory,
+  getStory,
 );
+router.get('/:storyId/viewers', authenticate, isActive, getViewers);
 
 export default router;

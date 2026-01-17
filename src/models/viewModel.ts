@@ -24,6 +24,7 @@ const viewSchema = new Schema<IView>({
 });
 
 viewSchema.index({ story: 1, user: 1 }, { unique: true });
+viewSchema.index({ story: 1, at: -1 });
 
 const View = model<IView>('View', viewSchema);
 export default View;
