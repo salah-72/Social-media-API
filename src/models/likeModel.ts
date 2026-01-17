@@ -42,19 +42,30 @@ const likeSchema = new Schema<ILike>(
 );
 
 likeSchema.index({ user: 1, createdAt: -1 });
-
-likeSchema.pre(
-  'validate' as any,
-  function (next: CallbackWithoutResultAndOptionalError) {
-    const fields = [this.post, this.comment, this.story].filter(Boolean);
-    if (fields.length === 0)
-      return next(new Error('like must contain post or comment or story'));
-    if (fields.length > 0)
-      return next(new Error('like must contain only one field'));
-
-    next();
-  },
+likeSchema.index(
+  { user: 1, post: 1 },
+  { unique: true, partialFilterExpression: { post: { $exists: true } } },
 );
+likeSchema.index(
+  { user: 1, story: 1 },
+  { unique: true, partialFilterExpression: { story: { $exists: true } } },
+);
+likeSchema.index(
+  { user: 1, comment: 1 },
+  { unique: true, partialFilterExpression: { comment: { $exists: true } } },
+);
+
+likeSchema.pre('save', function () {
+  if (!this.post && !this.comment && !this.story)
+    throw new Error('like must contain post or comment or story');
+
+  if (
+    (this.post && (this.comment || this.story)) ||
+    (this.comment && (this.post || this.story)) ||
+    (this.story && (this.post || this.comment))
+  )
+    throw new Error('like must contain only one field');
+});
 
 const Like = model<ILike>('Like', likeSchema);
 export default Like;
