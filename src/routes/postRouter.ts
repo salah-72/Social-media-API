@@ -3,6 +3,7 @@ import { createReply } from '@/controllers/comment/createReplyOnPost';
 import { deleteComment } from '@/controllers/comment/deleteComment';
 import { commentReplies } from '@/controllers/comment/getCommentReplies';
 import { getComments } from '@/controllers/comment/getComments';
+import { likeComment } from '@/controllers/comment/Like&UnLikeComment';
 import { updateComment } from '@/controllers/comment/updateCommentContent';
 import { changeReact } from '@/controllers/like/changeReact';
 import { postLikes } from '@/controllers/like/getPostLikes';
@@ -136,5 +137,12 @@ router.get(
   isActive,
   isTargetPostAvailable,
   commentReplies,
+);
+router.post(
+  '/:postId/comment/:commentId/like',
+  authenticate,
+  isActive,
+  isTargetPostAvailable,
+  likeComment,
 );
 export default router;

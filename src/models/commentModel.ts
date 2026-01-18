@@ -5,6 +5,7 @@ export interface IComment {
   post: Types.ObjectId;
   parentComment: Types.ObjectId | null;
   content: string;
+  likesCount: number;
 }
 
 const commentSchema = new Schema<IComment>(
@@ -30,6 +31,10 @@ const commentSchema = new Schema<IComment>(
       trim: true,
       minlength: [1, 'comment cannot be empty'],
       maxlength: [200, 'comment is too long'],
+    },
+    likesCount: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true },
