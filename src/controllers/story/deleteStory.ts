@@ -1,5 +1,7 @@
 import cloudinary from '@/config/cloudinaryConfig';
+import Like from '@/models/likeModel';
 import Story from '@/models/storyModel';
+import View from '@/models/viewModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
@@ -18,10 +20,12 @@ export const deleteStory = catchAsync(
     if (story.img?.publicId)
       await cloudinary.uploader.destroy(story.img?.publicId);
 
-    // TODO: delete views
-    // TODO: delete expired stories images from cloudinary
-
-    await story.deleteOne();
+    await Promise.all([
+      View.deleteMany({ story: storyId }),
+      Like.deleteMany({ story: storyId }),
+      story.deleteOne(),
+    ]);
+    // TODO: delete expired stories images, views, likes
 
     res.status(204).json({
       status: 'success',

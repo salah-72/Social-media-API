@@ -7,7 +7,7 @@ export const getStory = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const story = req.story!;
 
-    if (story.author.toString() !== req.currentuser?._id.toString()) {
+    if (story.author._id.toString() !== req.currentuser?._id.toString()) {
       try {
         await View.create({
           story: story._id,

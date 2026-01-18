@@ -1,5 +1,6 @@
 import Like from '@/models/likeModel';
 import Story from '@/models/storyModel';
+import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
 
@@ -7,6 +8,9 @@ export const likeStory = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { storyId } = req.params;
     const type = req.body?.type || 'like';
+
+    if (req.story?.author._id.toString() === req.currentuser?._id.toString())
+      return next(new appError('you cannot like your story', 400));
 
     try {
       const like = await Like.create({
