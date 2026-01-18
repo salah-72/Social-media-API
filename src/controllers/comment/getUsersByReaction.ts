@@ -6,9 +6,21 @@ import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 
-export const commentLikes = catchAsync(
+export const usersByReaction = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { postId, commentId } = req.params;
+    const { commentId, postId, type } = req.params;
+
+    const allowedTypes = [
+      'like',
+      'love',
+      'care',
+      'sad',
+      'angry',
+      'haha',
+      'wow',
+    ];
+    if (!allowedTypes.includes(type))
+      return next(new appError('invalid reaction type', 400));
 
     const comment = await Comment.findById(commentId);
 
@@ -44,6 +56,7 @@ export const commentLikes = catchAsync(
       {
         $match: {
           comment: new Types.ObjectId(commentId),
+          type,
         },
       },
       {
@@ -65,7 +78,6 @@ export const commentLikes = catchAsync(
       },
       {
         $project: {
-          type: 1,
           'user.username': 1,
           'user.profilePhoto': 1,
           'user.firstName': 1,
@@ -78,7 +90,7 @@ export const commentLikes = catchAsync(
       { $limit: limit },
     ]);
 
-    const likesCount = await Like.countDocuments({ comment: commentId });
+    const likesCount = await Like.countDocuments({ comment: commentId, type });
 
     res.status(200).json({
       status: 'success',

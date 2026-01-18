@@ -29,6 +29,7 @@ import { isTargetUserAvailable } from '@/middlewares/isTargetUserAvailable';
 import { upload } from '@/middlewares/multer';
 import { Router } from 'express';
 import { commentLikes } from '@/controllers/comment/getLikedUsers';
+import { usersByReaction } from '@/controllers/comment/getUsersByReaction';
 
 const router = Router();
 
@@ -160,5 +161,12 @@ router.get(
   isActive,
   isTargetPostAvailable,
   commentLikes,
+);
+router.get(
+  '/:postId/comment/:commentId/like/reaction/:type',
+  authenticate,
+  isActive,
+  isTargetPostAvailable,
+  usersByReaction,
 );
 export default router;
