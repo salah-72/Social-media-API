@@ -1,3 +1,4 @@
+import { changeStoryReact } from '@/controllers/story/changeStoryReact';
 import { createStory } from '@/controllers/story/createStory';
 import { deleteStory } from '@/controllers/story/deleteStory';
 import { getMyStories } from '@/controllers/story/getMyStories';
@@ -38,5 +39,6 @@ router.post(
   likeStory,
 );
 router.get('/:storyId/likes', authenticate, isActive, storyLikes);
+router.patch('/:storyId/like', authenticate, isActive, changeStoryReact);
 
 export default router;
