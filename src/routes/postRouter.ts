@@ -1,3 +1,4 @@
+import { changeCommentReact } from '@/controllers/comment/changeCommentReact';
 import { createComment } from '@/controllers/comment/createComment';
 import { createReply } from '@/controllers/comment/createReplyOnPost';
 import { deleteComment } from '@/controllers/comment/deleteComment';
@@ -144,5 +145,12 @@ router.post(
   isActive,
   isTargetPostAvailable,
   likeComment,
+);
+router.patch(
+  '/:postId/comment/:commentId/like',
+  authenticate,
+  isActive,
+  isTargetPostAvailable,
+  changeCommentReact,
 );
 export default router;
