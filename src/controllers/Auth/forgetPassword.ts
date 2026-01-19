@@ -5,6 +5,7 @@ import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { transporter } from '@/utils/nodemailer';
 import { logger } from '@/lib/winston';
+import config from '@/config/config';
 
 type IForget = Pick<IUser, 'email' | 'username'>;
 export const forgetPassword = catchAsync(
@@ -38,7 +39,7 @@ export const forgetPassword = catchAsync(
       subject: 'reset password',
       text: 'reset your password',
       html: `<h1>Password Resetting</h1>
-          <p>Hello ${user.firstName}, Please follow this link to reset your password. </p><a href= 'http://localhost:3000/api/v1/auth/reset/${plainToken}'> Click link </a>
+          <p>Hello ${user.firstName}, Please follow this link to reset your password. </p><a href= '${config.BASE_URL}/api/v1/auth/reset/${plainToken}'> Click link </a>
           <p>Your password reset token valid for only 10 minutes</p>`,
     });
     logger.info('Message sent:', info.messageId);

@@ -7,6 +7,7 @@ import { logger } from '@/lib/winston';
 import appError from '@/utils/appError';
 import crypto from 'crypto';
 import { transporter } from '@/utils/nodemailer';
+import config from '@/config/config';
 
 type userData = Pick<
   IUser,
@@ -61,7 +62,7 @@ export const register = catchAsync(
       subject: 'email verification',
       text: 'verify your email',
       html: `<h1>Email verification </h1>
-          <p>Hello ${newUser.firstName}, Please follow this link to verify your account. </p><a href= 'http://localhost:3000/api/v1/auth/verify/${plainToken}'> Click link </a>
+          <p>Hello ${newUser.firstName}, Please follow this link to verify your account. </p><a href= '${config.BASE_URL}/api/v1/auth/verify/${plainToken}'> Click link </a>
           <p>If you did not verfiy your account you won't be able to use the website</p>`,
     });
     logger.info('Message sent:', info.messageId);
