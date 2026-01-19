@@ -55,5 +55,7 @@ const storySchema = new Schema<IStory>(
   },
 );
 
+storySchema.index({ author: 1, createdAt: -1 });
+
 const Story = model<IStory>('Story', storySchema);
 export default Story;

@@ -11,6 +11,7 @@ export const getMyStories = catchAsync(
     const stories = await Story.find({ author: req.currentuser?._id })
       .select('-_id -__v -whoCanSee -updatedAt')
       .populate('author', 'username profilePhoto firstName lastName')
+      .sort('-createdAt')
       .skip(skip)
       .limit(limit)
       .lean();
