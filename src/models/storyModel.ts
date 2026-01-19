@@ -17,6 +17,7 @@ export interface IStory {
   whoCanSee: 'me' | 'followers' | 'public';
   viewsCount: number;
   likesCount: number;
+  createdAt: Date;
 }
 
 const storySchema = new Schema<IStory>(
@@ -53,8 +54,6 @@ const storySchema = new Schema<IStory>(
     timestamps: true,
   },
 );
-
-storySchema.index({ createdAt: 1 }, { expireAfterSeconds: 86400 });
 
 const Story = model<IStory>('Story', storySchema);
 export default Story;

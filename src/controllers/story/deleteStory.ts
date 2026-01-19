@@ -25,7 +25,6 @@ export const deleteStory = catchAsync(
       Like.deleteMany({ story: storyId }),
       story.deleteOne(),
     ]);
-    // TODO: delete expired stories images, views, likes
 
     res.status(204).json({
       status: 'success',
