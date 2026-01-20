@@ -1,8 +1,14 @@
 import app from './app';
 import config from './config/config';
 import { logger } from './lib/winston';
+import http from 'http';
+import { initSocket } from './socket';
 
-app.listen(config.PORT, () => {
+const server = http.createServer(app);
+
+initSocket(server);
+
+server.listen(config.PORT, () => {
   logger.info(`app is running at port ${config.PORT}`);
 });
 
