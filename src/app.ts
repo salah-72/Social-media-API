@@ -68,18 +68,5 @@ app.use('/api/v1/post', postRouter);
 app.use('/api/v1/story', storyRouter);
 
 app.use(errorHandler);
-app.listen(config.PORT, () => {
-  logger.info(`app is running at port ${config.PORT}`);
-});
 
-const handleServerShutdown = async () => {
-  try {
-    logger.warn('Server SHUTDOWN');
-    process.exit(0);
-  } catch (err) {
-    logger.error('Error during server shutdown', err);
-  }
-};
-
-process.on('SIGTERM', handleServerShutdown);
-process.on('SIGINT', handleServerShutdown);
+export default app;
