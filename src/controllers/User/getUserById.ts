@@ -1,5 +1,4 @@
 import Follow from '@/models/followModel';
-import Post from '@/models/postModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';

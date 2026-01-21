@@ -2,10 +2,10 @@ import Block from '@/models/blockModel';
 import Follow from '@/models/followModel';
 import Like from '@/models/likeModel';
 import catchAsync from '@/utils/catchAsync';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 
 export const postsLikedByMe = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response) => {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 5;
     const skip = (page - 1) * limit;

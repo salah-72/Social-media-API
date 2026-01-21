@@ -2,7 +2,7 @@ import Block from '@/models/blockModel';
 import User from '@/models/userModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
-import { Request, Response, NextFunction, text } from 'express';
+import { Request, Response, NextFunction } from 'express';
 
 export const searchUsers = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {

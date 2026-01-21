@@ -1,6 +1,5 @@
 import Block from '@/models/blockModel';
 import Follow from '@/models/followModel';
-import Post from '@/models/postModel';
 import User from '@/models/userModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
