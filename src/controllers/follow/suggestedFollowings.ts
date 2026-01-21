@@ -1,10 +1,10 @@
 import Block from '@/models/blockModel';
 import Follow from '@/models/followModel';
 import catchAsync from '@/utils/catchAsync';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 
 export const suggestedFollowings = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response) => {
     const myId = req.currentuser?._id;
     const myFollowings = await Follow.find({
       follower: myId,

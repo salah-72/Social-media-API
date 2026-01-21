@@ -1,10 +1,9 @@
 import Follow from '@/models/followModel';
-import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 
 export const mutualFollowers = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response) => {
     const followers = await Follow.find({
       following: req.currentuser?._id,
       status: 'accepted',

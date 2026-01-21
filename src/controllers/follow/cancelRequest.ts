@@ -1,6 +1,5 @@
 import { logger } from '@/lib/winston';
 import Follow from '@/models/followModel';
-import User from '@/models/userModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
