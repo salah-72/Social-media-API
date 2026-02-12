@@ -61,6 +61,16 @@ app.use(cookieParser());
 app.use(compression({ threshold: 1024 }));
 app.use(helmet());
 
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     summary: Root endpoint
+ *     description: Simple Welcome endpoint
+ *     responses:
+ *       200:
+ *         description: Welcome message
+ */
 app.get('/api/v1', (req, res) => {
   res.send('welcome to our social media api');
 });
