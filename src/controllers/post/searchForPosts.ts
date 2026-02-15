@@ -11,7 +11,7 @@ export const postsSearch = catchAsync(
     if (!input) return next(new appError('search query is required', 400));
 
     const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 15;
+    const limit = Number(req.query.limit) || 5;
     const skip = (page - 1) * limit;
 
     const blocks = await Block.find({

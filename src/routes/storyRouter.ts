@@ -84,13 +84,28 @@ router.post(
  * /api/v1/stories/myStories:
  *   get:
  *     summary: Get my stories
- *     description: Retrieve a list of stories created by the authenticated user.
+ *     description: Retrieve a paginated list of stories created by the authenticated user.
  *     tags: [Stories]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 5
+ *         description: Number of stories per page
  *     responses:
  *       200:
- *         description: List of user's stories retrieved successfully
+ *         description: User stories retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -100,40 +115,52 @@ router.post(
  *                   type: string
  *                   example: success
  *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                        storyId:
- *                          type: string
- *                          example: 1234567890abcdef
- *                        authorId:
- *                          type: string
- *                          example: 0987654321fedcba
- *                        content:
- *                          type: string
- *                          example: This is my story content.
- *                        imgUrl:
- *                          type: string
- *                          example: https://example.com/story-image.jpg
- *                        whoCanSee:
- *                          type: string
- *                          example: public
- *                        viewCount:
- *                          type: integer
- *                          example: 5
- *                        likesCount:
- *                          type: integer
- *                          example: 5
- *                        createdAt:
- *                          type: string
- *                          example: 2023-01-01T00:00:00Z
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 5
+ *                     length:
+ *                       type: integer
+ *                       example: 5
+ *                     stories:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           storyId:
+ *                             type: string
+ *                             example: 1234567890abcdef
+ *                           authorId:
+ *                             type: string
+ *                             example: 0987654321fedcba
+ *                           content:
+ *                             type: string
+ *                             example: This is my story content.
+ *                           imgUrl:
+ *                             type: string
+ *                             example: https://example.com/story-image.jpg
+ *                           whoCanSee:
+ *                             type: string
+ *                             example: public
+ *                           viewCount:
+ *                             type: integer
+ *                             example: 5
+ *                           likesCount:
+ *                             type: integer
+ *                             example: 5
+ *                           createdAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
  *       401:
- *        description: Unauthorized - user not authenticated
- *        content:
- *          application/json:
- *            schema:
- *              $ref: '#/components/schemas/Error'
+ *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/myStories', authenticate, isActive, getMyStories);
 
@@ -248,6 +275,18 @@ router.get(
  *         required: true
  *         schema:
  *           type: string
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 20
  *     responses:
  *       200:
  *         description: Viewers list retrieved
@@ -262,6 +301,15 @@ router.get(
  *                 data:
  *                   type: object
  *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 20
+ *                     length:
+ *                       type: integer
+ *                       example: 5
  *                     viewers:
  *                       type: array
  *                       items:
@@ -302,6 +350,16 @@ router.get('/:storyId/viewers', authenticate, isActive, getViewers);
  *         required: true
  *         schema:
  *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               react:
+ *                 type: string
+ *                 example: like
  *     responses:
  *       200:
  *         description: Action successful
@@ -338,6 +396,18 @@ router.post(
  *         required: true
  *         schema:
  *           type: string
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 20
  *     responses:
  *       200:
  *         description: Likes list retrieved
@@ -352,6 +422,15 @@ router.post(
  *                 data:
  *                   type: object
  *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 20
+ *                     length:
+ *                       type: integer
+ *                       example: 5
  *                     likes:
  *                       type: array
  *                       items:

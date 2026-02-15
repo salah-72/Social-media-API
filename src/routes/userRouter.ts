@@ -1508,6 +1508,19 @@ router.delete('/block/:id', authenticate, isActive, unblock);
  *     tags: [Blocks]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 20
  *     responses:
  *       200:
  *         description: Successfully retrieved blocked users list
@@ -1520,16 +1533,28 @@ router.delete('/block/:id', authenticate, isActive, unblock);
  *                   type: string
  *                   example: success
  *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       username:
- *                         type: string
- *                         example: salah123
- *                       profilePhoto:
- *                         type: string
- *                         example: https://example.com/profile.jpg
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 20
+ *                     length:
+ *                       type: integer
+ *                       example: 5
+ *                     blockedUsers:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           username:
+ *                             type: string
+ *                             example: salah123
+ *                           profilePhoto:
+ *                             type: string
+ *                             example: https://example.com/profile.jpg
  *       401:
  *         description: Unauthorized
  *         content:

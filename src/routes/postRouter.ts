@@ -33,6 +33,78 @@ import { usersByReaction } from '@/controllers/comment/getUsersByReaction';
 
 const router = Router();
 
+/**
+ * @swagger
+ * /api/v1/posts/createPost:
+ *   post:
+ *     summary: Create a new post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               content:
+ *                 type: string
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *               whoCanSee:
+ *                 type: string
+ *                 enum: [public, followers, private]
+ *               status:
+ *                 type: string
+ *                 enum: [draft, published]
+ *     responses:
+ *       201:
+ *         description: Post created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     postId:
+ *                       type: string
+ *                       example: 1234567890abcdef
+ *                     content:
+ *                       type: string
+ *                       example: This is my new post content.
+ *                     images:
+ *                       type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         url:
+ *                           type: string
+ *                           example: https://res.cloudinary.com/demo/image/upload/v1610000000/sample.jpg
+ *                         publicId:
+ *                           type: string
+ *                           example: sample.jpg
+ *       400:
+ *         description: Bad request - invalid input data
+ *         content:
+ *           application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Error'
+ */
 router.post(
   '/createPost',
   authenticate,
@@ -40,8 +112,128 @@ router.post(
   upload.array('images', 5),
   createPost,
 );
+
+/**
+ * @swagger
+ * /api/v1/posts/{postId}:
+ *   delete:
+ *     summary: Delete a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       204:
+ *         description: Post deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       404:
+ *         description: Story not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.delete('/deletePost/:id', authenticate, isActive, deletePost);
+
+/**
+ * @swagger
+ * /api/v1/posts/updatePost/{id}:
+ *   patch:
+ *     summary: Update a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 optional: true
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *               whoCanSee:
+ *                 type: string
+ *                 optional: true
+ *                 enum: [public, followers, private]
+ *               status:
+ *                 type: string
+ *                 optional: true
+ *                 enum: [published]
+ *     responses:
+ *       200:
+ *         description: Post updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       404:
+ *         description: Post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.patch('/updatePost/:id', authenticate, isActive, updatePost);
+
+/**
+ * @swagger
+ * /api/v1/posts/addImg/{id}:
+ *   post:
+ *     summary: Add an image to a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               images:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Image added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       404:
+ *         description: Post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.post(
   '/addImg/:id',
   authenticate,
@@ -49,6 +241,40 @@ router.post(
   upload.single('images'),
   addImg,
 );
+
+/**
+ * @swagger
+ * /api/v1/posts/deleteImg/{postId}/img/{imgId}:
+ *   delete:
+ *     summary: Delete an image from a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: imgId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       204:
+ *         description: Image deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       404:
+ *         description: Post not found or Image not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.delete(
   '/deleteImg/:postId/img/:imgId',
   authenticate,
@@ -56,9 +282,373 @@ router.delete(
   deleteImg,
 );
 
+/**
+ * @swagger
+ * /api/v1/posts/myPosts:
+ *   get:
+ *     summary: Get my posts
+ *     description: Retrieve a paginated list of posts created by the authenticated user.
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 5
+ *         description: Number of stories per page
+ *     responses:
+ *       200:
+ *         description: User posts retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 5
+ *                     length:
+ *                       type: integer
+ *                       example: 5
+ *                     posts:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           postId:
+ *                             type: string
+ *                             example: 1234567890abcdef
+ *                           authorId:
+ *                             type: string
+ *                             example: 0987654321fedcba
+ *                           content:
+ *                             type: string
+ *                             example: This is my post content.
+ *                           imgUrl:
+ *                             type: array
+ *                             items:
+ *                               type: string
+ *                               example: https://example.com/post-image.jpg
+ *                           whoCanSee:
+ *                             type: string
+ *                             example: public
+ *                           likesCount:
+ *                             type: integer
+ *                             example: 5
+ *                           commentsCount:
+ *                             type: integer
+ *                             example: 10
+ *                           createdAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *                           updatedAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *       401:
+ *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 router.get('/myPosts', authenticate, isActive, getMyPosts);
+
+/**
+ * @swagger
+ * /api/v1/posts/searchPosts:
+ *   get:
+ *     summary: Search for posts
+ *     description: Search for posts based on a query string. The search will look for matches in the content of the posts and return results that the authenticated user has permission to see.
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: text
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The text to search for in post content
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 5
+ *         description: Number of posts per page
+ *     responses:
+ *       200:
+ *         description: posts retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 5
+ *                     length:
+ *                       type: integer
+ *                       example: 5
+ *                     posts:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           postId:
+ *                             type: string
+ *                             example: 1234567890abcdef
+ *                           authorId:
+ *                             type: string
+ *                             example: 0987654321fedcba
+ *                           content:
+ *                             type: string
+ *                             example: This is my post content.
+ *                           imgUrl:
+ *                             type: array
+ *                             items:
+ *                               type: string
+ *                               example: https://example.com/post-image.jpg
+ *                           likesCount:
+ *                             type: integer
+ *                             example: 5
+ *                           commentsCount:
+ *                             type: integer
+ *                             example: 10
+ *                           createdAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *                           updatedAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *       401:
+ *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/searchPosts', authenticate, isActive, postsSearch);
+
+/**
+ * @swagger
+ * /api/v1/posts/timeLine:
+ *   get:
+ *     summary: Get timeline posts
+ *     description: Retrieve posts for the authenticated user's timeline.
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 5
+ *         description: Number of posts per page
+ *     responses:
+ *       200:
+ *         description: posts retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 5
+ *                     length:
+ *                       type: integer
+ *                       example: 5
+ *                     posts:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           postId:
+ *                             type: string
+ *                             example: 1234567890abcdef
+ *                           authorId:
+ *                             type: string
+ *                             example: 0987654321fedcba
+ *                           content:
+ *                             type: string
+ *                             example: This is my post content.
+ *                           imgUrl:
+ *                             type: array
+ *                             items:
+ *                               type: string
+ *                               example: https://example.com/post-image.jpg
+ *                           likesCount:
+ *                             type: integer
+ *                             example: 5
+ *                           commentsCount:
+ *                             type: integer
+ *                             example: 10
+ *                           createdAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *                           updatedAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *       401:
+ *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/timeLine', authenticate, isActive, timeLinePosts);
+
+/**
+ * @swagger
+ * /api/v1/posts/user/{id}:
+ *   get:
+ *     summary: Get posts by user ID
+ *     description: Retrieve posts for a specific user by his ID.
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 5
+ *         description: Number of posts per page
+ *     responses:
+ *       200:
+ *         description: posts retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 5
+ *                     length:
+ *                       type: integer
+ *                       example: 5
+ *                     posts:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           postId:
+ *                             type: string
+ *                             example: 1234567890abcdef
+ *                           authorId:
+ *                             type: string
+ *                             example: 0987654321fedcba
+ *                           content:
+ *                             type: string
+ *                             example: This is my post content.
+ *                           imgUrl:
+ *                             type: array
+ *                             items:
+ *                               type: string
+ *                               example: https://example.com/post-image.jpg
+ *                           likesCount:
+ *                             type: integer
+ *                             example: 5
+ *                           commentsCount:
+ *                             type: integer
+ *                             example: 10
+ *                           createdAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *                           updatedAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *       401:
+ *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Forbidden - user is not authorized to view posts of this user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get(
   '/user/:id',
   authenticate,
@@ -67,7 +657,185 @@ router.get(
   isFollower,
   getUserPosts,
 );
+
+/**
+ * @swagger
+ * /api/v1/posts/likes:
+ *   get:
+ *     summary: Get posts liked by me
+ *     description: Retrieve a list of posts that the authenticated user has liked.
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 5
+ *         description: Number of posts per page
+ *     responses:
+ *       200:
+ *         description: posts retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 5
+ *                     length:
+ *                       type: integer
+ *                       example: 5
+ *                     posts:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           postId:
+ *                             type: string
+ *                             example: 1234567890abcdef
+ *                           authorId:
+ *                             type: string
+ *                             example: 0987654321fedcba
+ *                           content:
+ *                             type: string
+ *                             example: This is my post content.
+ *                           imgUrl:
+ *                             type: array
+ *                             items:
+ *                               type: string
+ *                               example: https://example.com/post-image.jpg
+ *                           likesCount:
+ *                             type: integer
+ *                             example: 5
+ *                           commentsCount:
+ *                             type: integer
+ *                             example: 10
+ *                           createdAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *                           updatedAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *       401:
+ *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/likes', authenticate, isActive, postsLikedByMe);
+
+/**
+ * @swagger
+ * /api/v1/posts/{postId}/likedUsers:
+ *   get:
+ *     summary: Get users who liked a specific post
+ *     description: Retrieve a list of users who have liked a specific post.
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the post to retrieve liked users for
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 5
+ *         description: Number of posts per page
+ *     responses:
+ *       200:
+ *         description: posts retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 5
+ *                     length:
+ *                       type: integer
+ *                       example: 5
+ *                     posts:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           postId:
+ *                             type: string
+ *                             example: 1234567890abcdef
+ *                           authorId:
+ *                             type: string
+ *                             example: 0987654321fedcba
+ *                           content:
+ *                             type: string
+ *                             example: This is my post content.
+ *                           imgUrl:
+ *                             type: array
+ *                             items:
+ *                               type: string
+ *                               example: https://example.com/post-image.jpg
+ *                           likesCount:
+ *                             type: integer
+ *                             example: 5
+ *                           commentsCount:
+ *                             type: integer
+ *                             example: 10
+ *                           createdAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *                           updatedAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *       401:
+ *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get(
   '/:postId/likedUsers',
   authenticate,
@@ -75,6 +843,45 @@ router.get(
   isTargetPostAvailable,
   postLikes,
 );
+
+/**
+ * @swagger
+ * /api/v1/posts/{postId}/like:
+ *   patch:
+ *     summary: Change reaction on a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               react:
+ *                 type: string
+ *                 example: love
+ *     responses:
+ *       200:
+ *         description: Reaction updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       404:
+ *         description: Story not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.patch(
   '/:postId/react',
   authenticate,
@@ -82,6 +889,104 @@ router.patch(
   isTargetPostAvailable,
   changeReact,
 );
+
+/**
+ * @swagger
+ * /api/v1/posts/{postId}/react/{type}:
+ *   get:
+ *     summary: Get users who liked a specific post by reaction type
+ *     description: Retrieve a list of users who have liked a specific post by a specific reaction type.
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the post to retrieve liked users for
+ *       - in: path
+ *         name: type
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The reaction type (e.g., love, like, etc.)
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 5
+ *         description: Number of posts per page
+ *     responses:
+ *       200:
+ *         description: posts retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 5
+ *                     length:
+ *                       type: integer
+ *                       example: 5
+ *                     posts:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           postId:
+ *                             type: string
+ *                             example: 1234567890abcdef
+ *                           authorId:
+ *                             type: string
+ *                             example: 0987654321fedcba
+ *                           content:
+ *                             type: string
+ *                             example: This is my post content.
+ *                           imgUrl:
+ *                             type: array
+ *                             items:
+ *                               type: string
+ *                               example: https://example.com/post-image.jpg
+ *                           likesCount:
+ *                             type: integer
+ *                             example: 5
+ *                           commentsCount:
+ *                             type: integer
+ *                             example: 10
+ *                           createdAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *                           updatedAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *       401:
+ *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get(
   '/:postId/react/:type',
   authenticate,
@@ -89,8 +994,116 @@ router.get(
   isTargetPostAvailable,
   reaction,
 );
+
+/**
+ * @swagger
+ * /api/v1/posts/{postId}:
+ *   get:
+ *     summary: Get a specific post
+ *     description: Retrieve a specific post by its ID. If the authenticated user is not the author of the post, the view count will be incremented.
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the post to retrieve
+ *     responses:
+ *       200:
+ *         description: Post retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     postId:
+ *                       type: string
+ *                       example: 1234567890abcdef
+ *                     authorId:
+ *                       type: string
+ *                       example: 0987654321fedcba
+ *                     content:
+ *                       type: string
+ *                       example: This is my post content.
+ *                     imgUrl:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                         example: https://example.com/post-image.jpg
+ *                     likesCount:
+ *                       type: integer
+ *                       example: 5
+ *                     commentsCount:
+ *                       type: integer
+ *                       example: 10
+ *                     createdAt:
+ *                        type: string
+ *                        example: 2023-01-01T00:00:00.000Z
+ *                     updatedAt:
+ *                        type: string
+ *                        example: 2023-01-01T00:00:00.000Z
+ *       401:
+ *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/:postId', authenticate, isActive, getPost);
 
+/**
+ * @swagger
+ * /api/v1/posts/{postId}/like:
+ *   post:
+ *     summary: Like or Unlike a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               react:
+ *                 type: string
+ *                 example: like
+ *     responses:
+ *       200:
+ *         description: Action successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       404:
+ *         description: Story not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.post(
   '/:postId/like',
   authenticate,
