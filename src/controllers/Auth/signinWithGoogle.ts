@@ -63,11 +63,11 @@ export const googleAuthCallback = (
       sameSite: 'strict',
     });
 
-    await Token.deleteOne({ userId: user._id });
-    await Token.create({
-      token: refreshToken,
-      userId: user._id,
-    });
+    await Token.updateOne(
+      { userId: user._id },
+      { token: refreshToken },
+      { upsert: true },
+    );
 
     logger.info('Refresh token created for user', {
       userId: user._id,

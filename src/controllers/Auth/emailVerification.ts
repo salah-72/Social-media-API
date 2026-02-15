@@ -53,7 +53,6 @@ export const emailVerification = catchAsync(
 
     res.status(200).json({
       status: 'success',
-      message: 'email verified successfully',
       accessToken,
     });
 

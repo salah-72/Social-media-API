@@ -23,6 +23,12 @@ export const register = catchAsync(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { email, password, firstName, lastName } = req.body as userData;
 
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return next(new appError('this email is signed before', 409));
+    }
+
     const username = genUsername(firstName);
 
     const newUser = await User.create({
@@ -38,7 +44,14 @@ export const register = catchAsync(
 
     res.status(201).json({
       status: 'success',
-      data: newUser,
+      data: {
+        _id: newUser._id,
+        email: newUser.email,
+        username: newUser.username,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        emailVerified: newUser.emailVerified,
+      },
     });
 
     logger.info('new user created successfully', {
@@ -52,9 +65,8 @@ export const register = catchAsync(
       .update(plainToken)
       .digest('hex');
 
-    await User.findByIdAndUpdate(newUser._id, {
-      emailVerificationToken: hashedToken,
-    });
+    newUser.emailVerificationToken = hashedToken;
+    await newUser.save();
 
     const info = await transporter.sendMail({
       from: 'salah',

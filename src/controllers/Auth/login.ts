@@ -16,7 +16,6 @@ type ILogin = Pick<IUser, 'email' | 'username' | 'password'>;
 
 export const login = catchAsync(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    console.log(req.body);
     const { email, username, password } = req.body as ILogin;
     if (!(email || username) || !password)
       return next(
@@ -28,7 +27,7 @@ export const login = catchAsync(
     else if (username)
       user = await User.findOne({ username }).select('+password');
 
-    if (!user) return next(new appError('invalid email or username', 400));
+    if (!user) return next(new appError('invalid email or username', 401));
 
     if (!user.emailVerified)
       return next(new appError('please verify your account ', 401));
@@ -45,11 +44,12 @@ export const login = catchAsync(
       sameSite: 'strict',
     });
 
-    await Token.deleteOne({ userId: user._id });
-    await Token.create({
-      token: refreshToken,
-      userId: user._id,
-    });
+    await Token.updateOne(
+      { userId: user._id },
+      { token: refreshToken },
+      { upsert: true },
+    );
+
     logger.info('Refresh token created for user', {
       userId: user._id,
       token: refreshToken,

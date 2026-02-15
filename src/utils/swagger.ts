@@ -33,6 +33,34 @@ export const swaggerDefinition: SwaggerDefinition = {
         description: 'Enter JWT token',
       },
     },
+    schemas: {
+      Error: {
+        type: 'object',
+        properties: {
+          status: {
+            type: 'string',
+            example: 'error',
+          },
+          message: {
+            type: 'string',
+            example: 'Error message',
+          },
+        },
+      },
+      Success: {
+        type: 'object',
+        properties: {
+          status: {
+            type: 'string',
+            example: 'success',
+          },
+          message: {
+            type: 'string',
+            example: 'Operation completed successfully',
+          },
+        },
+      },
+    },
   },
   tags: [
     {

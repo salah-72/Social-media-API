@@ -13,7 +13,12 @@ interface JwtRefreshPayload extends jwt.JwtPayload {
 
 const refreshAccessToken = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const refreshToken = req.cookies.refreshToken as string;
+    const refreshToken =
+      (req.cookies.refreshToken as string) || (req.body.refreshToken as string);
+
+    if (!refreshToken) {
+      return next(new appError('refresh token is required', 400));
+    }
 
     const exist = await Token.exists({ token: refreshToken });
     if (!exist)
@@ -26,6 +31,7 @@ const refreshAccessToken = catchAsync(
     const accessToken = generateAccessToken(payload.userId);
 
     res.status(200).json({
+      status: 'success',
       accessToken,
     });
   },
