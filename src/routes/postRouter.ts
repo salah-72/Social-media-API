@@ -44,7 +44,7 @@ const router = Router();
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
@@ -213,7 +213,7 @@ router.patch('/updatePost/:id', authenticate, isActive, updatePost);
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
@@ -774,10 +774,10 @@ router.get('/likes', authenticate, isActive, postsLikedByMe);
  *         schema:
  *           type: integer
  *           default: 5
- *         description: Number of posts per page
+ *         description: Number of users per page
  *     responses:
  *       200:
- *         description: posts retrieved successfully
+ *         description: Users retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -794,43 +794,38 @@ router.get('/likes', authenticate, isActive, postsLikedByMe);
  *                       example: 1
  *                     limit:
  *                       type: integer
- *                       example: 5
+ *                       example: 20
  *                     length:
  *                       type: integer
- *                       example: 5
- *                     posts:
+ *                       example: 20
+ *                     Users:
  *                       type: array
  *                       items:
  *                         type: object
  *                         properties:
- *                           postId:
+ *                           username:
  *                             type: string
- *                             example: 1234567890abcdef
- *                           authorId:
+ *                             example: ahmed123
+ *                           firstName:
  *                             type: string
- *                             example: 0987654321fedcba
- *                           content:
+ *                             example: Ahmed
+ *                           lastName:
  *                             type: string
- *                             example: This is my post content.
- *                           imgUrl:
- *                             type: array
- *                             items:
- *                               type: string
- *                               example: https://example.com/post-image.jpg
- *                           likesCount:
- *                             type: integer
- *                             example: 5
- *                           commentsCount:
- *                             type: integer
- *                             example: 10
- *                           createdAt:
+ *                             example: Ali
+ *                           profilePhoto:
  *                             type: string
- *                             example: 2023-01-01T00:00:00.000Z
- *                           updatedAt:
+ *                             example: https://example.com/profile-photo.jpg
+ *                           type:
  *                             type: string
- *                             example: 2023-01-01T00:00:00.000Z
+ *                             example: love
  *       401:
  *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: post or comment not found
  *         content:
  *           application/json:
  *             schema:
@@ -925,10 +920,10 @@ router.patch(
  *         schema:
  *           type: integer
  *           default: 5
- *         description: Number of posts per page
+ *         description: Number of users per page
  *     responses:
  *       200:
- *         description: posts retrieved successfully
+ *         description: Users retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -945,43 +940,35 @@ router.patch(
  *                       example: 1
  *                     limit:
  *                       type: integer
- *                       example: 5
+ *                       example: 20
  *                     length:
  *                       type: integer
- *                       example: 5
- *                     posts:
+ *                       example: 20
+ *                     Users:
  *                       type: array
  *                       items:
  *                         type: object
  *                         properties:
- *                           postId:
+ *                           username:
  *                             type: string
- *                             example: 1234567890abcdef
- *                           authorId:
+ *                             example: ahmed123
+ *                           firstName:
  *                             type: string
- *                             example: 0987654321fedcba
- *                           content:
+ *                             example: Ahmed
+ *                           lastName:
  *                             type: string
- *                             example: This is my post content.
- *                           imgUrl:
- *                             type: array
- *                             items:
- *                               type: string
- *                               example: https://example.com/post-image.jpg
- *                           likesCount:
- *                             type: integer
- *                             example: 5
- *                           commentsCount:
- *                             type: integer
- *                             example: 10
- *                           createdAt:
+ *                             example: Ali
+ *                           profilePhoto:
  *                             type: string
- *                             example: 2023-01-01T00:00:00.000Z
- *                           updatedAt:
- *                             type: string
- *                             example: 2023-01-01T00:00:00.000Z
+ *                             example: https://example.com/profile-photo.jpg
  *       401:
  *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: post or comment not found
  *         content:
  *           application/json:
  *             schema:
@@ -1000,7 +987,7 @@ router.get(
  * /api/v1/posts/{postId}:
  *   get:
  *     summary: Get a specific post
- *     description: Retrieve a specific post by its ID. If the authenticated user is not the author of the post, the view count will be incremented.
+ *     description: Retrieve a specific post by its ID.
  *     tags: [Posts]
  *     security:
  *       - bearerAuth: []
@@ -1112,6 +1099,44 @@ router.post(
   likePost,
 );
 
+/**
+ * @swagger
+ * /api/v1/posts/{postId}/comment:
+ *   post:
+ *     summary: Add a comment to a post
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 example: This is a comment on the post.
+ *     responses:
+ *       201:
+ *         description: Comment created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       404:
+ *         description: Post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.post(
   '/:postId/comment',
   authenticate,
@@ -1119,6 +1144,50 @@ router.post(
   isTargetPostAvailable,
   createComment,
 );
+
+/**
+ * @swagger
+ * /api/v1/posts/{postId}/comment/{commentId}:
+ *   post:
+ *     summary: Add a reply to a comment
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 example: This is a reply to the comment.
+ *     responses:
+ *       201:
+ *         description: Reply created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       404:
+ *         description: Post or comment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.post(
   '/:postId/comment/:commentId',
   authenticate,
@@ -1126,6 +1195,50 @@ router.post(
   isTargetPostAvailable,
   createReply,
 );
+
+/**
+ * @swagger
+ * /api/v1/posts/{postId}/comment/{commentId}:
+ *   patch:
+ *     summary: Update a comment
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 example: This is an updated comment.
+ *     responses:
+ *       200:
+ *         description: Comment updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       404:
+ *         description: Post or comment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.patch(
   '/:postId/comment/:commentId',
   authenticate,
@@ -1133,6 +1246,40 @@ router.patch(
   isTargetPostAvailable,
   updateComment,
 );
+
+/**
+ * @swagger
+ * /api/v1/posts/{postId}/comment/{commentId}:
+ *   delete:
+ *     summary: Delete a comment
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       204:
+ *         description: Comment deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       404:
+ *         description: Post or comment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.delete(
   '/:postId/comment/:commentId',
   authenticate,
@@ -1140,6 +1287,95 @@ router.delete(
   isTargetPostAvailable,
   deleteComment,
 );
+
+/**
+ * @swagger
+ * /api/v1/posts/{postId}/comments:
+ *   get:
+ *     summary: Get comments for a specific post
+ *     description: Retrieve a paginated list of comments for a specific post.
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 5
+ *         description: Number of stories per page
+ *     responses:
+ *       200:
+ *         description: Comments retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 5
+ *                     length:
+ *                       type: integer
+ *                       example: 5
+ *                     Comments:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           userId:
+ *                             type: string
+ *                             example: 0987654321fedcba
+ *                           content:
+ *                             type: string
+ *                             example: This is my comment content.
+ *                           likesCount:
+ *                             type: integer
+ *                             example: 5
+ *                           commentsCount:
+ *                             type: integer
+ *                             example: 10
+ *                           createdAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *                           updatedAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *       401:
+ *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get(
   '/:postId/comments',
   authenticate,
@@ -1147,6 +1383,100 @@ router.get(
   isTargetPostAvailable,
   getComments,
 );
+
+/**
+ * @swagger
+ * /api/v1/posts/{postId}/comment/{commentId}/replies:
+ *   get:
+ *     summary: Get replies for a specific comment
+ *     description: Retrieve a paginated list of replies for a specific comment.
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 5
+ *         description: Number of stories per page
+ *     responses:
+ *       200:
+ *         description: Replies retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 5
+ *                     length:
+ *                       type: integer
+ *                       example: 5
+ *                     Comments:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           userId:
+ *                             type: string
+ *                             example: 0987654321fedcba
+ *                           content:
+ *                             type: string
+ *                             example: This is my comment content.
+ *                           likesCount:
+ *                             type: integer
+ *                             example: 5
+ *                           commentsCount:
+ *                             type: integer
+ *                             example: 10
+ *                           createdAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *                           updatedAt:
+ *                             type: string
+ *                             example: 2023-01-01T00:00:00.000Z
+ *       401:
+ *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get(
   '/:postId/comment/:commentId/replies',
   authenticate,
@@ -1154,6 +1484,50 @@ router.get(
   isTargetPostAvailable,
   commentReplies,
 );
+
+/**
+ * @swagger
+ * /api/v1/posts/{postId}/comment/{commentId}/like:
+ *   post:
+ *     summary: Like or Unlike a comment
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               react:
+ *                 type: string
+ *                 example: like
+ *     responses:
+ *       200:
+ *         description: Action successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       404:
+ *         description: Story not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.post(
   '/:postId/comment/:commentId/like',
   authenticate,
@@ -1161,6 +1535,50 @@ router.post(
   isTargetPostAvailable,
   likeComment,
 );
+
+/**
+ * @swagger
+ * /api/v1/posts/{postId}/comment/{commentId}/like:
+ *   patch:
+ *     summary: Change reaction on a comment
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               react:
+ *                 type: string
+ *                 example: love
+ *     responses:
+ *       200:
+ *         description: Reaction updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       404:
+ *         description: Story not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.patch(
   '/:postId/comment/:commentId/like',
   authenticate,
@@ -1168,6 +1586,88 @@ router.patch(
   isTargetPostAvailable,
   changeCommentReact,
 );
+
+/**
+ * @swagger
+ * /api/v1/stories/{storyId}/likes:
+ *   get:
+ *     summary: Get users who liked the comment
+ *     description: Retrieve a paginated list of users who have liked a specific comment.
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *     responses:
+ *       200:
+ *         description: Likes list retrieved
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 20
+ *                     length:
+ *                       type: integer
+ *                       example: 5
+ *                     likes:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           username:
+ *                             type: string
+ *                             example: Ahmed123
+ *                           firstName:
+ *                             type: string
+ *                             example: Ahmed
+ *                           lastName:
+ *                             type: string
+ *                             example: Salah
+ *                           profilePhoto:
+ *                             type: string
+ *                             example: https://example.com/profile-photo.jpg
+ *                           react:
+ *                             type: string
+ *       404:
+ *         description: post or comment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get(
   '/:postId/comment/:commentId/like',
   authenticate,
@@ -1175,8 +1675,104 @@ router.get(
   isTargetPostAvailable,
   commentLikes,
 );
+
+/**
+ * @swagger
+ * /api/v1/posts/{postId}/comment/{commentId}/react/{type}:
+ *   get:
+ *     summary: Get users who liked a specific post by reaction type
+ *     description: Retrieve a list of users who have liked a specific comment by a specific reaction type.
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the post to retrieve liked users for
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the comment to retrieve liked users for
+ *       - in: path
+ *         name: type
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The reaction type (e.g., love, like, etc.)
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 5
+ *         description: Number of Users per page
+ *     responses:
+ *       200:
+ *         description: Users retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 20
+ *                     length:
+ *                       type: integer
+ *                       example: 20
+ *                     Users:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           username:
+ *                             type: string
+ *                             example: ahmed123
+ *                           firstName:
+ *                             type: string
+ *                             example: Ahmed
+ *                           lastName:
+ *                             type: string
+ *                             example: Ali
+ *                           profilePhoto:
+ *                             type: string
+ *                             example: https://example.com/profile-photo.jpg
+ *       401:
+ *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: post or comment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get(
-  '/:postId/comment/:commentId/like/reaction/:type',
+  '/:postId/comment/:commentId/like/react/:type',
   authenticate,
   isActive,
   isTargetPostAvailable,
