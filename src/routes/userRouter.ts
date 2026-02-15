@@ -1410,8 +1410,133 @@ router.get(
   isActive,
   suggestedFollowings,
 );
+
+/**
+ * @swagger
+ * /api/v1/users/block/{id}:
+ *   post:
+ *     summary: Block a user
+ *     description: Block a user by their ID. Blocking a user will prevent them from interacting with you and viewing your profile.
+ *     tags: [Blocks]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *           example: 1234567890abcdef12345678
+ *     responses:
+ *       200:
+ *         description: User blocked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/success'
+ *       400:
+ *         description: Bad request (e.g., trying to block yourself or already blocking the user).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *
+ */
 router.post('/block/:id', authenticate, isActive, block);
+
+/**
+ * @swagger
+ * /api/v1/users/unblock/{id}:
+ *   delete:
+ *     summary: Unblock a user
+ *     description: Unblock a user by their ID. Unblocking a user will allow them to interact with you and view your profile again.
+ *     tags: [Blocks]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *           example: 1234567890abcdef12345678
+ *     responses:
+ *       200:
+ *         description: User unblocked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/success'
+ *       400:
+ *         description: Bad request (e.g., trying to unblock yourself or not blocking the user).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *
+ */
 router.delete('/block/:id', authenticate, isActive, unblock);
+
+/**
+ * @swagger
+ * /api/v1/users/block/blockList:
+ *   get:
+ *     summary: Get blocked users list
+ *     description: Retrieve a list of users that are blocked by the authenticated user.
+ *     tags: [Blocks]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved blocked users list
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       username:
+ *                         type: string
+ *                         example: salah123
+ *                       profilePhoto:
+ *                         type: string
+ *                         example: https://example.com/profile.jpg
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Error'
+ */
 router.get('/block/blockList', authenticate, isActive, blockList);
 
 export default router;
