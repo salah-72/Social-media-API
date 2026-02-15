@@ -11,7 +11,7 @@ export const isTargetStoryAvailable = catchAsync(
     const { storyId } = req.params;
 
     const story = await Story.findById(storyId)
-      .select('-__v -updatedAt')
+      .select('-__v -updatedAt -viewsCount -likesCount -_id')
       .populate('author', 'username profilePhoto firstName lastName');
 
     if (!story) return next(new appError('story not found', 404));

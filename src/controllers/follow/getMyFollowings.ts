@@ -13,7 +13,7 @@ export const getMyFollowings = catchAsync(
       status: 'accepted',
     })
       .select('following -_id')
-      .populate('following', 'username profilePhoto')
+      .populate('following', 'username profilePhoto -_id')
       .skip(skip)
       .limit(limit)
       .lean();

@@ -9,7 +9,7 @@ export const blockList = catchAsync(async (req: Request, res: Response) => {
 
   const blockList = await Block.find({ blocker: req.currentuser?._id })
     .select('blocked -_id')
-    .populate('blocked', 'username profilePhoto')
+    .populate('blocked', 'username profilePhoto -_id')
     .skip(skip)
     .limit(limit)
     .lean();

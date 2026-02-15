@@ -7,9 +7,12 @@ import { logger } from '@/lib/winston';
 
 export const updatePassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { oldPassword, newPassword } = req.body;
-    if (!oldPassword || !newPassword)
-      return next(new appError('required values are missed', 404));
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+    if (!oldPassword || !newPassword || !confirmPassword)
+      return next(new appError('required values are missed', 400));
+
+    if (newPassword !== confirmPassword)
+      return next(new appError('passwords do not match', 400));
 
     const user = await User.findOne({ email: req.currentuser?.email }).select(
       '+password',

@@ -8,6 +8,8 @@ import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import config from './config/config';
 import { logger } from './lib/winston';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from '@/utils/swagger';
 import authRouter from '@/routes/authRouter';
 import userRouter from '@/routes/userRouter';
 import postRouter from '@/routes/postRouter';
@@ -59,9 +61,27 @@ app.use(cookieParser());
 app.use(compression({ threshold: 1024 }));
 app.use(helmet());
 
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     summary: Root endpoint
+ *     description: Simple Welcome endpoint
+ *     responses:
+ *       200:
+ *         description: Welcome message
+ */
 app.get('/api/v1', (req, res) => {
   res.send('welcome to our social media api');
 });
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'API Documentation',
+  }),
+);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/post', postRouter);

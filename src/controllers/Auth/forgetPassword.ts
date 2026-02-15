@@ -18,7 +18,7 @@ export const forgetPassword = catchAsync(
     user = user || (await User.findOne({ username }));
 
     if (!user)
-      return next(new appError('entered email or password not correct', 400));
+      return next(new appError('entered email or username not correct', 404));
 
     if (!user.emailVerified)
       return next(new appError('please verify your account ', 401));
@@ -46,7 +46,7 @@ export const forgetPassword = catchAsync(
 
     res.status(200).json({
       status: 'success',
-      message: 'password reset token sent successfully',
+      message: 'password reset link sent successfully',
     });
   },
 );
