@@ -283,8 +283,90 @@ router.get('/followers', authenticate, isActive, getMyFollowers);
  */
 router.get('/followings', authenticate, isActive, getMyFollowings);
 
+/**
+ * @swagger
+ * /api/v1/users/deleteMe:
+ *   patch:
+ *     summary: Deactivate current user's account
+ *     description: Deactivate the account of the currently authenticated user. This action is reversible and the user can reactivate their account later.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *      204:
+ *       description: Account deactivated successfully
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Success'
+ *
+ */
 router.patch('/deleteMe', authenticate, isActive, deleteMe);
+
+/**
+ * @swagger
+ * /api/v1/users/activeMe:
+ *   patch:
+ *     summary: Reactivate current user's account
+ *     description: Reactivate the account of the currently authenticated user if it was previously deactivated.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *      200:
+ *       description: Account reactivated successfully
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Success'
+ */
 router.patch('/activeMe', authenticate, activeMe);
+
+/**
+ * @swagger
+ * /api/v1/users/uploadCover:
+ *   patch:
+ *    summary: Upload or update cover photo
+ *    description: Upload a new cover photo or update the existing one for the currently authenticated user.
+ *    tags: [Users]
+ *    security:
+ *      - bearerAuth: []
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              coverPhoto:
+ *                type: string
+ *                format: binary
+ *    responses:
+ *      200:
+ *        description: Cover photo uploaded/updated successfully
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Success'
+ *      400:
+ *        description: Bad request (e.g., invalid file type).
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Error'
+ *      401:
+ *        description: Unauthorized
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Error'
+ *      404:
+ *        description: photo not found
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Error'
+ */
 router.patch(
   '/uploadCover',
   authenticate,
@@ -292,6 +374,52 @@ router.patch(
   upload.single('coverPhoto'),
   uploadCoverPhoto,
 );
+
+/**
+ * @swagger
+ * /api/v1/users/uploadProfilePic:
+ *   patch:
+ *    summary: Upload or update profile photo
+ *    description: Upload a new profile photo or update the existing one for the currently authenticated user.
+ *    tags: [Users]
+ *    security:
+ *      - bearerAuth: []
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              profilePhoto:
+ *                type: string
+ *                format: binary
+ *    responses:
+ *      200:
+ *        description: Profile photo uploaded/updated successfully
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Success'
+ *      400:
+ *        description: Bad request (e.g., invalid file type).
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Error'
+ *      401:
+ *        description: Unauthorized
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Error'
+ *      404:
+ *        description: photo not found
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Error'
+ */
 router.patch(
   '/uploadProfilePic',
   authenticate,
@@ -299,10 +427,383 @@ router.patch(
   upload.single('profilePhoto'),
   uploadProfilePic,
 );
+
+/**
+ * @swagger
+ * /api/v1/users/updateInfo:
+ *   patch:
+ *     summary: Update profile information
+ *     description: Update the profile information of the currently authenticated user, such as name, bio, education, experience, etc.
+ *     tags: [Users]
+ *     security:
+ *      - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 optional: true
+ *               firstName:
+ *                 type: string
+ *                 optional: true
+ *               lastName:
+ *                 type: string
+ *                 optional: true
+ *               about:
+ *                 type: string
+ *                 optional: true
+ *               education:
+ *                 type: string
+ *                 optional: true
+ *               experience:
+ *                 type: string
+ *                 optional: true
+ *               birthday:
+ *                 type: string
+ *                 format: date
+ *                 optional: true
+ *     responses:
+ *       200:
+ *         description: Profile information updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       400:
+ *         description: Bad request (e.g., invalid input data).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.patch('/updateInfo', authenticate, isActive, updateProfileInfo);
 
+/**
+ * @swagger
+ * /api/v1/users/searchUsers:
+ *   get:
+ *     summary: Search for users
+ *     description: Search for users by their username or name. This endpoint allows you to find users based on a search query.
+ *     tags: [Users]
+ *     security:
+ *      - bearerAuth: []
+ *     parameters:
+ *      - in: query
+ *        name: text
+ *        schema:
+ *          type: string
+ *          example: ahmed
+ *      - in: query
+ *        name: page
+ *        schema:
+ *          type: integer
+ *          example: 1
+ *      - in: query
+ *        name: limit
+ *        schema:
+ *          type: integer
+ *          example: 10
+ *     responses:
+ *       200:
+ *         description: List of users matching the search query
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 10
+ *                     users:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           username:
+ *                             type: string
+ *                             example: ahmed123
+ *                           firstName:
+ *                             type: string
+ *                             example: Ahmed
+ *                           lastName:
+ *                             type: string
+ *                             example: Salah
+ *                           profilePhoto:
+ *                             type: string
+ *                             example: https://example.com/profile.jpg
+ *                           score:
+ *                             type: number
+ *                             example: 1.5
+ *       400:
+ *         description: Bad request (e.g., missing search query).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/searchUsers', authenticate, isActive, searchUsers);
+
+/**
+ * @swagger
+ * /api/v1/users/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     description: Retrieve user information by his unique ID.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *          example: 64c7c8f0f1b2c3d4e5f6a7b8
+ *     responses:
+ *       200:
+ *         description: Current user profile returned successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     userInfo:
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                           example: 60d0fe4f5311236168a109ca
+ *                         email:
+ *                           type: string
+ *                           example: user@example.com
+ *                         username:
+ *                           type: string
+ *                           example: ahmed123
+ *                         firstName:
+ *                           type: string
+ *                           example: Ahmed
+ *                         lastName:
+ *                           type: string
+ *                           example: Salah
+ *                         profilePic:
+ *                           type: string
+ *                           example: https://example.com/profile.jpg
+ *                         coverPhoto:
+ *                           type: string
+ *                           example: https://example.com/cover.jpg
+ *                         about:
+ *                           type: string
+ *                           example: This is Ahmed's bio.
+ *                         followersCount:
+ *                           type: integer
+ *                           example: 100
+ *                         followingsCount:
+ *                           type: integer
+ *                           example: 50
+ *                         public:
+ *                           type: boolean
+ *                           example: true
+ *                         education:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               school:
+ *                                 type: string
+ *                                 example: University of Example
+ *                               level:
+ *                                 type: string
+ *                                 example: Bachelor's Degree
+ *                         experience:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               company:
+ *                                 type: string
+ *                                 example: Example Company
+ *                               title:
+ *                                 type: string
+ *                                 example: Software Engineer
+ *                               from:
+ *                                 type: string
+ *                                 example: 2018-01-01T00:00:00.000Z
+ *                               to:
+ *                                 type: string
+ *                                 example: 2021-12-31T23:59:59.999Z
+ *                         birthday:
+ *                           type: string
+ *                           example: 1990-01-01T00:00:00.000Z
+ *                         gender:
+ *                           type: string
+ *                           example: male
+ *                         currentCity:
+ *                           type: string
+ *                           example: Cairo
+ *                         hometown:
+ *                           type: string
+ *                           example: Alexandria
+ *                         socialLinks:
+ *                           type: object
+ *                           example:
+ *                             facebook: https://facebook.com/ahmed123
+ *                             twitter: https://twitter.com/ahmed123
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/:id', authenticate, isActive, isTargetUserAvailable, getUserById);
+
+/**
+ * @swagger
+ * /api/v1/users/username/{username}:
+ *  get:
+ *    summary: Get user by username
+ *    description: Retrieve user information by his unique username.
+ *    tags: [Users]
+ *    security:
+ *      - bearerAuth: []
+ *    parameters:
+ *      - in: path
+ *        name: username
+ *        schema:
+ *          type: string
+ *          example: ahmed123
+ *    responses:
+ *       200:
+ *         description: Current user profile returned successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     userInfo:
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                           example: 60d0fe4f5311236168a109ca
+ *                         email:
+ *                           type: string
+ *                           example: user@example.com
+ *                         username:
+ *                           type: string
+ *                           example: ahmed123
+ *                         firstName:
+ *                           type: string
+ *                           example: Ahmed
+ *                         lastName:
+ *                           type: string
+ *                           example: Salah
+ *                         profilePic:
+ *                           type: string
+ *                           example: https://example.com/profile.jpg
+ *                         coverPhoto:
+ *                           type: string
+ *                           example: https://example.com/cover.jpg
+ *                         about:
+ *                           type: string
+ *                           example: This is Ahmed's bio.
+ *                         followersCount:
+ *                           type: integer
+ *                           example: 100
+ *                         followingsCount:
+ *                           type: integer
+ *                           example: 50
+ *                         public:
+ *                           type: boolean
+ *                           example: true
+ *                         education:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               school:
+ *                                 type: string
+ *                                 example: University of Example
+ *                               level:
+ *                                 type: string
+ *                                 example: Bachelor's Degree
+ *                         experience:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               company:
+ *                                 type: string
+ *                                 example: Example Company
+ *                               title:
+ *                                 type: string
+ *                                 example: Software Engineer
+ *                               from:
+ *                                 type: string
+ *                                 example: 2018-01-01T00:00:00.000Z
+ *                               to:
+ *                                 type: string
+ *                                 example: 2021-12-31T23:59:59.999Z
+ *                         birthday:
+ *                           type: string
+ *                           example: 1990-01-01T00:00:00.000Z
+ *                         gender:
+ *                           type: string
+ *                           example: male
+ *                         currentCity:
+ *                           type: string
+ *                           example: Cairo
+ *                         hometown:
+ *                           type: string
+ *                           example: Alexandria
+ *                         socialLinks:
+ *                           type: object
+ *                           example:
+ *                             facebook: https://facebook.com/ahmed123
+ *                             twitter: https://twitter.com/ahmed123
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/username/:username', authenticate, isActive, getUserByUsername);
 
 /**
