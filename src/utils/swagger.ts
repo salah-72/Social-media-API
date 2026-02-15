@@ -80,8 +80,8 @@ export const swaggerDefinition: SwaggerDefinition = {
       description: 'Comment management endpoints',
     },
     {
-      name: 'Followers',
-      description: 'Follower management endpoints',
+      name: 'Follow',
+      description: 'Follow management endpoints',
     },
     {
       name: 'Stories',
