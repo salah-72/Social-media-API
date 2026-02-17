@@ -16,7 +16,7 @@ import postRouter from '@/routes/postRouter';
 import storyRouter from '@/routes/storyRouter';
 import errorHandler from './middlewares/errorHandler';
 import passport from 'passport';
-import '@/controllers/story/node_cron';
+import '@/jops/node_cron';
 
 const app = express();
 

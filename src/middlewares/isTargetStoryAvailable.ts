@@ -14,7 +14,8 @@ export const isTargetStoryAvailable = catchAsync(
       .select('-__v -updatedAt -viewsCount -likesCount -_id')
       .populate('author', 'username profilePhoto firstName lastName');
 
-    if (!story) return next(new appError('story not found', 404));
+    if (!story || story.createdAt < new Date(Date.now() - 24 * 60 * 60 * 1000))
+      return next(new appError('story not found', 404));
 
     const authorExist = await User.exists({
       _id: story.author,

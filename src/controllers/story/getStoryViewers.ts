@@ -16,7 +16,8 @@ export const getViewers = catchAsync(
     const story = await Story.findById(storyId);
     if (
       !story ||
-      story.author._id.toString() !== req.currentuser?._id.toString()
+      story.author._id.toString() !== req.currentuser?._id.toString() ||
+      story.createdAt < new Date(Date.now() - 24 * 60 * 60 * 1000)
     )
       return next(new appError('story not found', 404));
 

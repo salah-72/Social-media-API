@@ -11,7 +11,8 @@ export const deleteStory = catchAsync(
     const { storyId } = req.params;
 
     const story = await Story.findById(storyId);
-    if (!story) return next(new appError('story not found', 404));
+    if (!story || story.createdAt < new Date(Date.now() - 24 * 60 * 60 * 1000))
+      return next(new appError('story not found', 404));
     if (req.currentuser?._id.toString() !== story.author.toString())
       return next(
         new appError('you have no permission to delete this story', 401),

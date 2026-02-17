@@ -7,7 +7,10 @@ export const getMyStories = catchAsync(async (req: Request, res: Response) => {
   const limit = Number(req.query.limit) || 20;
   const skip = (page - 1) * limit;
 
-  const stories = await Story.find({ author: req.currentuser?._id })
+  const stories = await Story.find({
+    author: req.currentuser?._id,
+    createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+  })
     .select('-_id -__v -whoCanSee -updatedAt')
     .populate('author', 'username profilePhoto firstName lastName')
     .sort('-createdAt')
