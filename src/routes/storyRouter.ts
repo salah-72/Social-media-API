@@ -495,6 +495,12 @@ router.get('/:storyId/likes', authenticate, isActive, storyLikes);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.patch('/:storyId/like', authenticate, isActive, changeStoryReact);
+router.patch(
+  '/:storyId/like',
+  authenticate,
+  isActive,
+  isTargetStoryAvailable,
+  changeStoryReact,
+);
 
 export default router;

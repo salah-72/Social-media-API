@@ -5,10 +5,10 @@ import Story from '@/models/storyModel';
 import View from '@/models/viewModel';
 import cron from 'node-cron';
 
-cron.schedule('*/5 * * * *', async () => {
+cron.schedule('0 0 * * *', async () => {
   try {
     const expiredStories = await Story.find({
-      createdAt: { $lt: new Date(Date.now() - 86400000) },
+      createdAt: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
     }).select('_id img');
 
     if (!expiredStories.length) return;
@@ -20,11 +20,13 @@ cron.schedule('*/5 * * * *', async () => {
       View.deleteMany({ story: { $in: ids } }),
     ]);
 
-    await Promise.all(
-      expiredStories
-        .filter((e) => e.img?.publicId)
-        .map((e) => cloudinary.uploader.destroy(e.img!.publicId)),
-    );
+    const publicIds: string[] = expiredStories
+      .filter((e) => e.img?.publicId)
+      .map((e) => e.img!.publicId!);
+
+    if (publicIds.length > 0) {
+      await cloudinary.api.delete_resources(publicIds);
+    }
 
     logger.info(`${expiredStories.length} story is deleted`);
   } catch (err: any) {
