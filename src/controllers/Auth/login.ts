@@ -17,8 +17,6 @@ type ILogin = Pick<IUser, 'email' | 'username' | 'password'>;
 export const login = catchAsync(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { email, username, password } = req.body as ILogin;
-    if (!email && !username)
-      return next(new appError('please enter your email or username', 400));
 
     let user;
     if (email) user = await User.findOne({ email }).select('+password');

@@ -11,8 +11,6 @@ type IForget = Pick<IUser, 'email' | 'username'>;
 export const forgetPassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { email, username } = req.body as IForget;
-    if (!username && !email)
-      return next(new appError('please enter your email or username', 400));
 
     let user = await User.findOne({ email });
     user = user || (await User.findOne({ username }));

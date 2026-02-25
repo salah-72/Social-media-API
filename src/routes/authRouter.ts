@@ -10,7 +10,13 @@ import { updatePassword } from '@/controllers/Auth/updatePassword';
 import { authenticate } from '@/middlewares/authenticate';
 import { isActive } from '@/middlewares/isActive';
 import { validateRequest } from '@/middlewares/validation';
-import { loginValidation } from '@/validation/authValidation';
+import {
+  forgotPasswordValidation,
+  loginValidation,
+  registerValidation,
+  tokenValidation,
+  updatePasswordValidation,
+} from '@/validation/authValidation';
 import { Router } from 'express';
 import passport from 'passport';
 
@@ -98,7 +104,7 @@ const router = Router();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/signup', register);
+router.post('/signup', validateRequest({ body: registerValidation }), register);
 
 /**
  * @swagger
@@ -181,7 +187,11 @@ router.post('/refreshToken', refreshAccessToken);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/verify/:token', emailVerification);
+router.get(
+  '/verify/:token',
+  validateRequest({ params: tokenValidation }),
+  emailVerification,
+);
 
 /**
  * @swagger
@@ -347,7 +357,11 @@ router.get('/google/callback', googleAuthCallback);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/forgetPassword', forgetPassword);
+router.post(
+  '/forgetPassword',
+  validateRequest({ body: forgotPasswordValidation }),
+  forgetPassword,
+);
 
 /**
  * @swagger
@@ -394,7 +408,11 @@ router.post('/forgetPassword', forgetPassword);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/reset/:token', resetPassword);
+router.post(
+  '/reset/:token',
+  validateRequest({ params: tokenValidation }),
+  resetPassword,
+);
 
 /**
  * @swagger
@@ -473,5 +491,11 @@ router.post('/logout', authenticate, isActive, logOut);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.patch('/updatePassword', authenticate, isActive, updatePassword);
+router.patch(
+  '/updatePassword',
+  authenticate,
+  isActive,
+  validateRequest({ body: updatePasswordValidation }),
+  updatePassword,
+);
 export default router;
