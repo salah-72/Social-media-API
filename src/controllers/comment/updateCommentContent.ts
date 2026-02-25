@@ -8,8 +8,6 @@ export const updateComment = catchAsync(
     const { postId, commentId } = req.params;
     const { content } = req.body;
 
-    if (!content) return next(new appError('content is required', 400));
-
     const comment = await Comment.findOneAndUpdate(
       {
         user: req.currentuser?._id,

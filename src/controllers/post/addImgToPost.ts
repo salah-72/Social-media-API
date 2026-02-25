@@ -6,7 +6,7 @@ import { Request, Response, NextFunction } from 'express';
 
 export const addImg = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
+    const id = req.params.postId;
 
     const post = await Post.findById(id);
     if (!post) return next(new appError('post not found', 404));

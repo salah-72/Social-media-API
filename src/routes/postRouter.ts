@@ -30,6 +30,21 @@ import { upload } from '@/middlewares/multer';
 import { Router } from 'express';
 import { commentLikes } from '@/controllers/comment/getLikedUsers';
 import { usersByReaction } from '@/controllers/comment/getUsersByReaction';
+import { validateRequest } from '@/middlewares/validation';
+import {
+  changeTypeValidation,
+  createCommentValidation,
+  createPostValidation,
+  createReplyValidation,
+  deleteImgFromPostValidation,
+  deletePostValidation,
+  getLikedUsersOnCommentValidation,
+  getLIkedUsersValidation,
+  getPostsValidation,
+  getUserPostsValidation,
+  PostValidation,
+  updatePostValidation,
+} from '@/validation/postValidation';
 
 const router = Router();
 
@@ -109,6 +124,7 @@ router.post(
   '/createPost',
   authenticate,
   isActive,
+  validateRequest({ body: createPostValidation }),
   upload.array('images', 5),
   createPost,
 );
@@ -141,7 +157,13 @@ router.post(
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.delete('/deletePost/:id', authenticate, isActive, deletePost);
+router.delete(
+  '/deletePost/:id',
+  authenticate,
+  isActive,
+  validateRequest({ params: deletePostValidation }),
+  deletePost,
+);
 
 /**
  * @swagger
@@ -194,7 +216,14 @@ router.delete('/deletePost/:id', authenticate, isActive, deletePost);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.patch('/updatePost/:id', authenticate, isActive, updatePost);
+router.patch(
+  '/updatePost/:id',
+  authenticate,
+  isActive,
+  validateRequest({ params: updatePostValidation }),
+  validateRequest({ body: updatePostValidation }),
+  updatePost,
+);
 
 /**
  * @swagger
@@ -235,9 +264,10 @@ router.patch('/updatePost/:id', authenticate, isActive, updatePost);
  *               $ref: '#/components/schemas/Error'
  */
 router.post(
-  '/addImg/:id',
+  '/addImg/:postId',
   authenticate,
   isActive,
+  validateRequest({ params: PostValidation }),
   upload.single('images'),
   addImg,
 );
@@ -279,6 +309,7 @@ router.delete(
   '/deleteImg/:postId/img/:imgId',
   authenticate,
   isActive,
+  validateRequest({ params: deleteImgFromPostValidation }),
   deleteImg,
 );
 
@@ -371,7 +402,13 @@ router.delete(
  *               $ref: '#/components/schemas/Error'
  */
 
-router.get('/myPosts', authenticate, isActive, getMyPosts);
+router.get(
+  '/myPosts',
+  authenticate,
+  isActive,
+  validateRequest({ query: getPostsValidation }),
+  getMyPosts,
+);
 
 /**
  * @swagger
@@ -464,7 +501,13 @@ router.get('/myPosts', authenticate, isActive, getMyPosts);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/searchPosts', authenticate, isActive, postsSearch);
+router.get(
+  '/searchPosts',
+  authenticate,
+  isActive,
+  validateRequest({ query: getPostsValidation }),
+  postsSearch,
+);
 
 /**
  * @swagger
@@ -551,7 +594,13 @@ router.get('/searchPosts', authenticate, isActive, postsSearch);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/timeLine', authenticate, isActive, timeLinePosts);
+router.get(
+  '/timeLine',
+  authenticate,
+  isActive,
+  validateRequest({ query: getPostsValidation }),
+  timeLinePosts,
+);
 
 /**
  * @swagger
@@ -653,6 +702,8 @@ router.get(
   '/user/:id',
   authenticate,
   isActive,
+  validateRequest({ params: getUserPostsValidation }),
+  validateRequest({ query: getPostsValidation }),
   isTargetUserAvailable,
   isFollower,
   getUserPosts,
@@ -743,7 +794,13 @@ router.get(
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/likes', authenticate, isActive, postsLikedByMe);
+router.get(
+  '/likes',
+  authenticate,
+  isActive,
+  validateRequest({ query: getPostsValidation }),
+  postsLikedByMe,
+);
 
 /**
  * @swagger
@@ -835,6 +892,8 @@ router.get(
   '/:postId/likedUsers',
   authenticate,
   isActive,
+  validateRequest({ params: PostValidation }),
+  validateRequest({ query: getPostsValidation }),
   isTargetPostAvailable,
   postLikes,
 );
@@ -881,6 +940,8 @@ router.patch(
   '/:postId/react',
   authenticate,
   isActive,
+  validateRequest({ query: PostValidation }),
+  validateRequest({ body: changeTypeValidation }),
   isTargetPostAvailable,
   changeReact,
 );
@@ -978,6 +1039,8 @@ router.get(
   '/:postId/react/:type',
   authenticate,
   isActive,
+  validateRequest({ params: getLIkedUsersValidation }),
+  validateRequest({ query: getPostsValidation }),
   isTargetPostAvailable,
   reaction,
 );
@@ -1051,7 +1114,13 @@ router.get(
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:postId', authenticate, isActive, getPost);
+router.get(
+  '/:postId',
+  authenticate,
+  isActive,
+  validateRequest({ params: PostValidation }),
+  getPost,
+);
 
 /**
  * @swagger
@@ -1095,6 +1164,8 @@ router.post(
   '/:postId/like',
   authenticate,
   isActive,
+  validateRequest({ params: PostValidation }),
+  validateRequest({ body: changeTypeValidation }),
   isTargetPostAvailable,
   likePost,
 );
@@ -1141,6 +1212,8 @@ router.post(
   '/:postId/comment',
   authenticate,
   isActive,
+  validateRequest({ params: PostValidation }),
+  validateRequest({ body: createCommentValidation }),
   isTargetPostAvailable,
   createComment,
 );
@@ -1192,6 +1265,8 @@ router.post(
   '/:postId/comment/:commentId',
   authenticate,
   isActive,
+  validateRequest({ params: createReplyValidation }),
+  validateRequest({ body: createCommentValidation }),
   isTargetPostAvailable,
   createReply,
 );
@@ -1243,6 +1318,8 @@ router.patch(
   '/:postId/comment/:commentId',
   authenticate,
   isActive,
+  validateRequest({ params: createReplyValidation }),
+  validateRequest({ body: createCommentValidation }),
   isTargetPostAvailable,
   updateComment,
 );
@@ -1284,6 +1361,7 @@ router.delete(
   '/:postId/comment/:commentId',
   authenticate,
   isActive,
+  validateRequest({ params: createReplyValidation }),
   isTargetPostAvailable,
   deleteComment,
 );
@@ -1379,6 +1457,8 @@ router.delete(
 router.get(
   '/:postId/comments',
   authenticate,
+  validateRequest({ params: PostValidation }),
+  validateRequest({ query: getPostsValidation }),
   isActive,
   isTargetPostAvailable,
   getComments,
@@ -1481,6 +1561,8 @@ router.get(
   '/:postId/comment/:commentId/replies',
   authenticate,
   isActive,
+  validateRequest({ params: createReplyValidation }),
+  validateRequest({ query: getPostsValidation }),
   isTargetPostAvailable,
   commentReplies,
 );
@@ -1532,6 +1614,8 @@ router.post(
   '/:postId/comment/:commentId/like',
   authenticate,
   isActive,
+  validateRequest({ params: createReplyValidation }),
+  validateRequest({ body: changeTypeValidation }),
   isTargetPostAvailable,
   likeComment,
 );
@@ -1583,13 +1667,15 @@ router.patch(
   '/:postId/comment/:commentId/like',
   authenticate,
   isActive,
+  validateRequest({ params: createReplyValidation }),
+  validateRequest({ body: changeTypeValidation }),
   isTargetPostAvailable,
   changeCommentReact,
 );
 
 /**
  * @swagger
- * /api/v1/stories/{storyId}/likes:
+ * /api/v1/posts/{postId}/comment/{commentId}/likes:
  *   get:
  *     summary: Get users who liked the comment
  *     description: Retrieve a paginated list of users who have liked a specific comment.
@@ -1672,6 +1758,8 @@ router.get(
   '/:postId/comment/:commentId/like',
   authenticate,
   isActive,
+  validateRequest({ params: createReplyValidation }),
+  validateRequest({ query: getPostsValidation }),
   isTargetPostAvailable,
   commentLikes,
 );
@@ -1775,6 +1863,7 @@ router.get(
   '/:postId/comment/:commentId/like/react/:type',
   authenticate,
   isActive,
+  validateRequest({ params: getLikedUsersOnCommentValidation }),
   isTargetPostAvailable,
   usersByReaction,
 );

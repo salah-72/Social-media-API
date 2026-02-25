@@ -12,7 +12,7 @@ export const changeReact = catchAsync(
       user: req.currentuser!._id,
       post: postId,
     });
-    if (!like || !type) return next(new appError('react not found', 404));
+    if (!like) return next(new appError('react not found', 404));
 
     like.type = type;
     await like.save();

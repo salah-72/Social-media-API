@@ -14,14 +14,16 @@ export const validateRequest = (schema: validationSchema) => {
         req.body = (await schema.body.parseAsync(req.body)) as typeof req.body;
       }
       if (schema.params) {
-        req.params = (await schema.params.parseAsync(
+        const parsedParams = (await schema.params.parseAsync(
           req.params,
         )) as typeof req.params;
+        Object.assign(req.params, parsedParams);
       }
       if (schema.query) {
-        req.query = (await schema.query.parseAsync(
+        const parsedQuery = (await schema.query.parseAsync(
           req.query,
         )) as typeof req.query;
+        Object.assign(req.query, parsedQuery);
       }
       next();
     } catch (error) {
