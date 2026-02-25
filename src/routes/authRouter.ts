@@ -9,6 +9,8 @@ import { googleAuthCallback } from '@/controllers/Auth/signinWithGoogle';
 import { updatePassword } from '@/controllers/Auth/updatePassword';
 import { authenticate } from '@/middlewares/authenticate';
 import { isActive } from '@/middlewares/isActive';
+import { validateRequest } from '@/middlewares/validation';
+import { loginValidation } from '@/validation/authValidation';
 import { Router } from 'express';
 import passport from 'passport';
 
@@ -272,7 +274,7 @@ router.get('/verify/:token', emailVerification);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/login', login);
+router.post('/login', validateRequest({ body: loginValidation }), login);
 
 /**
  * @swagger
