@@ -9,7 +9,6 @@ export const changeCommentReact = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { postId, commentId } = req.params;
     const type = req.body?.type;
-    if (!type) return next(new appError('react not found', 404));
 
     const comment = await Comment.findById(commentId);
 

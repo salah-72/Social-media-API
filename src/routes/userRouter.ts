@@ -28,6 +28,15 @@ import { getMyFollowings } from '@/controllers/follow/getMyFollowings';
 import { blockList } from '@/controllers/block/getMyBlockList';
 import { suggestedFollowings } from '@/controllers/follow/suggestedFollowings';
 import { searchUsers } from '@/controllers/User/searchForUsers';
+import {
+  getUsersValidation,
+  searchUsersValidation,
+  updateProfileValidation,
+  userIdValidation,
+  usernameValidation,
+  usersValidation,
+} from '@/validation/userValidation';
+import { validateRequest } from '@/middlewares/validation';
 
 const router = Router();
 
@@ -215,7 +224,13 @@ router.get('/myProfile', authenticate, isActive, getMe);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/followers', authenticate, isActive, getMyFollowers);
+router.get(
+  '/followers',
+  authenticate,
+  isActive,
+  validateRequest({ query: getUsersValidation }),
+  getMyFollowers,
+);
 
 /**
  * @swagger
@@ -281,7 +296,13 @@ router.get('/followers', authenticate, isActive, getMyFollowers);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/followings', authenticate, isActive, getMyFollowings);
+router.get(
+  '/followings',
+  authenticate,
+  isActive,
+  validateRequest({ query: getUsersValidation }),
+  getMyFollowings,
+);
 
 /**
  * @swagger
@@ -480,7 +501,13 @@ router.patch(
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.patch('/updateInfo', authenticate, isActive, updateProfileInfo);
+router.patch(
+  '/updateInfo',
+  authenticate,
+  isActive,
+  validateRequest({ body: updateProfileValidation }),
+  updateProfileInfo,
+);
 
 /**
  * @swagger
@@ -554,7 +581,13 @@ router.patch('/updateInfo', authenticate, isActive, updateProfileInfo);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/searchUsers', authenticate, isActive, searchUsers);
+router.get(
+  '/searchUsers',
+  authenticate,
+  isActive,
+  validateRequest({ query: searchUsersValidation }),
+  searchUsers,
+);
 
 /**
  * @swagger
@@ -679,7 +712,14 @@ router.get('/searchUsers', authenticate, isActive, searchUsers);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:id', authenticate, isActive, isTargetUserAvailable, getUserById);
+router.get(
+  '/:id',
+  authenticate,
+  isActive,
+  validateRequest({ params: userIdValidation }),
+  isTargetUserAvailable,
+  getUserById,
+);
 
 /**
  * @swagger
@@ -804,7 +844,13 @@ router.get('/:id', authenticate, isActive, isTargetUserAvailable, getUserById);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/username/:username', authenticate, isActive, getUserByUsername);
+router.get(
+  '/username/:username',
+  authenticate,
+  isActive,
+  validateRequest({ params: usernameValidation }),
+  getUserByUsername,
+);
 
 /**
  * @swagger
@@ -851,6 +897,7 @@ router.post(
   '/follow/:id',
   authenticate,
   isActive,
+  validateRequest({ params: userIdValidation }),
   isTargetUserAvailable,
   follow,
 );
@@ -900,6 +947,7 @@ router.delete(
   '/follow/:id',
   authenticate,
   isActive,
+  validateRequest({ params: userIdValidation }),
   isTargetUserAvailable,
   unfollow,
 );
@@ -948,6 +996,7 @@ router.patch(
   '/followReq/:id',
   authenticate,
   isActive,
+  validateRequest({ params: userIdValidation }),
   isTargetUserAvailable,
   accept,
 );
@@ -983,7 +1032,13 @@ router.patch(
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.delete('/followReq/:id', authenticate, isActive, reject);
+router.delete(
+  '/followReq/:id',
+  authenticate,
+  isActive,
+  validateRequest({ params: userIdValidation }),
+  reject,
+);
 
 /**
  * @swagger
@@ -1016,7 +1071,13 @@ router.delete('/followReq/:id', authenticate, isActive, reject);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.delete('/cancelFollowReq/:id', authenticate, isActive, cancelReq);
+router.delete(
+  '/cancelFollowReq/:id',
+  authenticate,
+  isActive,
+  validateRequest({ params: userIdValidation }),
+  cancelReq,
+);
 
 /**
  * @swagger
@@ -1103,6 +1164,8 @@ router.get(
   '/:id/followers',
   authenticate,
   isActive,
+  validateRequest({ params: userIdValidation }),
+  validateRequest({ query: usersValidation }),
   isTargetUserAvailable,
   isFollower,
   getUserFollowers,
@@ -1193,6 +1256,8 @@ router.get(
   '/:id/followings',
   authenticate,
   isActive,
+  validateRequest({ params: userIdValidation }),
+  validateRequest({ query: usersValidation }),
   isTargetUserAvailable,
   isFollower,
   getUserFollowings,
@@ -1268,6 +1333,8 @@ router.get(
   '/mutualFollowers/:id',
   authenticate,
   isActive,
+  validateRequest({ params: userIdValidation }),
+  validateRequest({ query: usersValidation }),
   isTargetUserAvailable,
   isFollower,
   mutualFollowers,
@@ -1344,6 +1411,8 @@ router.get(
   '/mutualFollowings/:id',
   authenticate,
   isActive,
+  validateRequest({ params: userIdValidation }),
+  validateRequest({ query: usersValidation }),
   isTargetUserAvailable,
   isFollower,
   mutualFollowings,
@@ -1408,6 +1477,7 @@ router.get(
   '/follow/suggestedFollowings',
   authenticate,
   isActive,
+  validateRequest({ query: usersValidation }),
   suggestedFollowings,
 );
 
@@ -1453,7 +1523,13 @@ router.get(
  *               $ref: '#/components/schemas/Error'
  *
  */
-router.post('/block/:id', authenticate, isActive, block);
+router.post(
+  '/block/:id',
+  authenticate,
+  isActive,
+  validateRequest({ params: userIdValidation }),
+  block,
+);
 
 /**
  * @swagger
@@ -1497,7 +1573,13 @@ router.post('/block/:id', authenticate, isActive, block);
  *               $ref: '#/components/schemas/Error'
  *
  */
-router.delete('/block/:id', authenticate, isActive, unblock);
+router.delete(
+  '/block/:id',
+  authenticate,
+  isActive,
+  validateRequest({ params: userIdValidation }),
+  unblock,
+);
 
 /**
  * @swagger
@@ -1562,6 +1644,12 @@ router.delete('/block/:id', authenticate, isActive, unblock);
  *            schema:
  *              $ref: '#/components/schemas/Error'
  */
-router.get('/block/blockList', authenticate, isActive, blockList);
+router.get(
+  '/block/blockList',
+  authenticate,
+  isActive,
+  validateRequest({ query: usersValidation }),
+  blockList,
+);
 
 export default router;

@@ -18,7 +18,7 @@ export const createStory = catchAsync(
       };
     }
 
-    if (!content.trim() && !img)
+    if (!content && !img)
       return next(new appError('story must contain content or img', 400));
 
     if (!req.currentuser?.public && (whoCanSee === 'public' || !whoCanSee))

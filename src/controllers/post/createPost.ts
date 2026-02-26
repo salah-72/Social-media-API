@@ -4,7 +4,6 @@ import DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 import Post from '@/models/postModel';
 import { uploadToCloudinary } from '@/utils/cloudinaryUpload';
-import appError from '@/utils/appError';
 import { logger } from '@/lib/winston';
 
 const window = new JSDOM('').window;
@@ -13,7 +12,6 @@ const purify = DOMPurify(window);
 export const createPost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     let { content, status, whoCanSee } = req.body;
-    if (!content) return next(new appError('content is required', 400));
 
     const cleanContent = purify.sanitize(content);
     const author = req.currentuser?._id;
