@@ -124,8 +124,8 @@ router.post(
   '/createPost',
   authenticate,
   isActive,
-  validateRequest({ body: createPostValidation }),
   upload.array('images', 5),
+  validateRequest({ body: createPostValidation }),
   createPost,
 );
 

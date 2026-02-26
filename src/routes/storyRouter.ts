@@ -10,6 +10,13 @@ import { authenticate } from '@/middlewares/authenticate';
 import { isActive } from '@/middlewares/isActive';
 import { isTargetStoryAvailable } from '@/middlewares/isTargetStoryAvailable';
 import { upload } from '@/middlewares/multer';
+import { validateRequest } from '@/middlewares/validation';
+import {
+  getStoriesValidation,
+  getStoryValidation,
+  reactTypeValidation,
+  storyValidation,
+} from '@/validation/storyValidation';
 import { Router } from 'express';
 
 const router = Router();
@@ -76,6 +83,7 @@ router.post(
   authenticate,
   isActive,
   upload.single('img'),
+  validateRequest({ body: storyValidation }),
   createStory,
 );
 
@@ -162,7 +170,13 @@ router.post(
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/myStories', authenticate, isActive, getMyStories);
+router.get(
+  '/myStories',
+  authenticate,
+  isActive,
+  validateRequest({ query: getStoriesValidation }),
+  getMyStories,
+);
 
 /**
  * @swagger
@@ -192,7 +206,13 @@ router.get('/myStories', authenticate, isActive, getMyStories);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.delete('/:storyId', authenticate, isActive, deleteStory);
+router.delete(
+  '/:storyId',
+  authenticate,
+  isActive,
+  validateRequest({ params: getStoryValidation }),
+  deleteStory,
+);
 
 /**
  * @swagger
@@ -257,6 +277,7 @@ router.get(
   '/:storyId',
   authenticate,
   isActive,
+  validateRequest({ params: getStoryValidation }),
   isTargetStoryAvailable,
   getStory,
 );
@@ -334,7 +355,14 @@ router.get(
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:storyId/viewers', authenticate, isActive, getViewers);
+router.get(
+  '/:storyId/viewers',
+  authenticate,
+  isActive,
+  validateRequest({ params: getStoryValidation }),
+  validateRequest({ query: getStoriesValidation }),
+  getViewers,
+);
 
 /**
  * @swagger
@@ -378,6 +406,8 @@ router.post(
   '/:storyId/like',
   authenticate,
   isActive,
+  validateRequest({ params: getStoryValidation }),
+  validateRequest({ body: reactTypeValidation }),
   isTargetStoryAvailable,
   likeStory,
 );
@@ -455,7 +485,14 @@ router.post(
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:storyId/likes', authenticate, isActive, storyLikes);
+router.get(
+  '/:storyId/likes',
+  authenticate,
+  isActive,
+  validateRequest({ params: getStoryValidation }),
+  validateRequest({ query: getStoriesValidation }),
+  storyLikes,
+);
 
 /**
  * @swagger
@@ -499,6 +536,8 @@ router.patch(
   '/:storyId/like',
   authenticate,
   isActive,
+  validateRequest({ params: getStoryValidation }),
+  validateRequest({ body: reactTypeValidation }),
   isTargetStoryAvailable,
   changeStoryReact,
 );

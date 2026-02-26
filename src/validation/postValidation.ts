@@ -46,7 +46,9 @@ export const getUserPostsValidation = z.object({
 });
 
 export const changeTypeValidation = z.object({
-  type: z.enum(['like', 'love', 'care', 'sad', 'angry', 'haha', 'wow']),
+  type: z
+    .enum(['like', 'love', 'care', 'sad', 'angry', 'haha', 'wow'])
+    .default('like'),
 });
 
 export const getLIkedUsersValidation = z.object({
