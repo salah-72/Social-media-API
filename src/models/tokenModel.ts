@@ -14,11 +14,12 @@ const tokenSchema = new mongoose.Schema<IToken>({
   token: {
     type: String,
     required: [true, 'token is required'],
+    index: true,
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     required: [true, 'user of token is required'],
-    unique: true,
+    index: true,
   },
   deviceIp: {
     type: String,
