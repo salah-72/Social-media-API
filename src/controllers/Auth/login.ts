@@ -40,11 +40,17 @@ export const login = catchAsync(
       sameSite: 'strict',
     });
 
-    await Token.updateOne(
-      { userId: user._id },
-      { token: refreshToken },
-      { upsert: true },
-    );
+    // await Token.updateOne(
+    //   { userId: user._id },
+    //   { token: refreshToken },
+    //   { upsert: true },
+    // );
+    await Token.create({
+      token: refreshToken,
+      userId: user._id,
+      deviceIp: req.ip,
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
 
     logger.info('Refresh token created for user', {
       userId: user._id,
