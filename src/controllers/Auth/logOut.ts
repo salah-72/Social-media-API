@@ -49,3 +49,38 @@ export const logOut = catchAsync(
     });
   },
 );
+
+export const logoutAll = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.currentuser?._id;
+    const accessToken = req.headers.authorization?.split(' ')[1];
+    await Token.updateMany(
+      { userId, revoked: false },
+      { revoked: true, revokedAt: new Date() },
+    );
+
+    if (accessToken) {
+      const decoded = jwt.decode(accessToken) as { exp: number };
+      const expiryDate = decoded.exp
+        ? new Date(decoded.exp * 1000)
+        : new Date(Date.now() + 15 * 60 * 1000);
+      await BlackList.create({
+        token: accessToken,
+        expiredAt: expiryDate,
+      });
+    }
+
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: config.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+    logger.info('user logged out from all devices successfully', {
+      email: req.currentuser?.email,
+    });
+    res.status(200).json({
+      status: 'success',
+      message: 'logged out from all devices successfully',
+    });
+  },
+);
