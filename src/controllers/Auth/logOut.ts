@@ -2,21 +2,36 @@ import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '@/lib/winston';
 import Token from '@/models/tokenModel';
+import BlackList from '@/models/blackListTokensModel';
 import config from '@/config/config';
-import appError from '@/utils/appError';
+import jwt from 'jsonwebtoken';
 
 export const logOut = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const refreshToken = req.cookies.refreshToken as string;
+    const accessToken = req.headers.authorization?.split(' ')[1];
 
-    if (!refreshToken) return next(new appError('you are not logging in', 400));
+    if (!refreshToken) {
+      return res
+        .status(200)
+        .json({ status: 'success', message: 'Already logged out' });
+    }
 
-    await Token.deleteOne({ token: refreshToken });
+    await Token.updateOne(
+      { token: refreshToken },
+      { revoked: true, revokedAt: new Date() },
+    );
 
-    logger.info('User refresh token deleted successfully', {
-      email: req.currentuser?.email,
-      refreshToken,
-    });
+    if (accessToken) {
+      const decoded = jwt.decode(accessToken) as { exp: number };
+      const expiryDate = decoded.exp
+        ? new Date(decoded.exp * 1000)
+        : new Date(Date.now() + 15 * 60 * 1000);
+      await BlackList.create({
+        token: accessToken,
+        expiredAt: expiryDate,
+      });
+    }
 
     res.clearCookie('refreshToken', {
       httpOnly: true,
@@ -29,7 +44,7 @@ export const logOut = catchAsync(
     });
 
     res.status(200).json({
-      success: 'success',
+      status: 'success',
       message: 'logout successfully',
     });
   },

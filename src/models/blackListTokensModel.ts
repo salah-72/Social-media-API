@@ -11,6 +11,7 @@ const blckListTokenSchema = new Schema({
     type: Date,
     required: [true, 'expiration date is required'],
     index: true,
+    expires: 0,
   },
 });
 
