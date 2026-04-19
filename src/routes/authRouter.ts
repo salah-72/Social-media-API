@@ -1,7 +1,7 @@
 import { emailVerification } from '@/controllers/Auth/emailVerification';
 import { forgetPassword } from '@/controllers/Auth/forgetPassword';
 import { login } from '@/controllers/Auth/login';
-import { logOut } from '@/controllers/Auth/logOut';
+import { logOut, logoutAll } from '@/controllers/Auth/logOut';
 import refreshAccessToken from '@/controllers/Auth/refreshAccessToken';
 import { register } from '@/controllers/Auth/register';
 import { resetPassword } from '@/controllers/Auth/resetPassword';
@@ -438,6 +438,31 @@ router.post(
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/logout', authenticate, isActive, logOut);
+
+/**
+ * @swagger
+ * /api/v1/auth/logoutAll:
+ *   post:
+ *     summary: Logout user from all devices
+ *     description: Invalidates the user session on all devices (clears cookies/tokens).
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logged out from all devices successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       401:
+ *         description: Unauthorized (Token missing or invalid)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/logoutAll', authenticate, isActive, logoutAll);
 
 /**
  * @swagger
