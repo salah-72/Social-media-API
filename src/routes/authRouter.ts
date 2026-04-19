@@ -3,7 +3,7 @@ import { emailVerification } from '@/controllers/Auth/emailVerification';
 import { forgetPassword } from '@/controllers/Auth/forgetPassword';
 import { login } from '@/controllers/Auth/login';
 import { logOut, logoutAll } from '@/controllers/Auth/logOut';
-import refreshAccessToken from '@/controllers/Auth/refreshAccessToken';
+import refreshToken from '@/controllers/Auth/refreshToken';
 import { register } from '@/controllers/Auth/register';
 import { resetPassword } from '@/controllers/Auth/resetPassword';
 import { googleAuthCallback } from '@/controllers/Auth/signinWithGoogle';
@@ -179,7 +179,7 @@ router.get('/sessions', authenticate, isActive, getActiveSessions);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/refreshToken', refreshAccessToken);
+router.post('/refreshToken', refreshToken);
 
 /**
  * @swagger
