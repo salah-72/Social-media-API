@@ -1,3 +1,4 @@
+import { getActiveSessions } from '@/controllers/Auth/activeSessions';
 import { emailVerification } from '@/controllers/Auth/emailVerification';
 import { forgetPassword } from '@/controllers/Auth/forgetPassword';
 import { login } from '@/controllers/Auth/login';
@@ -105,6 +106,35 @@ const router = Router();
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/signup', validateRequest({ body: registerValidation }), register);
+
+/**
+ * @swagger
+ * /api/v1/auth/sessions:
+ *   get:
+ *     summary: Get active sessions
+ *     description: Retrieve a list of active sessions for the authenticated user
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Active sessions retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     activeSessions:
+ *                       type: array
+ *                       items:
+ *                         type: object
+
+ */
+router.get('/sessions', authenticate, isActive, getActiveSessions);
 
 /**
  * @swagger
