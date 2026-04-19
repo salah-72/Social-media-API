@@ -38,6 +38,7 @@ export const login = catchAsync(
       httpOnly: true,
       secure: config.NODE_ENV === 'production',
       sameSite: 'strict',
+      maxAge: 20 * 24 * 60 * 60 * 1000,
     });
 
     // await Token.updateOne(
