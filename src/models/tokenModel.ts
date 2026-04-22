@@ -34,6 +34,7 @@ const tokenSchema = new mongoose.Schema<IToken>({
   expiresAt: {
     type: Date,
     default: () => new Date(Date.now() + 20 * 24 * 60 * 60 * 1000),
+    expires: 0,
   },
   userAgent: {
     type: String,
