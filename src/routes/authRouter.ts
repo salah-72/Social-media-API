@@ -1,8 +1,9 @@
+import { getActiveSessions } from '@/controllers/Auth/activeSessions';
 import { emailVerification } from '@/controllers/Auth/emailVerification';
 import { forgetPassword } from '@/controllers/Auth/forgetPassword';
 import { login } from '@/controllers/Auth/login';
-import { logOut } from '@/controllers/Auth/logOut';
-import refreshAccessToken from '@/controllers/Auth/refreshAccessToken';
+import { logOut, logoutAll } from '@/controllers/Auth/logOut';
+import refreshToken from '@/controllers/Auth/refreshToken';
 import { register } from '@/controllers/Auth/register';
 import { resetPassword } from '@/controllers/Auth/resetPassword';
 import { googleAuthCallback } from '@/controllers/Auth/signinWithGoogle';
@@ -108,6 +109,35 @@ router.post('/signup', validateRequest({ body: registerValidation }), register);
 
 /**
  * @swagger
+ * /api/v1/auth/sessions:
+ *   get:
+ *     summary: Get active sessions
+ *     description: Retrieve a list of active sessions for the authenticated user
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Active sessions retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     activeSessions:
+ *                       type: array
+ *                       items:
+ *                         type: object
+
+ */
+router.get('/sessions', authenticate, isActive, getActiveSessions);
+
+/**
+ * @swagger
  * /api/v1/auth/refreshToken:
  *   post:
  *     summary: Refresh access token
@@ -149,7 +179,7 @@ router.post('/signup', validateRequest({ body: registerValidation }), register);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/refreshToken', refreshAccessToken);
+router.post('/refreshToken', refreshToken);
 
 /**
  * @swagger
@@ -438,6 +468,31 @@ router.post(
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/logout', authenticate, isActive, logOut);
+
+/**
+ * @swagger
+ * /api/v1/auth/logoutAll:
+ *   post:
+ *     summary: Logout user from all devices
+ *     description: Invalidates the user session on all devices (clears cookies/tokens).
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logged out from all devices successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       401:
+ *         description: Unauthorized (Token missing or invalid)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/logoutAll', authenticate, isActive, logoutAll);
 
 /**
  * @swagger

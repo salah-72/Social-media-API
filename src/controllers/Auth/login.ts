@@ -38,13 +38,20 @@ export const login = catchAsync(
       httpOnly: true,
       secure: config.NODE_ENV === 'production',
       sameSite: 'strict',
+      maxAge: 20 * 24 * 60 * 60 * 1000,
     });
 
-    await Token.updateOne(
-      { userId: user._id },
-      { token: refreshToken },
-      { upsert: true },
-    );
+    // await Token.updateOne(
+    //   { userId: user._id },
+    //   { token: refreshToken },
+    //   { upsert: true },
+    // );
+    await Token.create({
+      token: refreshToken,
+      userId: user._id,
+      deviceIp: req.ip,
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
 
     logger.info('Refresh token created for user', {
       userId: user._id,

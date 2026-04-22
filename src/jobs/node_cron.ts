@@ -2,6 +2,7 @@ import cloudinary from '@/config/cloudinaryConfig';
 import { logger } from '@/lib/winston';
 import Like from '@/models/likeModel';
 import Story from '@/models/storyModel';
+import Token from '@/models/tokenModel';
 import View from '@/models/viewModel';
 import cron from 'node-cron';
 
@@ -29,6 +30,19 @@ cron.schedule('0 0 * * *', async () => {
     }
 
     logger.info(`${expiredStories.length} story is deleted`);
+  } catch (err: any) {
+    logger.error(err.message);
+  }
+});
+
+cron.schedule('0 0 * * *', async () => {
+  try {
+    const revokedTokens = await Token.deleteMany({
+      revoked: true,
+      revokedAt: { $lt: new Date() },
+    });
+
+    logger.info(`Deleted ${revokedTokens.deletedCount} revoked tokens`);
   } catch (err: any) {
     logger.error(err.message);
   }
