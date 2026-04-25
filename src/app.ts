@@ -17,6 +17,7 @@ import storyRouter from '@/routes/storyRouter';
 import errorHandler from './middlewares/errorHandler';
 import passport from 'passport';
 import './jobs/node_cron';
+import '@/utils/redis';
 
 const app = express();
 
@@ -26,7 +27,7 @@ mongoose
     logger.info('good connection to DB');
   })
   .catch((err) => {
-    logger.error('failed to connect rhe DB', err);
+    logger.error('failed to connect to the DB', err);
   });
 
 const corsOptions: CorsOptions = {
