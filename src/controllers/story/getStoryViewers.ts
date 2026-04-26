@@ -4,6 +4,7 @@ import View from '@/models/viewModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
+import redisClient from '@/utils/redis';
 import { Types } from 'mongoose';
 
 export const getViewers = catchAsync(
@@ -21,56 +22,38 @@ export const getViewers = catchAsync(
     )
       return next(new appError('story not found', 404));
 
-    const blocks = await Block.find({
-      $or: [
-        { blocker: req.currentuser?._id },
-        { blocked: req.currentuser?._id },
-      ],
-    });
-    const blockIds = blocks.map((e) => {
-      if (e.blocker.toString() === req.currentuser?._id.toString())
-        return e.blocked;
-      else return e.blocker;
-    });
+    const userId = req.currentuser?._id.toString();
 
-    const viewers = await View.aggregate([
-      {
-        $match: {
-          story: new Types.ObjectId(storyId),
-        },
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'user',
-          foreignField: '_id',
-          as: 'user',
-        },
-      },
-      {
-        $unwind: '$user',
-      },
-      {
-        $match: {
-          'user._id': { $nin: blockIds },
-          'user.active': true,
-        },
-      },
-      {
-        $project: {
-          at: 1,
-          'user.username': 1,
-          'user.profilePhoto': 1,
-          'user.firstName': 1,
-          'user.lastName': 1,
-          _id: 0,
-        },
-      },
-      { $sort: { at: -1 } },
-      { $skip: skip },
-      { $limit: limit },
-    ]);
+    let blockIds: Set<string>;
+    try {
+      const [iBlock, blockedByMe] = await Promise.all([
+        redisClient.sMembers(`user:blocks:${userId}`),
+        redisClient.sMembers(`user:blockedBy:${userId}`),
+      ]);
+      blockIds = new Set([...iBlock, ...blockedByMe]);
+    } catch {
+      const blocks = await Block.find({
+        $or: [{ blocker: userId }, { blocked: userId }],
+      });
+      blockIds = new Set(
+        blocks.map((e) =>
+          e.blocker.toString() === userId
+            ? e.blocked.toString()
+            : e.blocker.toString(),
+        ),
+      );
+    }
 
+    const views = await View.find({ story: storyId })
+      .sort({ at: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const filtered = views.filter((e) => !blockIds.has(e.user.toString()));
+    const userIds = filtered.map((e) => e.user.toString());
+
+    // ------ TODO: CACH USERS ------------
     const viewsCount = await View.countDocuments({ story: storyId });
 
     res.status(200).json({
