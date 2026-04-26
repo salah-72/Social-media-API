@@ -5,6 +5,7 @@ import User from '@/models/userModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
+import redisClient from '@/utils/redis';
 
 export const block = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -58,8 +59,18 @@ export const block = catchAsync(
     if (followedReq) await Follow.deleteOne({ _id: followedReq._id });
 
     const block = await Block.create({ blocker, blocked });
-
     logger.info(`${blocker} blocked ${blocked}`);
+
+    try {
+      const pipeline = redisClient.multi();
+      pipeline.sAdd(`user:blocks:${blocker}`, blocked.toString());
+      pipeline.expire(`user:blocks:${blocker}`, 60 * 60 * 24);
+      pipeline.sAdd(`user:blockedBy:${blocked}`, blocker!.toString());
+      pipeline.expire(`user:blockedBy:${blocked}`, 60 * 60 * 24);
+      await pipeline.exec();
+    } catch (err) {
+      logger.warn(`Redis sync failed after block ${blocker} → ${blocked}`);
+    }
 
     res.status(201).json({
       status: 'success',
