@@ -23,6 +23,7 @@ export const block = catchAsync(
       following: blocked,
       status: 'accepted',
     });
+
     if (follow) {
       await Promise.all([
         Follow.deleteOne({ _id: follow._id }),
