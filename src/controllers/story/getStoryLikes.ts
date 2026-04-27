@@ -26,6 +26,7 @@ export const storyLikes = catchAsync(
 
     const userId = req.currentuser?._id.toString();
 
+    // TODO: SOLVE THE BLOCK LIST IN A BETTER WAY
     let blockIds: Set<string>;
     try {
       const [iBlock, blockedByMe] = await Promise.all([
