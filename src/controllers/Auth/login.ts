@@ -1,5 +1,5 @@
 import catchAsync from '@/utils/catchAsync';
-import { Request, Response, NextFunction } from 'express';
+import e, { Request, Response, NextFunction } from 'express';
 import User from '@/models/userModel';
 import { IUser } from '@/models/userModel';
 import appError from '@/utils/appError';
@@ -10,6 +10,7 @@ import {
 } from '@/functions/generateTokens';
 import config from '@/config/config';
 import Token from '@/models/tokenModel';
+import redisClient from '@/utils/redis';
 import { logger } from '@/lib/winston';
 
 type ILogin = Pick<IUser, 'email' | 'username' | 'password'>;
@@ -57,6 +58,21 @@ export const login = catchAsync(
       userId: user._id,
       token: refreshToken,
     });
+
+    try {
+      await redisClient.set(
+        `user:${user._id}`,
+        JSON.stringify({
+          username: user.username,
+          profilePhoto: user.profilePhoto,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        }),
+        { EX: 24 * 60 * 60 },
+      );
+    } catch {
+      logger.warn('Failed to cache user data in Redis during login');
+    }
 
     res.status(200).json({
       status: 'success',
