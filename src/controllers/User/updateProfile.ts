@@ -62,7 +62,7 @@ export const updateProfileInfo = catchAsync(
         { EX: 24 * 60 * 60 },
       );
     } catch {
-      logger.warn('Failed to cache user data in Redis during login');
+      logger.warn('Redis set failed in updateProfileInfo for user');
     }
 
     res.status(200).json({
