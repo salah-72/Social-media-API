@@ -11,7 +11,7 @@ export const isTargetStoryAvailable = catchAsync(
     const { storyId } = req.params;
 
     const story = await Story.findById(storyId)
-      .select('-__v -updatedAt -viewsCount -likesCount -_id')
+      .select('-__v -updatedAt -viewsCount -likesCount')
       .populate('author', 'username profilePhoto firstName lastName');
 
     if (!story || story.createdAt < new Date(Date.now() - 24 * 60 * 60 * 1000))
