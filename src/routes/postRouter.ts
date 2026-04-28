@@ -1164,8 +1164,10 @@ router.post(
   '/:postId/like',
   authenticate,
   isActive,
-  validateRequest({ params: PostValidation }),
-  validateRequest({ body: changeTypeValidation }),
+  validateRequest({
+    params: PostValidation,
+    body: changeTypeValidation,
+  }),
   isTargetPostAvailable,
   likePost,
 );
