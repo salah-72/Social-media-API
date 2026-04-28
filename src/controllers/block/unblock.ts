@@ -3,7 +3,6 @@ import Block from '@/models/blockModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
-import redisClient from '@/utils/redis';
 
 export const unblock = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -16,17 +15,6 @@ export const unblock = catchAsync(
     const block = await Block.findOneAndDelete({ blocker, blocked });
     if (!block) return next(new appError('you didnot block this user', 400));
     logger.info(`${blocker} unblocked ${blocked}`);
-
-    try {
-      const pipeline = redisClient.multi();
-      pipeline.sRem(`user:blocks:${blocker}`, blocked.toString());
-      pipeline.sRem(`user:blockedBy:${blocked}`, blocker!.toString());
-      await pipeline.exec();
-    } catch (err) {
-      logger.warn(
-        `Redis sync failed after delete block ${blocker} → ${blocked}`,
-      );
-    }
 
     res.status(204).send();
   },
