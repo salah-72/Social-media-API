@@ -7,6 +7,7 @@ import { storyLikes } from '@/controllers/story/getStoryLikes';
 import { getViewers } from '@/controllers/story/getStoryViewers';
 import { likeStory } from '@/controllers/story/likeStory';
 import { authenticate } from '@/middlewares/authenticate';
+import { loadBlockList } from '@/middlewares/blocks';
 import { isActive } from '@/middlewares/isActive';
 import { isTargetStoryAvailable } from '@/middlewares/isTargetStoryAvailable';
 import { upload } from '@/middlewares/multer';
@@ -361,6 +362,7 @@ router.get(
   isActive,
   validateRequest({ params: getStoryValidation }),
   validateRequest({ query: getStoriesValidation }),
+  loadBlockList,
   getViewers,
 );
 
@@ -491,6 +493,7 @@ router.get(
   isActive,
   validateRequest({ params: getStoryValidation }),
   validateRequest({ query: getStoriesValidation }),
+  loadBlockList,
   storyLikes,
 );
 

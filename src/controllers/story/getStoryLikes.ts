@@ -24,28 +24,7 @@ export const storyLikes = catchAsync(
     )
       return next(new appError('story not found', 404));
 
-    const userId = req.currentuser?._id.toString();
-
-    // TODO: SOLVE THE BLOCK LIST IN A BETTER WAY
-    let blockIds: Set<string>;
-    try {
-      const [iBlock, blockedByMe] = await Promise.all([
-        redisClient.sMembers(`user:blocks:${userId}`),
-        redisClient.sMembers(`user:blockedBy:${userId}`),
-      ]);
-      blockIds = new Set([...iBlock, ...blockedByMe]);
-    } catch {
-      const blocks = await Block.find({
-        $or: [{ blocker: userId }, { blocked: userId }],
-      });
-      blockIds = new Set(
-        blocks.map((e) =>
-          e.blocker.toString() === userId
-            ? e.blocked.toString()
-            : e.blocker.toString(),
-        ),
-      );
-    }
+    const blockIds = req.blockIds || new Set();
 
     const likes = await Like.find({ story: storyId })
       .sort({ createdAt: -1 })
