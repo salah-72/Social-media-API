@@ -1871,6 +1871,7 @@ router.get(
   isActive,
   validateRequest({ params: getLikedUsersOnCommentValidation }),
   isTargetPostAvailable,
+  loadBlockList,
   usersByReaction,
 );
 export default router;
