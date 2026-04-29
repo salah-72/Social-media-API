@@ -10,17 +10,7 @@ export const postsLikedByMe = catchAsync(
     const limit = Number(req.query.limit) || 5;
     const skip = (page - 1) * limit;
 
-    const blocks = await Block.find({
-      $or: [
-        { blocker: req.currentuser?._id },
-        { blocked: req.currentuser?._id },
-      ],
-    });
-    const blockIds = blocks.map((e) => {
-      if (e.blocker.toString() === req.currentuser?._id.toString())
-        return e.blocked;
-      else return e.blocker;
-    });
+    const blockIds = req.blockIds;
 
     const followings = await Follow.find({
       follower: req.currentuser?._id,
@@ -48,7 +38,7 @@ export const postsLikedByMe = catchAsync(
       {
         $match: {
           'post.status': 'published',
-          'post.author': { $nin: blockIds },
+          'post.author': { $nin: [...(blockIds ?? [])] },
           $or: [
             { 'post.whoCanSee': 'public' },
             {
@@ -69,8 +59,8 @@ export const postsLikedByMe = catchAsync(
         },
       },
       { $sort: { createdAt: -1 } },
-      { $limit: limit },
       { $skip: skip },
+      { $limit: limit },
     ]);
 
     res.status(200).json({

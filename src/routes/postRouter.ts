@@ -45,6 +45,7 @@ import {
   PostValidation,
   updatePostValidation,
 } from '@/validation/postValidation';
+import { loadBlockList } from '@/middlewares/blocks';
 
 const router = Router();
 
@@ -506,6 +507,7 @@ router.get(
   authenticate,
   isActive,
   validateRequest({ query: getPostsValidation }),
+  loadBlockList,
   postsSearch,
 );
 
@@ -799,6 +801,7 @@ router.get(
   authenticate,
   isActive,
   validateRequest({ query: getPostsValidation }),
+  loadBlockList,
   postsLikedByMe,
 );
 
@@ -895,6 +898,7 @@ router.get(
   validateRequest({ params: PostValidation }),
   validateRequest({ query: getPostsValidation }),
   isTargetPostAvailable,
+  loadBlockList,
   postLikes,
 );
 

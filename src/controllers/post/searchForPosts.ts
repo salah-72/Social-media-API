@@ -1,4 +1,3 @@
-import Block from '@/models/blockModel';
 import Follow from '@/models/followModel';
 import Post from '@/models/postModel';
 import appError from '@/utils/appError';
@@ -14,18 +13,7 @@ export const postsSearch = catchAsync(
     const limit = Number(req.query.limit) || 5;
     const skip = (page - 1) * limit;
 
-    const blocks = await Block.find({
-      $or: [
-        { blocked: req.currentuser?._id },
-        { blocker: req.currentuser?._id },
-      ],
-    });
-
-    const BlocksIds = blocks.map((e) => {
-      if (e.blocker.toString() === req.currentuser?._id.toString())
-        return e.blocked;
-      else return e.blocker;
-    });
+    const BlocksIds = req.blockIds;
 
     const followings = await Follow.find({
       follower: req.currentuser?._id,
@@ -48,7 +36,7 @@ export const postsSearch = catchAsync(
       {
         $match: {
           status: 'published',
-          author: { $nin: BlocksIds },
+          author: { $nin: [...(BlocksIds ?? [])] },
           $or: [
             { whoCanSee: 'public' },
             { whoCanSee: 'followers', author: { $in: followingsIds } },

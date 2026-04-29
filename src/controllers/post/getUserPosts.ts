@@ -18,6 +18,14 @@ export const getUserPosts = catchAsync(async (req: Request, res: Response) => {
   if (isFollower) can.push('followers');
   if (req.targetUser?.public) can.push('public');
 
+  const authorData = {
+    _id: req.targetUser?._id,
+    username: req.targetUser?.username,
+    profilePhoto: req.targetUser?.profilePhoto,
+    firstName: req.targetUser?.firstName,
+    lastName: req.targetUser?.lastName,
+  };
+
   const posts = await Post.find({
     author: req.targetUser?._id,
     whoCanSee: { $in: can },
@@ -25,10 +33,14 @@ export const getUserPosts = catchAsync(async (req: Request, res: Response) => {
   })
     .select('-__v -status')
     .sort('-publishedAt')
-    .populate('author', 'username profilePhoto firstName lastName')
     .limit(limit)
     .skip(skip)
     .lean();
+
+  const postsWithAuthor = posts.map((post) => ({
+    ...post,
+    author: authorData,
+  }));
 
   res.status(200).json({
     status: 'success',
@@ -36,7 +48,7 @@ export const getUserPosts = catchAsync(async (req: Request, res: Response) => {
       page,
       limit,
       length: posts.length,
-      posts,
+      posts: postsWithAuthor,
     },
   });
 });
