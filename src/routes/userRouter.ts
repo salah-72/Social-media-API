@@ -37,6 +37,7 @@ import {
   usersValidation,
 } from '@/validation/userValidation';
 import { validateRequest } from '@/middlewares/validation';
+import { loadBlockList } from '@/middlewares/blocks';
 
 const router = Router();
 
@@ -1168,6 +1169,7 @@ router.get(
   validateRequest({ query: usersValidation }),
   isTargetUserAvailable,
   isFollower,
+  loadBlockList,
   getUserFollowers,
 );
 
@@ -1260,6 +1262,7 @@ router.get(
   validateRequest({ query: usersValidation }),
   isTargetUserAvailable,
   isFollower,
+  loadBlockList,
   getUserFollowings,
 );
 
