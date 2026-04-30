@@ -1481,6 +1481,7 @@ router.get(
   authenticate,
   isActive,
   validateRequest({ query: usersValidation }),
+  loadBlockList,
   suggestedFollowings,
 );
 
