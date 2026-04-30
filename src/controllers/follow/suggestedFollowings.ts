@@ -5,6 +5,7 @@ import { Request, Response } from 'express';
 import redisClient from '@/utils/redis';
 import { logger } from '@/lib/winston';
 import User from '@/models/userModel';
+import { getUsersFromCache } from '@/utils/getUsersFromCache';
 
 export const suggestedFollowings = catchAsync(
   async (req: Request, res: Response) => {
@@ -79,49 +80,9 @@ export const suggestedFollowings = catchAsync(
     ]);
 
     const userIds = suggestedFollowings.map((e) => e._id.toString());
-    const cacheKeys = userIds.map((id) => `user:${id}`);
-
-    let cachedUsers: (string | null)[] = [];
-    try {
-      cachedUsers = cacheKeys.length ? await redisClient.mGet(cacheKeys) : [];
-    } catch {
-      logger.warn('Redis mGet failed in mutualFollowers');
-    }
-    const missedIds = userIds.filter((_, i) => !cachedUsers[i]);
-    const missedUsers = missedIds.length
-      ? await User.find({ _id: { $in: missedIds }, active: true })
-          .select('username profilePhoto firstName lastName')
-          .lean()
-      : [];
-
-    if (missedUsers.length) {
-      try {
-        const pipeline = redisClient.multi();
-        missedUsers.forEach((u) => {
-          pipeline.set(
-            `user:${u._id}`,
-            JSON.stringify({
-              username: u.username,
-              profilePhoto: u.profilePhoto,
-              firstName: u.firstName,
-              lastName: u.lastName,
-            }),
-            { EX: 24 * 60 * 60 },
-          );
-        });
-        await pipeline.exec();
-      } catch {
-        logger.warn('Redis pipeline failed in mutualFollowers');
-      }
-    }
-
-    const mongooseMap = new Map(missedUsers.map((u) => [u._id.toString(), u]));
-
-    const result = userIds
-      .map((id, i) => {
-        const userData = cachedUsers[i]
-          ? JSON.parse(cachedUsers[i]!)
-          : mongooseMap.get(id);
+    const users = await getUsersFromCache(userIds);
+    const result = users
+      .map((userData) => {
         if (!userData) return null;
         return { user: userData };
       })
