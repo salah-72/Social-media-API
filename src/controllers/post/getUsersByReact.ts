@@ -7,6 +7,7 @@ import { Types } from 'mongoose';
 import redisClient from '@/utils/redis';
 import { logger } from '@/lib/winston';
 import User from '@/models/userModel';
+import { getUsersFromCache } from '@/utils/getUsersFromCache';
 
 export const reaction = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -40,55 +41,13 @@ export const reaction = catchAsync(
       (like) => !blockIds?.has(like.user.toString()),
     );
     const userIds = filtered.map((like) => like.user.toString());
-    const cacheKeys = userIds.map((id) => `user:${id}`);
+    const usersData = await getUsersFromCache(userIds);
 
-    let cachedUsers: any[] = [];
-    try {
-      cachedUsers =
-        cacheKeys.length > 0 ? await redisClient.mGet(cacheKeys) : [];
-    } catch {
-      logger.warn('Redis mGet failed in postLikes');
-    }
-
-    const missedIds = userIds.filter((id, idx) => !cachedUsers[idx]);
-    const missedUsers =
-      missedIds.length > 0
-        ? await User.find({ _id: { $in: missedIds }, active: true })
-            .select('username profilePhoto firstName lastName')
-            .lean()
-        : [];
-
-    if (missedUsers.length > 0) {
-      try {
-        const pipeline = redisClient.multi();
-        missedUsers.forEach((user) => {
-          pipeline.set(
-            `user:${user._id}`,
-            JSON.stringify({
-              username: user.username,
-              profilePhoto: user.profilePhoto,
-              firstName: user.firstName,
-              lastName: user.lastName,
-            }),
-            { EX: 24 * 60 * 60 },
-          );
-        });
-        await pipeline.exec();
-      } catch {
-        logger.warn('Redis pipeline failed in storyLikes');
-      }
-    }
-
-    const mongooseMap = new Map(missedUsers.map((u) => [u._id.toString(), u]));
     const users = filtered
       .map((like, idx) => {
-        const userId = userIds[idx];
-        const userData = cachedUsers[idx]
-          ? JSON.parse(cachedUsers[idx]!)
-          : mongooseMap.get(userId);
-        if (!userData) return null;
+        if (!usersData[idx]) return null;
         return {
-          user: userData,
+          user: usersData[idx],
           type: like.type,
           createdAt: like.createdAt,
           updatedAt: like.updatedAt,
