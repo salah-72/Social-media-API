@@ -2,6 +2,7 @@ import Follow from '@/models/followModel';
 import Post from '@/models/postModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { getUsersFromCache } from '@/utils/getUsersFromCache';
 import { Request, Response, NextFunction } from 'express';
 
 export const postsSearch = catchAsync(
@@ -25,7 +26,7 @@ export const postsSearch = catchAsync(
     const posts = await Post.aggregate([
       {
         $search: {
-          index: 'posts_search',
+          index: 'search',
           text: {
             query: input,
             path: 'content',
@@ -50,22 +51,8 @@ export const postsSearch = catchAsync(
         },
       },
       {
-        $lookup: {
-          from: 'users',
-          localField: 'author',
-          foreignField: '_id',
-          as: 'author',
-        },
-      },
-      {
-        $unwind: '$author',
-      },
-      {
         $project: {
-          'author.username': 1,
-          'author.profilePhoto': 1,
-          'author.firstName': 1,
-          'author.lastName': 1,
+          author: 1,
           content: 1,
           status: 1,
           whoCanSee: 1,
@@ -80,13 +67,23 @@ export const postsSearch = catchAsync(
       { $limit: limit },
     ]);
 
+    const authorIds = posts.map((p) => p.author.toString());
+    const authorsData = await getUsersFromCache(authorIds);
+
+    const result = posts
+      .map((post, i) => {
+        if (!authorsData[i]) return null;
+        return { ...post, author: authorsData[i] };
+      })
+      .filter(Boolean);
+
     res.status(200).json({
       status: 'success',
       data: {
         page,
         limit,
-        length: posts.length,
-        posts,
+        length: result.length,
+        posts: result,
       },
     });
   },
