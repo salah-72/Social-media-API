@@ -2,6 +2,7 @@ import Block from '@/models/blockModel';
 import Follow from '@/models/followModel';
 import Post from '@/models/postModel';
 import catchAsync from '@/utils/catchAsync';
+import { getUsersFromCache } from '@/utils/getUsersFromCache';
 import { Request, Response } from 'express';
 
 export const timeLinePosts = catchAsync(async (req: Request, res: Response) => {
@@ -12,63 +13,68 @@ export const timeLinePosts = catchAsync(async (req: Request, res: Response) => {
   const id = req.currentuser?._id;
 
   const myLimit = Math.floor(limit * 0.2);
-  const followersLimit = Math.ceil(limit * 0.6);
-  const othersLimit = limit - myLimit - followersLimit;
+  const followingLimit = Math.ceil(limit * 0.6);
+  const othersLimit = limit - myLimit - followingLimit;
 
   const mySkip = Math.floor(skip * 0.2);
-  const followersSkip = Math.ceil(skip * 0.6);
-  const othersSkip = skip - mySkip - followersSkip;
+  const followingSkip = Math.ceil(skip * 0.6);
+  const othersSkip = skip - mySkip - followingSkip;
 
-  const myPosts = await Post.find({
-    author: id,
-    status: 'published',
-  })
-    .sort('-publishedAt')
-    .populate('author', 'username profilePhoto firstName lastName')
-    .limit(myLimit)
-    .skip(mySkip);
-
-  const followers = await Follow.find({
+  const followings = await Follow.find({
     follower: id,
     status: 'accepted',
   }).select('following -_id');
 
-  const followersIds = followers.map((e) => {
+  const followingIds = followings.map((e) => {
     return e.following;
   });
 
-  const followersPosts = await Post.find({
-    author: { $in: followersIds },
-    status: 'published',
-    whoCanSee: { $in: ['public', 'followers'] },
-  })
-    .sort('-publishedAt')
-    .populate('author', 'username profilePhoto firstName lastName')
-    .limit(followersLimit)
-    .skip(followersSkip);
+  const blockIds = [...(req.blockIds ?? [])];
 
-  const blocks = await Block.find({
-    $or: [{ blocker: id }, { blocked: id }],
-  });
+  const [myPosts, followingsPosts, othersPosts] = await Promise.all([
+    Post.find({ status: 'published', author: id })
+      .select('-__v')
+      .sort('-publishedAt')
+      .limit(myLimit)
+      .skip(mySkip)
+      .lean(),
 
-  const blocksIds = blocks.map((e) => {
-    if (e.blocker.toString() === id?.toString()) return e.blocked;
-    else return e.blocker;
-  });
+    Post.find({
+      author: { $in: followingIds },
+      status: 'published',
+      whoCanSee: { $in: ['public', 'followers'] },
+    })
+      .select('-__v')
+      .sort('-publishedAt')
+      .limit(followingLimit)
+      .skip(followingSkip)
+      .lean(),
 
-  const othersPosts = await Post.find({
-    author: { $nin: [...blocksIds, ...followersIds, id!] },
-    status: 'published',
-    whoCanSee: 'public',
-  })
-    .sort('-publishedAt')
-    .populate('author', 'username profilePhoto firstName lastName')
-    .limit(othersLimit)
-    .skip(othersSkip);
+    Post.find({
+      author: { $nin: [...blockIds, ...followingIds, id!] },
+      status: 'published',
+      whoCanSee: 'public',
+    })
+      .select('-__v')
+      .sort('-publishedAt')
+      .limit(othersLimit)
+      .skip(othersSkip)
+      .lean(),
+  ]);
 
-  const posts = [...myPosts, ...followersPosts, ...othersPosts].sort(
+  const allPosts = [...myPosts, ...followingsPosts, ...othersPosts].sort(
     (a, b) => b.publishedAt!.getTime() - a.publishedAt!.getTime(),
   );
+
+  const authorIds = allPosts.map((p) => p.author.toString());
+  const authors = await getUsersFromCache(authorIds);
+
+  const posts = allPosts
+    .map((post, idx) => {
+      if (!authors[idx]) return null;
+      return { ...post, author: authors[idx] };
+    })
+    .filter(Boolean);
 
   res.status(200).json({
     status: 'success',
