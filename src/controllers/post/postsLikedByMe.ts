@@ -2,6 +2,7 @@ import Block from '@/models/blockModel';
 import Follow from '@/models/followModel';
 import Like from '@/models/likeModel';
 import catchAsync from '@/utils/catchAsync';
+import { getUsersFromCache } from '@/utils/getUsersFromCache';
 import { Request, Response } from 'express';
 
 export const postsLikedByMe = catchAsync(
@@ -63,13 +64,23 @@ export const postsLikedByMe = catchAsync(
       { $limit: limit },
     ]);
 
+    const authorIds = posts.map((p) => p.post.author.toString());
+    const authors = await getUsersFromCache(authorIds);
+
+    const postsWithAuthors = posts
+      .map((p, idx) => {
+        if (!authors[idx]) return null;
+        return { ...p.post, author: authors[idx] };
+      })
+      .filter(Boolean);
+
     res.status(200).json({
       status: 'success',
       data: {
         page,
         limit,
-        length: posts.length,
-        posts,
+        length: postsWithAuthors.length,
+        posts: postsWithAuthors,
       },
     });
   },

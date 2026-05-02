@@ -601,6 +601,7 @@ router.get(
   authenticate,
   isActive,
   validateRequest({ query: getPostsValidation }),
+  loadBlockList,
   timeLinePosts,
 );
 
