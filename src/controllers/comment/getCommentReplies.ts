@@ -43,7 +43,6 @@ export const commentReplies = catchAsync(
       {
         $project: {
           user: 1,
-          _id: 0,
           content: 1,
           createdAt: 1,
           updatedAt: 1,
