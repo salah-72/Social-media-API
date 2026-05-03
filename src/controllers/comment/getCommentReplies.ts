@@ -3,6 +3,7 @@ import Comment from '@/models/commentModel';
 import User from '@/models/userModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { getUsersFromCache } from '@/utils/getUsersFromCache';
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 
@@ -13,22 +14,12 @@ export const commentReplies = catchAsync(
     const limit = Number(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
-    const blocks = await Block.find({
-      $or: [
-        { blocker: req.currentuser?._id },
-        { blocked: req.currentuser?._id },
-      ],
-    });
-
-    const blocksIds = blocks.map((el) => {
-      if (el.blocker.toString() === req.currentuser?._id.toString())
-        return el.blocked;
-      else return el.blocker;
-    });
+    const blocksIds = [...(req.blockIds ?? [])];
 
     const comment = await Comment.findById(commentId)
       .select('-post -parentComment -_id -__v')
       .lean();
+
     if (
       !comment ||
       blocksIds.some((id) => id.toString() === comment.user.toString())
@@ -50,27 +41,8 @@ export const commentReplies = catchAsync(
         },
       },
       {
-        $lookup: {
-          from: 'users',
-          localField: 'user',
-          foreignField: '_id',
-          as: 'user',
-        },
-      },
-      {
-        $unwind: '$user',
-      },
-      {
-        $match: {
-          'user.active': true,
-        },
-      },
-      {
         $project: {
-          'user.username': 1,
-          'user.profilePhoto': 1,
-          'user.firstName': 1,
-          'user.lastName': 1,
+          user: 1,
           _id: 0,
           content: 1,
           createdAt: 1,
@@ -82,14 +54,23 @@ export const commentReplies = catchAsync(
       { $limit: limit },
     ]);
 
+    const userIds = replies.map((r) => r.user.toString());
+    const users = await getUsersFromCache(userIds);
+    const repliesWithUser = replies
+      .map((reply, idx) => {
+        if (!users[idx]) return null;
+        return { ...reply, user: users[idx] };
+      })
+      .filter(Boolean);
+
     res.status(200).json({
       status: 'success',
       data: {
         page,
         limit,
         comment,
-        repliesLength: replies.length,
-        replies,
+        repliesLength: repliesWithUser.length,
+        replies: repliesWithUser,
       },
     });
   },
