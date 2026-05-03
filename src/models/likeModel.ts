@@ -11,6 +11,8 @@ export interface ILike {
   comment?: Types.ObjectId;
   story?: Types.ObjectId;
   type: 'like' | 'love' | 'care' | 'sad' | 'angry' | 'haha' | 'wow';
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const likeSchema = new Schema<ILike>(

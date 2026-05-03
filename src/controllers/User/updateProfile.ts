@@ -3,6 +3,7 @@ import User from '@/models/userModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
+import redisClient from '@/utils/redis';
 
 const allowedFeilds = [
   'username',
@@ -48,6 +49,21 @@ export const updateProfileInfo = catchAsync(
     });
 
     logger.info('user updated his profile info', { id: req.currentuser?._id });
+
+    try {
+      await redisClient.set(
+        `user:${user!._id}`,
+        JSON.stringify({
+          username: user!.username,
+          profilePhoto: user!.profilePhoto,
+          firstName: user!.firstName,
+          lastName: user!.lastName,
+        }),
+        { EX: 24 * 60 * 60 },
+      );
+    } catch {
+      logger.warn('Redis set failed in updateProfileInfo for user');
+    }
 
     res.status(200).json({
       status: 'success',

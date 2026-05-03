@@ -14,11 +14,8 @@ export const unblock = catchAsync(
 
     const block = await Block.findOneAndDelete({ blocker, blocked });
     if (!block) return next(new appError('you didnot block this user', 400));
-
     logger.info(`${blocker} unblocked ${blocked}`);
 
-    res.status(204).json({
-      status: 'success',
-    });
+    res.status(204).send();
   },
 );

@@ -1,6 +1,10 @@
 import Follow from '@/models/followModel';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response } from 'express';
+import redisClient from '@/utils/redis';
+import { logger } from '@/lib/winston';
+import User from '@/models/userModel';
+import { getUsersFromCache } from '@/utils/getUsersFromCache';
 
 export const getMyFollowers = catchAsync(
   async (req: Request, res: Response) => {
@@ -13,10 +17,18 @@ export const getMyFollowers = catchAsync(
       status: 'accepted',
     })
       .select('follower -_id')
-      .populate('follower', 'username profilePhoto -_id')
       .skip(skip)
       .limit(limit)
       .lean();
+
+    const userIds = followers.map((e) => e.follower.toString());
+    const followerss = await getUsersFromCache(userIds);
+    const followersData = followerss
+      .map((userData) => {
+        if (!userData) return null;
+        return { user: userData };
+      })
+      .filter(Boolean);
 
     res.status(200).json({
       status: 'success',
@@ -24,7 +36,7 @@ export const getMyFollowers = catchAsync(
         page,
         limit,
         length: followers.length,
-        followers,
+        followersData,
       },
     });
   },

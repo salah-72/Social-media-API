@@ -2,6 +2,7 @@ import Block from '@/models/blockModel';
 import Follow from '@/models/followModel';
 import Like from '@/models/likeModel';
 import catchAsync from '@/utils/catchAsync';
+import { getUsersFromCache } from '@/utils/getUsersFromCache';
 import { Request, Response } from 'express';
 
 export const postsLikedByMe = catchAsync(
@@ -10,17 +11,7 @@ export const postsLikedByMe = catchAsync(
     const limit = Number(req.query.limit) || 5;
     const skip = (page - 1) * limit;
 
-    const blocks = await Block.find({
-      $or: [
-        { blocker: req.currentuser?._id },
-        { blocked: req.currentuser?._id },
-      ],
-    });
-    const blockIds = blocks.map((e) => {
-      if (e.blocker.toString() === req.currentuser?._id.toString())
-        return e.blocked;
-      else return e.blocker;
-    });
+    const blockIds = req.blockIds;
 
     const followings = await Follow.find({
       follower: req.currentuser?._id,
@@ -48,7 +39,7 @@ export const postsLikedByMe = catchAsync(
       {
         $match: {
           'post.status': 'published',
-          'post.author': { $nin: blockIds },
+          'post.author': { $nin: [...(blockIds ?? [])] },
           $or: [
             { 'post.whoCanSee': 'public' },
             {
@@ -69,17 +60,27 @@ export const postsLikedByMe = catchAsync(
         },
       },
       { $sort: { createdAt: -1 } },
-      { $limit: limit },
       { $skip: skip },
+      { $limit: limit },
     ]);
+
+    const authorIds = posts.map((p) => p.post.author.toString());
+    const authors = await getUsersFromCache(authorIds);
+
+    const postsWithAuthors = posts
+      .map((p, idx) => {
+        if (!authors[idx]) return null;
+        return { ...p.post, author: authors[idx] };
+      })
+      .filter(Boolean);
 
     res.status(200).json({
       status: 'success',
       data: {
         page,
         limit,
-        length: posts.length,
-        posts,
+        length: postsWithAuthors.length,
+        posts: postsWithAuthors,
       },
     });
   },

@@ -1,8 +1,11 @@
-import Block from '@/models/blockModel';
 import Like from '@/models/likeModel';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response } from 'express';
 import { Types } from 'mongoose';
+import redisClient from '@/utils/redis';
+import { logger } from '@/lib/winston';
+import User from '@/models/userModel';
+import { getUsersFromCache } from '@/utils/getUsersFromCache';
 
 export const postLikes = catchAsync(async (req: Request, res: Response) => {
   const { postId } = req.params;
@@ -11,52 +14,29 @@ export const postLikes = catchAsync(async (req: Request, res: Response) => {
   const limit = Number(req.query.limit) || 40;
   const skip = (page - 1) * limit;
 
-  const blocks = await Block.find({
-    $or: [{ blocker: req.currentuser?._id }, { blocked: req.currentuser?._id }],
-  });
-  const blockIds = blocks.map((e) => {
-    if (e.blocker.toString() === req.currentuser?._id.toString())
-      return e.blocked;
-    else return e.blocker;
-  });
+  const blockIds = req.blockIds;
 
-  const users = await Like.aggregate([
-    {
-      $match: {
-        post: new Types.ObjectId(postId),
-      },
-    },
-    {
-      $lookup: {
-        from: 'users',
-        localField: 'user',
-        foreignField: '_id',
-        as: 'user',
-      },
-    },
-    {
-      $unwind: '$user',
-    },
-    {
-      $match: {
-        'user._id': { $nin: blockIds },
-        'user.active': true,
-      },
-    },
-    {
-      $project: {
-        type: 1,
-        'user.username': 1,
-        'user.profilePhoto': 1,
-        'user.firstName': 1,
-        'user.lastName': 1,
-        _id: 0,
-      },
-    },
-    { $sort: { createdAt: -1 } },
-    { $skip: skip },
-    { $limit: limit },
-  ]);
+  const likes = await Like.find({ post: postId })
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .lean();
+
+  const filtered = likes.filter((like) => !blockIds?.has(like.user.toString()));
+  const userIds = filtered.map((like) => like.user.toString());
+  const usersData = await getUsersFromCache(userIds);
+
+  const users = filtered
+    .map((like, idx) => {
+      if (!usersData[idx]) return null;
+      return {
+        user: usersData[idx],
+        type: like.type,
+        createdAt: like.createdAt,
+        updatedAt: like.updatedAt,
+      };
+    })
+    .filter(Boolean);
 
   const length = await Like.countDocuments({ post: postId });
 

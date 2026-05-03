@@ -45,6 +45,7 @@ import {
   PostValidation,
   updatePostValidation,
 } from '@/validation/postValidation';
+import { loadBlockList } from '@/middlewares/blocks';
 
 const router = Router();
 
@@ -506,6 +507,7 @@ router.get(
   authenticate,
   isActive,
   validateRequest({ query: getPostsValidation }),
+  loadBlockList,
   postsSearch,
 );
 
@@ -599,6 +601,7 @@ router.get(
   authenticate,
   isActive,
   validateRequest({ query: getPostsValidation }),
+  loadBlockList,
   timeLinePosts,
 );
 
@@ -799,6 +802,7 @@ router.get(
   authenticate,
   isActive,
   validateRequest({ query: getPostsValidation }),
+  loadBlockList,
   postsLikedByMe,
 );
 
@@ -895,6 +899,7 @@ router.get(
   validateRequest({ params: PostValidation }),
   validateRequest({ query: getPostsValidation }),
   isTargetPostAvailable,
+  loadBlockList,
   postLikes,
 );
 
@@ -1164,8 +1169,10 @@ router.post(
   '/:postId/like',
   authenticate,
   isActive,
-  validateRequest({ params: PostValidation }),
-  validateRequest({ body: changeTypeValidation }),
+  validateRequest({
+    params: PostValidation,
+    body: changeTypeValidation,
+  }),
   isTargetPostAvailable,
   likePost,
 );
@@ -1461,6 +1468,7 @@ router.get(
   validateRequest({ query: getPostsValidation }),
   isActive,
   isTargetPostAvailable,
+  loadBlockList,
   getComments,
 );
 
@@ -1564,6 +1572,7 @@ router.get(
   validateRequest({ params: createReplyValidation }),
   validateRequest({ query: getPostsValidation }),
   isTargetPostAvailable,
+  loadBlockList,
   commentReplies,
 );
 
@@ -1761,6 +1770,7 @@ router.get(
   validateRequest({ params: createReplyValidation }),
   validateRequest({ query: getPostsValidation }),
   isTargetPostAvailable,
+  loadBlockList,
   commentLikes,
 );
 
@@ -1865,6 +1875,7 @@ router.get(
   isActive,
   validateRequest({ params: getLikedUsersOnCommentValidation }),
   isTargetPostAvailable,
+  loadBlockList,
   usersByReaction,
 );
 export default router;

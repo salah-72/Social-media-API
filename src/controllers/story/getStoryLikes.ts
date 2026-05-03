@@ -5,6 +5,10 @@ import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
+import redisClient from '@/utils/redis';
+import { logger } from '@/lib/winston';
+import User from '@/models/userModel';
+import { getUsersFromCache } from '@/utils/getUsersFromCache';
 
 export const storyLikes = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -21,55 +25,28 @@ export const storyLikes = catchAsync(
     )
       return next(new appError('story not found', 404));
 
-    const blocks = await Block.find({
-      $or: [
-        { blocker: req.currentuser?._id },
-        { blocked: req.currentuser?._id },
-      ],
-    });
-    const blockIds = blocks.map((e) => {
-      if (e.blocker.toString() === req.currentuser?._id.toString())
-        return e.blocked;
-      else return e.blocker;
-    });
+    const blockIds = req.blockIds || new Set();
 
-    const users = await Like.aggregate([
-      {
-        $match: {
-          story: new Types.ObjectId(storyId),
-        },
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'user',
-          foreignField: '_id',
-          as: 'user',
-        },
-      },
-      {
-        $unwind: '$user',
-      },
-      {
-        $match: {
-          'user._id': { $nin: blockIds },
-          'user.active': true,
-        },
-      },
-      {
-        $project: {
-          type: 1,
-          'user.username': 1,
-          'user.profilePhoto': 1,
-          'user.firstName': 1,
-          'user.lastName': 1,
-          _id: 0,
-        },
-      },
-      { $sort: { createdAt: -1 } },
-      { $skip: skip },
-      { $limit: limit },
-    ]);
+    const likes = await Like.find({ story: storyId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const filtered = likes.filter((e) => !blockIds.has(e.user.toString()));
+    const userIds = filtered.map((e) => e.user.toString());
+    const usersData = await getUsersFromCache(userIds);
+    const users = filtered
+      .map((like, idx) => {
+        if (!usersData[idx]) return null;
+        return {
+          user: usersData[idx],
+          type: like.type,
+          createdAt: like.createdAt,
+          updatedAt: like.updatedAt,
+        };
+      })
+      .filter(Boolean);
 
     const likesCount = await Like.countDocuments({ story: storyId });
 

@@ -22,6 +22,7 @@ export const block = catchAsync(
       following: blocked,
       status: 'accepted',
     });
+
     if (follow) {
       await Promise.all([
         Follow.deleteOne({ _id: follow._id }),
@@ -58,7 +59,6 @@ export const block = catchAsync(
     if (followedReq) await Follow.deleteOne({ _id: followedReq._id });
 
     const block = await Block.create({ blocker, blocked });
-
     logger.info(`${blocker} blocked ${blocked}`);
 
     res.status(201).json({

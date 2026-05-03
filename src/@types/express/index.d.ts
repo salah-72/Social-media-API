@@ -7,6 +7,7 @@ declare global {
       currentuser?: IUser;
       targetUser?: IUser;
       story?: IStory;
+      blockIds?: Set<string>;
     }
   }
 }
