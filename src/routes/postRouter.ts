@@ -1468,6 +1468,7 @@ router.get(
   validateRequest({ query: getPostsValidation }),
   isActive,
   isTargetPostAvailable,
+  loadBlockList,
   getComments,
 );
 
@@ -1571,6 +1572,7 @@ router.get(
   validateRequest({ params: createReplyValidation }),
   validateRequest({ query: getPostsValidation }),
   isTargetPostAvailable,
+  loadBlockList,
   commentReplies,
 );
 
@@ -1768,6 +1770,7 @@ router.get(
   validateRequest({ params: createReplyValidation }),
   validateRequest({ query: getPostsValidation }),
   isTargetPostAvailable,
+  loadBlockList,
   commentLikes,
 );
 
