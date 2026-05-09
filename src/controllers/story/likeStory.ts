@@ -1,5 +1,5 @@
+import { incrementLike, decrementLike } from '@/functions/likeCounter';
 import Like from '@/models/likeModel';
-import Story from '@/models/storyModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
@@ -19,7 +19,7 @@ export const likeStory = catchAsync(
         type,
       });
 
-      await Story.updateOne({ _id: storyId }, { $inc: { likesCount: 1 } });
+      await incrementLike('story', storyId);
 
       return res.status(201).json({
         status: 'success',
@@ -32,7 +32,7 @@ export const likeStory = catchAsync(
       if (err.code === 11000) {
         await Like.deleteOne({ user: req.currentuser?._id, story: storyId });
 
-        await Story.updateOne({ _id: storyId }, { $inc: { likesCount: -1 } });
+        await decrementLike('story', storyId);
 
         return res.status(204).json({
           status: 'success',

@@ -1,3 +1,4 @@
+import { incrementLike, decrementLike } from '@/functions/likeCounter';
 import Block from '@/models/blockModel';
 import Comment from '@/models/commentModel';
 import Like from '@/models/likeModel';
@@ -30,7 +31,7 @@ export const likeComment = catchAsync(
         type,
       });
 
-      await Comment.updateOne({ _id: commentId }, { $inc: { likesCount: 1 } });
+      await incrementLike('comment', commentId);
 
       return res.status(201).json({
         status: 'success',
@@ -46,10 +47,7 @@ export const likeComment = catchAsync(
           comment: commentId,
         });
 
-        await Comment.updateOne(
-          { _id: commentId },
-          { $inc: { likesCount: -1 } },
-        );
+        await decrementLike('comment', commentId);
 
         return res.status(204).json({
           status: 'success',
