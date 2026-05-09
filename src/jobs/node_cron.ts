@@ -4,7 +4,10 @@ import Like from '@/models/likeModel';
 import Story from '@/models/storyModel';
 import Token from '@/models/tokenModel';
 import View from '@/models/viewModel';
+import Comment from '@/models/commentModel';
 import cron from 'node-cron';
+import redisClient from '@/utils/redis';
+import Post from '@/models/postModel';
 
 cron.schedule('0 0 * * *', async () => {
   try {
@@ -45,5 +48,29 @@ cron.schedule('0 0 * * *', async () => {
     logger.info(`Deleted ${revokedTokens.deletedCount} revoked tokens`);
   } catch (err: any) {
     logger.error(err.message);
+  }
+});
+
+cron.schedule('0/10 * * * *', async () => {
+  const keys = await redisClient.keys('likes:*');
+  if (!keys.length) return;
+
+  const pipeline = redisClient.multi();
+  keys.forEach((key) => pipeline.get(key));
+  const results = await pipeline.exec();
+
+  for (let i = 0; i < keys.length; i++) {
+    const [, type, id] = keys[i].split(':');
+    const count = Number(results[i]);
+    if (!count) continue;
+
+    if (type === 'post')
+      await Post.updateOne({ _id: id }, { $inc: { likesCount: count } });
+    else if (type === 'comment')
+      await Comment.updateOne({ _id: id }, { $inc: { likesCount: count } });
+    else if (type === 'story')
+      await Story.updateOne({ _id: id }, { $inc: { likesCount: count } });
+
+    await redisClient.del(keys[i]);
   }
 });
