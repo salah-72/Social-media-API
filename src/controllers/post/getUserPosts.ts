@@ -1,6 +1,7 @@
 import Follow from '@/models/followModel';
 import Post from '@/models/postModel';
 import catchAsync from '@/utils/catchAsync';
+import redisClient from '@/utils/redis';
 import { Request, Response } from 'express';
 
 export const getUserPosts = catchAsync(async (req: Request, res: Response) => {
@@ -37,9 +38,13 @@ export const getUserPosts = catchAsync(async (req: Request, res: Response) => {
     .skip(skip)
     .lean();
 
-  const postsWithAuthor = posts.map((post) => ({
+  const keys = posts.map((post) => `likes:post:${post._id}`);
+  const pendingCounts = keys.length ? await redisClient.mGet(keys) : [];
+
+  const result = posts.map((post, i) => ({
     ...post,
     author: authorData,
+    likesCount: post.likesCount + Number(pendingCounts[i] || 0),
   }));
 
   res.status(200).json({
@@ -48,7 +53,7 @@ export const getUserPosts = catchAsync(async (req: Request, res: Response) => {
       page,
       limit,
       length: posts.length,
-      posts: postsWithAuthor,
+      posts: result,
     },
   });
 });

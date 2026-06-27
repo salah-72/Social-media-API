@@ -3,6 +3,8 @@ import Follow from '@/models/followModel';
 import Post from '@/models/postModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { mergeLikesCount } from '@/functions/mergeLikesCount';
+import redisClient from '@/utils/redis';
 import { Request, Response, NextFunction } from 'express';
 
 export const getPost = catchAsync(
@@ -39,10 +41,18 @@ export const getPost = catchAsync(
         return next(new appError('post not exist', 404));
     }
 
+    // const pendingLikesCount = await redisClient.get(`likes:post:${post._id}`);
+    // const result = {
+    //   ...post,
+    //   likesCount: post.likesCount + Number(pendingLikesCount || 0),
+    // };
+
+    const [result] = await mergeLikesCount([post], 'post');
+
     res.status(200).json({
       status: 'success',
       data: {
-        post,
+        post: result,
       },
     });
   },

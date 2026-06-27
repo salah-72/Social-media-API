@@ -3,6 +3,7 @@ import Post from '@/models/postModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { getUsersFromCache } from '@/utils/getUsersFromCache';
+import redisClient from '@/utils/redis';
 import { Request, Response, NextFunction } from 'express';
 
 export const postsSearch = catchAsync(
@@ -70,10 +71,17 @@ export const postsSearch = catchAsync(
     const authorIds = posts.map((p) => p.author.toString());
     const authorsData = await getUsersFromCache(authorIds);
 
+    const keys = posts.map((post) => `likes:post:${post._id}`);
+    const pendingCounts = keys.length ? await redisClient.mGet(keys) : [];
+
     const result = posts
       .map((post, i) => {
         if (!authorsData[i]) return null;
-        return { ...post, author: authorsData[i] };
+        return {
+          ...post,
+          author: authorsData[i],
+          likesCount: post.likesCount + Number(pendingCounts[i] || 0),
+        };
       })
       .filter(Boolean);
 
