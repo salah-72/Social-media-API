@@ -4,6 +4,7 @@ import User from '@/models/userModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { getUsersFromCache } from '@/utils/getUsersFromCache';
+import redisClient from '@/utils/redis';
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 
@@ -17,7 +18,7 @@ export const commentReplies = catchAsync(
     const blocksIds = [...(req.blockIds ?? [])];
 
     const comment = await Comment.findById(commentId)
-      .select('-post -parentComment -_id -__v')
+      .select('-post -parentComment -__v')
       .lean();
 
     if (
@@ -55,10 +56,18 @@ export const commentReplies = catchAsync(
 
     const userIds = replies.map((r) => r.user.toString());
     const users = await getUsersFromCache(userIds);
-    const repliesWithUser = replies
+
+    const keys = replies.map((reply) => `likes:comment:${reply._id}`);
+    const pendingCounts = keys.length ? await redisClient.mGet(keys) : [];
+
+    const result = replies
       .map((reply, idx) => {
         if (!users[idx]) return null;
-        return { ...reply, user: users[idx] };
+        return {
+          ...reply,
+          user: users[idx],
+          likesCount: reply.likesCount + Number(pendingCounts[idx] || 0),
+        };
       })
       .filter(Boolean);
 
@@ -68,8 +77,8 @@ export const commentReplies = catchAsync(
         page,
         limit,
         comment,
-        repliesLength: repliesWithUser.length,
-        replies: repliesWithUser,
+        repliesLength: result.length,
+        replies: result,
       },
     });
   },

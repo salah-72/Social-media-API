@@ -1,3 +1,4 @@
+import { incrementLike, decrementLike } from '@/functions/likeCounter';
 import Like from '@/models/likeModel';
 import Post from '@/models/postModel';
 import catchAsync from '@/utils/catchAsync';
@@ -15,7 +16,7 @@ export const likePost = catchAsync(async (req: Request, res: Response) => {
       type,
     });
 
-    await Post.updateOne({ _id: postId }, { $inc: { likesCount: 1 } });
+    await incrementLike('post', postId);
 
     return res.status(201).json({
       status: 'success',
@@ -28,7 +29,7 @@ export const likePost = catchAsync(async (req: Request, res: Response) => {
     if (err.code === 11000) {
       await Like.deleteOne({ user: req.currentuser?._id, post: postId });
 
-      await Post.updateOne({ _id: postId }, { $inc: { likesCount: -1 } });
+      await decrementLike('post', postId);
 
       return res.status(204).json({
         status: 'success',

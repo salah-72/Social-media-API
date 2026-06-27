@@ -3,6 +3,7 @@ import Follow from '@/models/followModel';
 import Post from '@/models/postModel';
 import catchAsync from '@/utils/catchAsync';
 import { getUsersFromCache } from '@/utils/getUsersFromCache';
+import redisClient from '@/utils/redis';
 import { Request, Response } from 'express';
 
 export const timeLinePosts = catchAsync(async (req: Request, res: Response) => {
@@ -69,10 +70,17 @@ export const timeLinePosts = catchAsync(async (req: Request, res: Response) => {
   const authorIds = allPosts.map((p) => p.author.toString());
   const authors = await getUsersFromCache(authorIds);
 
+  const keys = allPosts.map((post) => `likes:post:${post._id}`);
+  const pendingCounts = keys.length ? await redisClient.mGet(keys) : [];
+
   const posts = allPosts
     .map((post, idx) => {
       if (!authors[idx]) return null;
-      return { ...post, author: authors[idx] };
+      return {
+        ...post,
+        author: authors[idx],
+        likesCount: post.likesCount + Number(pendingCounts[idx] || 0),
+      };
     })
     .filter(Boolean);
 

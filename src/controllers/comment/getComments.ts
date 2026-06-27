@@ -1,8 +1,8 @@
-import Block from '@/models/blockModel';
 import Comment from '@/models/commentModel';
 import Post from '@/models/postModel';
 import catchAsync from '@/utils/catchAsync';
 import { getUsersFromCache } from '@/utils/getUsersFromCache';
+import redisClient from '@/utils/redis';
 import { Request, Response } from 'express';
 import { Types } from 'mongoose';
 
@@ -42,10 +42,18 @@ export const getComments = catchAsync(async (req: Request, res: Response) => {
 
   const userIds = comments.map((c) => c.user.toString());
   const users = await getUsersFromCache(userIds);
-  const commentsWithUser = comments
+
+  const keys = comments.map((comment) => `likes:comment:${comment._id}`);
+  const pendingCounts = keys.length ? await redisClient.mGet(keys) : [];
+
+  const result = comments
     .map((comment, idx) => {
       if (!users[idx]) return null;
-      return { ...comment, user: users[idx] };
+      return {
+        ...comment,
+        user: users[idx],
+        likesCount: comment.likesCount + Number(pendingCounts[idx] || 0),
+      };
     })
     .filter(Boolean);
 
@@ -55,7 +63,7 @@ export const getComments = catchAsync(async (req: Request, res: Response) => {
       page,
       limit,
       post,
-      comments: commentsWithUser,
+      comments: result,
     },
   });
 });

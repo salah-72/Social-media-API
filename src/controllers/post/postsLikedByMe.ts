@@ -3,6 +3,7 @@ import Follow from '@/models/followModel';
 import Like from '@/models/likeModel';
 import catchAsync from '@/utils/catchAsync';
 import { getUsersFromCache } from '@/utils/getUsersFromCache';
+import redisClient from '@/utils/redis';
 import { Request, Response } from 'express';
 
 export const postsLikedByMe = catchAsync(
@@ -67,10 +68,17 @@ export const postsLikedByMe = catchAsync(
     const authorIds = posts.map((p) => p.post.author.toString());
     const authors = await getUsersFromCache(authorIds);
 
-    const postsWithAuthors = posts
+    const keys = posts.map((post) => `likes:post:${post._id}`);
+    const pendingCounts = keys.length ? await redisClient.mGet(keys) : [];
+
+    const result = posts
       .map((p, idx) => {
         if (!authors[idx]) return null;
-        return { ...p.post, author: authors[idx] };
+        return {
+          ...p.post,
+          author: authors[idx],
+          likesCount: p.post.likesCount + Number(pendingCounts[idx] || 0),
+        };
       })
       .filter(Boolean);
 
@@ -79,8 +87,8 @@ export const postsLikedByMe = catchAsync(
       data: {
         page,
         limit,
-        length: postsWithAuthors.length,
-        posts: postsWithAuthors,
+        length: result.length,
+        posts: result,
       },
     });
   },

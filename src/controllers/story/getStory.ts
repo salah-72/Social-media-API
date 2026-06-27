@@ -1,3 +1,4 @@
+import { mergeLikesCount } from '@/functions/mergeLikesCount';
 import Story from '@/models/storyModel';
 import View from '@/models/viewModel';
 import catchAsync from '@/utils/catchAsync';
@@ -18,10 +19,12 @@ export const getStory = catchAsync(async (req: Request, res: Response) => {
     }
   }
 
+  const [result] = await mergeLikesCount([story], 'story');
+
   res.status(200).json({
     status: 'success',
     data: {
-      story,
+      story: result,
     },
   });
 });
