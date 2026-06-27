@@ -52,25 +52,57 @@ cron.schedule('0 0 * * *', async () => {
 });
 
 cron.schedule('0/10 * * * *', async () => {
-  const keys = await redisClient.keys('likes:*');
-  if (!keys.length) return;
+  // const keys = await redisClient.keys('likes:*');
+  // if (!keys.length) return;
 
-  const pipeline = redisClient.multi();
-  keys.forEach((key) => pipeline.get(key));
-  const results = await pipeline.exec();
+  // const pipeline = redisClient.multi();
+  // keys.forEach((key) => pipeline.get(key));
+  // const results = await pipeline.exec();
 
-  for (let i = 0; i < keys.length; i++) {
-    const [, type, id] = keys[i].split(':');
-    const count = Number(results[i]);
-    if (!count) continue;
+  // for (let i = 0; i < keys.length; i++) {
+  //   const [, type, id] = keys[i].split(':');
+  //   const count = Number(results[i]);
+  //   if (!count) continue;
 
-    if (type === 'post')
-      await Post.updateOne({ _id: id }, { $inc: { likesCount: count } });
-    else if (type === 'comment')
-      await Comment.updateOne({ _id: id }, { $inc: { likesCount: count } });
-    else if (type === 'story')
-      await Story.updateOne({ _id: id }, { $inc: { likesCount: count } });
+  //   if (type === 'post')
+  //     await Post.updateOne({ _id: id }, { $inc: { likesCount: count } });
+  //   else if (type === 'comment')
+  //     await Comment.updateOne({ _id: id }, { $inc: { likesCount: count } });
+  //   else if (type === 'story')
+  //     await Story.updateOne({ _id: id }, { $inc: { likesCount: count } });
 
-    await redisClient.del(keys[i]);
-  }
+  //   await redisClient.del(keys[i]);
+  // }
+
+  await syncEntity('post', Post);
+  await syncEntity('comment', Comment);
+  await syncEntity('story', Story);
 });
+
+async function syncEntity(type: string, model: any) {
+  const syncKeys = `sync:likes:${type}`;
+  const ids = await redisClient.sMembers(syncKeys);
+  if (!ids.length) return;
+
+  const keys = ids.map((id) => `likes:${type}:${id}`);
+  const values = await redisClient.mGet(keys);
+
+  const bulkOps: any[] = [];
+  for (let i = 0; i < ids.length; i++) {
+    const count = Number(values[i]);
+    if (count === null || count === undefined) continue;
+
+    bulkOps.push({
+      updateOne: {
+        filter: { _id: ids[i] },
+        update: { $inc: { likesCount: count } },
+      },
+    });
+  }
+
+  if (bulkOps.length > 0) {
+    await model.bulkWrite(bulkOps);
+    await redisClient.srem(syncKeys, ids);
+    await redisClient.del(keys);
+  }
+}
