@@ -1413,7 +1413,10 @@ router.delete(
  *                 status:
  *                   type: string
  *                   example: success
- *                 data:
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
  *                   type: object
  *                   properties:
  *                     page:
@@ -1422,31 +1425,51 @@ router.delete(
  *                     limit:
  *                       type: integer
  *                       example: 5
- *                     length:
+ *                     total:
  *                       type: integer
- *                       example: 5
+ *                       example: 10
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 2
+ *                 data:
+ *                   type: object
+ *                   properties:
  *                     Comments:
  *                       type: array
  *                       items:
  *                         type: object
  *                         properties:
- *                           userId:
+ *                           _id:
  *                             type: string
- *                             example: 0987654321fedcba
+ *                             example: 1234567890abcdef
+ *                           user:
+ *                             type: object
+ *                             properties:
+ *                               username:
+ *                                 type: string
+ *                                 example: ahmed_ss
+ *                               profilePhoto:
+ *                                 type: string
+ *                                 example: https://example.com/profile.jpg
+ *                               firstName:
+ *                                 type: string
+ *                                 example: Ahmed
+ *                               lastName:
+ *                                 type: string
+ *                                 example: Salah
  *                           content:
  *                             type: string
  *                             example: This is my comment content.
  *                           likesCount:
  *                             type: integer
  *                             example: 5
- *                           commentsCount:
- *                             type: integer
- *                             example: 10
  *                           createdAt:
  *                             type: string
+ *                             format: date-time
  *                             example: 2023-01-01T00:00:00.000Z
  *                           updatedAt:
  *                             type: string
+ *                             format: date-time
  *                             example: 2023-01-01T00:00:00.000Z
  *       401:
  *         description: Unauthorized - user not authenticated
@@ -1517,7 +1540,10 @@ router.get(
  *                 status:
  *                   type: string
  *                   example: success
- *                 data:
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
  *                   type: object
  *                   properties:
  *                     page:
@@ -1526,31 +1552,86 @@ router.get(
  *                     limit:
  *                       type: integer
  *                       example: 5
- *                     length:
+ *                     total:
  *                       type: integer
- *                       example: 5
- *                     Comments:
+ *                       example: 10
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 2
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     comment:
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                           example: 1234567890abcdef
+ *                         user:
+ *                           type: object
+ *                           properties:
+ *                             username:
+ *                               type: string
+ *                               example: ahmed_ss
+ *                             profilePhoto:
+ *                               type: string
+ *                               example: https://example.com/profile.jpg
+ *                             firstName:
+ *                               type: string
+ *                               example: Ahmed
+ *                             lastName:
+ *                               type: string
+ *                               example: Salah
+ *                         content:
+ *                           type: string
+ *                           example: This is my comment content.
+ *                         likesCount:
+ *                           type: integer
+ *                           example: 5
+ *                         createdAt:
+ *                           type: string
+ *                           format: date-time
+ *                           example: 2023-01-01T00:00:00.000Z
+ *                         updatedAt:
+ *                           type: string
+ *                           format: date-time
+ *                           example: 2023-01-01T00:00:00.000Z
+ *                     replies:
  *                       type: array
  *                       items:
  *                         type: object
  *                         properties:
- *                           userId:
+ *                           _id:
  *                             type: string
- *                             example: 0987654321fedcba
+ *                             example: 1234567890abcdef
+ *                           user:
+ *                             type: object
+ *                             properties:
+ *                               username:
+ *                                 type: string
+ *                                 example: ahmed_ss
+ *                               profilePhoto:
+ *                                 type: string
+ *                                 example: https://example.com/profile.jpg
+ *                               firstName:
+ *                                 type: string
+ *                                 example: Ahmed
+ *                               lastName:
+ *                                 type: string
+ *                                 example: Salah
  *                           content:
  *                             type: string
  *                             example: This is my comment content.
  *                           likesCount:
  *                             type: integer
  *                             example: 5
- *                           commentsCount:
- *                             type: integer
- *                             example: 10
  *                           createdAt:
  *                             type: string
+ *                             format: date-time
  *                             example: 2023-01-01T00:00:00.000Z
  *                           updatedAt:
  *                             type: string
+ *                             format: date-time
  *                             example: 2023-01-01T00:00:00.000Z
  *       401:
  *         description: Unauthorized - user not authenticated
@@ -1725,7 +1806,10 @@ router.patch(
  *                 status:
  *                   type: string
  *                   example: success
- *                 data:
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
  *                   type: object
  *                   properties:
  *                     page:
@@ -1734,28 +1818,41 @@ router.patch(
  *                     limit:
  *                       type: integer
  *                       example: 20
- *                     length:
+ *                     total:
  *                       type: integer
  *                       example: 5
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 1
+ *                 data:
+ *                   type: object
+ *                   properties:
  *                     likes:
  *                       type: array
  *                       items:
  *                         type: object
  *                         properties:
- *                           username:
+ *                           _id:
  *                             type: string
- *                             example: Ahmed123
- *                           firstName:
- *                             type: string
- *                             example: Ahmed
- *                           lastName:
- *                             type: string
- *                             example: Salah
- *                           profilePhoto:
- *                             type: string
- *                             example: https://example.com/profile-photo.jpg
+ *                             example: 1234567890abcdef
+ *                           user:
+ *                             type: object
+ *                             properties:
+ *                               username:
+ *                                 type: string
+ *                                 example: Ahmed123
+ *                               profilePhoto:
+ *                                 type: string
+ *                                 example: https://example.com/profile-photo.jpg
+ *                               firstName:
+ *                                 type: string
+ *                                 example: Ahmed
+ *                               lastName:
+ *                                 type: string
+ *                                 example: Salah
  *                           react:
  *                             type: string
+ *                             example: love
  *       404:
  *         description: post or comment not found
  *         content:
@@ -1827,7 +1924,10 @@ router.get(
  *                 status:
  *                   type: string
  *                   example: success
- *                 data:
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
  *                   type: object
  *                   properties:
  *                     page:
@@ -1836,9 +1936,15 @@ router.get(
  *                     limit:
  *                       type: integer
  *                       example: 20
- *                     length:
+ *                     total:
  *                       type: integer
- *                       example: 20
+ *                       example: 5
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 1
+ *                 data:
+ *                   type: object
+ *                   properties:
  *                     Users:
  *                       type: array
  *                       items:
@@ -1847,15 +1953,16 @@ router.get(
  *                           username:
  *                             type: string
  *                             example: ahmed123
+ *                           profilePhoto:
+ *                             type: string
+ *                             example: https://example.com/profile-photo.jpg
  *                           firstName:
  *                             type: string
  *                             example: Ahmed
  *                           lastName:
  *                             type: string
  *                             example: Ali
- *                           profilePhoto:
- *                             type: string
- *                             example: https://example.com/profile-photo.jpg
+ *
  *       401:
  *         description: Unauthorized - user not authenticated
  *         content:

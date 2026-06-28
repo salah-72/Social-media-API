@@ -37,6 +37,7 @@ export const commentLikes = catchAsync(
         comment: new Types.ObjectId(commentId),
         user: { $nin: blockIds },
       })
+        .select('_id user type')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
