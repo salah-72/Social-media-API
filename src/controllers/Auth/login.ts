@@ -12,6 +12,7 @@ import config from '@/config/config';
 import Token from '@/models/tokenModel';
 import redisClient from '@/utils/redis';
 import { logger } from '@/lib/winston';
+import { sendResponse } from '@/utils/sendResponse';
 
 type ILogin = Pick<IUser, 'email' | 'username' | 'password'>;
 
@@ -74,10 +75,18 @@ export const login = catchAsync(
       logger.warn('Failed to cache user data in Redis during login');
     }
 
-    res.status(200).json({
-      status: 'success',
-      data: user,
-      accessToken,
+    sendResponse(res, 200, {
+      user: {
+        _id: user._id,
+        email: user.email,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profilePhoto: user.profilePhoto,
+      },
+      tokens: {
+        accessToken,
+      },
     });
 
     logger.info('user logged in', {

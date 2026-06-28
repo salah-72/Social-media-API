@@ -6,6 +6,7 @@ import crypto from 'crypto';
 import { transporter } from '@/utils/nodemailer';
 import { logger } from '@/lib/winston';
 import config from '@/config/config';
+import { sendResponse } from '@/utils/sendResponse';
 
 type IForget = Pick<IUser, 'email' | 'username'>;
 export const forgetPassword = catchAsync(
@@ -42,8 +43,7 @@ export const forgetPassword = catchAsync(
     });
     logger.info('Message sent:', info.messageId);
 
-    res.status(200).json({
-      status: 'success',
+    sendResponse(res, 200, undefined, {
       message: 'password reset link sent successfully',
     });
   },

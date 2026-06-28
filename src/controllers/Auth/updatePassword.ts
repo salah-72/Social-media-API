@@ -4,6 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 import User from '@/models/userModel';
 import { logger } from '@/lib/winston';
+import { sendResponse } from '@/utils/sendResponse';
 
 export const updatePassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -24,8 +25,7 @@ export const updatePassword = catchAsync(
 
     logger.info('user changed his password', { id: user._id });
 
-    res.status(200).json({
-      status: 'success',
+    sendResponse(res, 200, undefined, {
       message: 'password changed successfully',
     });
   },

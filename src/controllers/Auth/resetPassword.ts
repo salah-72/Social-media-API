@@ -4,6 +4,7 @@ import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { logger } from '@/lib/winston';
+import { sendResponse } from '@/utils/sendResponse';
 
 export const resetPassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -34,8 +35,7 @@ export const resetPassword = catchAsync(
 
     logger.info('user reset his password successfully', { Email: user.email });
 
-    res.status(200).json({
-      status: 'success',
+    sendResponse(res, 200, undefined, {
       message: 'password is reset successfully',
     });
   },

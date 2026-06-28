@@ -5,6 +5,7 @@ import Token from '@/models/tokenModel';
 import BlackList from '@/models/blackListTokensModel';
 import config from '@/config/config';
 import jwt from 'jsonwebtoken';
+import { sendResponse } from '@/utils/sendResponse';
 
 export const logOut = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -43,10 +44,7 @@ export const logOut = catchAsync(
       email: req.currentuser?.email,
     });
 
-    res.status(200).json({
-      status: 'success',
-      message: 'logout successfully',
-    });
+    sendResponse(res, 200, undefined, { message: 'logged out successfully' });
   },
 );
 
@@ -78,9 +76,9 @@ export const logoutAll = catchAsync(
     logger.info('user logged out from all devices successfully', {
       email: req.currentuser?.email,
     });
-    res.status(200).json({
-      status: 'success',
-      message: 'logged out from all devices successfully',
+
+    sendResponse(res, 200, undefined, {
+      message: 'logged out successfully from all devices',
     });
   },
 );

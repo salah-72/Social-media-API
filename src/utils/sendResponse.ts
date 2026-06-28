@@ -9,7 +9,7 @@ interface paginationInput {
 export const sendResponse = (
   res: Response,
   statusCode: number,
-  data?: Record<string, any>,
+  data?: Record<string, any> | undefined,
   options?: {
     message?: string;
     pagination?: paginationInput;
