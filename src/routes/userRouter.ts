@@ -1501,12 +1501,12 @@ router.get(
  *           type: string
  *           example: 1234567890abcdef12345678
  *     responses:
- *       200:
+ *       201:
  *         description: User blocked successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/success'
+ *               $ref: '#/components/schemas/Success'
  *       400:
  *         description: Bad request (e.g., trying to block yourself or already blocking the user).
  *         content:
@@ -1556,7 +1556,7 @@ router.post(
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/success'
+ *               $ref: '#/components/schemas/Success'
  *       400:
  *         description: Bad request (e.g., trying to unblock yourself or not blocking the user).
  *         content:
@@ -1618,7 +1618,10 @@ router.delete(
  *                 status:
  *                   type: string
  *                   example: success
- *                 data:
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
  *                   type: object
  *                   properties:
  *                     page:
@@ -1627,17 +1630,32 @@ router.delete(
  *                     limit:
  *                       type: integer
  *                       example: 20
- *                     length:
+ *                     total:
  *                       type: integer
  *                       example: 5
- *                     blockedUsers:
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 1
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     blockList:
  *                       type: array
  *                       items:
  *                         type: object
  *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: 507f1f77bcf86cd799439011
  *                           username:
  *                             type: string
  *                             example: salah123
+ *                           firstName:
+ *                             type: string
+ *                             example: Salah
+ *                           lastName:
+ *                             type: string
+ *                             example: El-Sayed
  *                           profilePhoto:
  *                             type: string
  *                             example: https://example.com/profile.jpg
