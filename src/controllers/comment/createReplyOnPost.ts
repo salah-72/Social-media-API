@@ -3,6 +3,7 @@ import Comment from '@/models/commentModel';
 import Post from '@/models/postModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 
 export const createReply = catchAsync(
@@ -32,11 +33,6 @@ export const createReply = catchAsync(
 
     await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
 
-    res.status(201).json({
-      status: 'success',
-      data: {
-        comment,
-      },
-    });
+    sendResponse(res, 201, { comment });
   },
 );

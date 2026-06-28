@@ -1,6 +1,7 @@
 import Comment from '@/models/commentModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 
 export const updateComment = catchAsync(
@@ -20,11 +21,6 @@ export const updateComment = catchAsync(
 
     if (!comment) return next(new appError('comment not found', 404));
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        comment,
-      },
-    });
+    sendResponse(res, 200, undefined, { message: 'comment updated' });
   },
 );

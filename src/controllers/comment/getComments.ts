@@ -3,6 +3,7 @@ import Post from '@/models/postModel';
 import catchAsync from '@/utils/catchAsync';
 import { getUsersFromCache } from '@/utils/getUsersFromCache';
 import redisClient from '@/utils/redis';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response } from 'express';
 import { Types } from 'mongoose';
 
@@ -57,13 +58,16 @@ export const getComments = catchAsync(async (req: Request, res: Response) => {
     })
     .filter(Boolean);
 
-  res.status(200).json({
-    status: 'success',
-    data: {
-      page,
-      limit,
-      post,
-      comments: result,
-    },
+  const total = await Comment.countDocuments({
+    post: new Types.ObjectId(postId),
+    user: { $nin: blocksIds },
+    parentComment: null,
   });
+
+  sendResponse(
+    res,
+    200,
+    { comments: result },
+    { pagination: { page, limit, total }, results: result.length },
+  );
 });

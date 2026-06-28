@@ -3,6 +3,7 @@ import Comment from '@/models/commentModel';
 import Like from '@/models/likeModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 
 export const changeCommentReact = catchAsync(
@@ -33,11 +34,6 @@ export const changeCommentReact = catchAsync(
     like.type = type;
     await like.save();
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        like,
-      },
-    });
+    sendResponse(res, 200, { like });
   },
 );
