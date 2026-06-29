@@ -29,8 +29,6 @@ export const unfollow = catchAsync(
 
     logger.warn(`${follower} stop following ${following}`);
 
-    res.status(204).json({
-      status: 'success',
-    });
+    res.status(204).send();
   },
 );

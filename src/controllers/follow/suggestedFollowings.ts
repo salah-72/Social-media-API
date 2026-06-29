@@ -1,22 +1,18 @@
-import Block from '@/models/blockModel';
 import Follow from '@/models/followModel';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response } from 'express';
-import redisClient from '@/utils/redis';
-import { logger } from '@/lib/winston';
-import User from '@/models/userModel';
+import { sendResponse } from '@/utils/sendResponse';
 import { getUsersFromCache } from '@/utils/getUsersFromCache';
 
 export const suggestedFollowings = catchAsync(
   async (req: Request, res: Response) => {
     const myId = req.currentuser?._id;
-    const BlocksIds = [...(req.blockIds ?? [])];
-
+    const blockIds = [...(req.blockIds ?? [])];
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 15;
     const skip = (page - 1) * limit;
 
-    const suggestedFollowings = await Follow.aggregate([
+    const pipeline = [
       {
         $match: {
           status: 'accepted',
@@ -45,14 +41,13 @@ export const suggestedFollowings = catchAsync(
       { $unwind: '$theirFollowings' },
       {
         $match: {
-          'theirFollowings.following': { $ne: [...BlocksIds, myId] },
+          'theirFollowings.following': { $nin: [...blockIds, myId] },
         },
       },
       {
         $lookup: {
           from: 'follows',
-          let: { suggestedId: '$theirFollowings.following', myId: myId },
-
+          let: { suggestedId: '$theirFollowings.following', myId },
           pipeline: [
             {
               $match: {
@@ -70,32 +65,28 @@ export const suggestedFollowings = catchAsync(
         },
       },
       { $match: { alreadyFollowing: { $eq: [] } } },
-      {
-        $group: {
-          _id: '$theirFollowings.following',
-        },
-      },
-      { $skip: skip },
-      { $limit: limit },
+      { $group: { _id: '$theirFollowings.following' } },
+    ];
+
+    const [suggestedFollowings, totalResult] = await Promise.all([
+      Follow.aggregate([...pipeline, { $skip: skip }, { $limit: limit }]),
+      Follow.aggregate([...pipeline, { $count: 'total' }]),
     ]);
 
+    const total = totalResult[0]?.total ?? 0;
+
     const userIds = suggestedFollowings.map((e) => e._id.toString());
-    const users = await getUsersFromCache(userIds);
-    const result = users
-      .map((userData) => {
-        if (!userData) return null;
-        return { user: userData };
-      })
+    const usersData = await getUsersFromCache(userIds);
+
+    const result = usersData
+      .map((userData) => (userData ? { user: userData } : null))
       .filter(Boolean);
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        page,
-        limit,
-        length: result.length,
-        suggestedFollowings: result,
-      },
-    });
+    sendResponse(
+      res,
+      200,
+      { suggestedFollowings: result },
+      { pagination: { page, limit, total }, results: result.length },
+    );
   },
 );

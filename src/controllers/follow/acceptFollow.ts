@@ -3,6 +3,7 @@ import Follow from '@/models/followModel';
 import User from '@/models/userModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 
 export const accept = catchAsync(
@@ -28,9 +29,6 @@ export const accept = catchAsync(
 
     logger.info(`you accept ${follower}'s follow request`);
 
-    res.status(200).json({
-      status: 'success',
-      follow,
-    });
+    sendResponse(res, 200, undefined, { message: 'follow request accepted' });
   },
 );

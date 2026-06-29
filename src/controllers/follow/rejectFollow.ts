@@ -20,8 +20,6 @@ export const reject = catchAsync(
 
     logger.info(`you reject ${follower}'s follow request`);
 
-    res.status(204).json({
-      status: 'success',
-    });
+    res.status(204).send();
   },
 );
