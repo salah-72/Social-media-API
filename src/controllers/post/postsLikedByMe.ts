@@ -4,6 +4,7 @@ import Like from '@/models/likeModel';
 import catchAsync from '@/utils/catchAsync';
 import { getUsersFromCache } from '@/utils/getUsersFromCache';
 import redisClient from '@/utils/redis';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response } from 'express';
 
 export const postsLikedByMe = catchAsync(
@@ -20,12 +21,8 @@ export const postsLikedByMe = catchAsync(
     });
     const followingIds = followings.map((e) => e.following);
 
-    const posts = await Like.aggregate([
-      {
-        $match: {
-          user: req.currentuser?._id,
-        },
-      },
+    const pipeline = [
+      { $match: { user: req.currentuser?._id } },
       {
         $lookup: {
           from: 'posts',
@@ -34,9 +31,7 @@ export const postsLikedByMe = catchAsync(
           as: 'post',
         },
       },
-      {
-        $unwind: '$post',
-      },
+      { $unwind: '$post' },
       {
         $match: {
           'post.status': 'published',
@@ -51,19 +46,29 @@ export const postsLikedByMe = catchAsync(
           ],
         },
       },
-      {
-        $project: {
-          'post.author': 1,
-          'post.content': 1,
-          'post.images.url': 1,
-          'post.whoCanSee': 1,
-          _id: 0,
+    ];
+
+    const [posts, totalResult] = await Promise.all([
+      Like.aggregate([
+        ...pipeline,
+        {
+          $project: {
+            'post.author': 1,
+            'post.content': 1,
+            'post.images.url': 1,
+            'post.whoCanSee': 1,
+            _id: 0,
+          },
         },
-      },
-      { $sort: { createdAt: -1 } },
-      { $skip: skip },
-      { $limit: limit },
+        { $sort: { createdAt: -1 } },
+        { $skip: skip },
+        { $limit: limit },
+      ]),
+
+      Like.aggregate([...pipeline, { $count: 'total' }]),
     ]);
+
+    const total = totalResult[0]?.total ?? 0;
 
     const authorIds = posts.map((p) => p.post.author.toString());
     const authors = await getUsersFromCache(authorIds);
@@ -82,14 +87,11 @@ export const postsLikedByMe = catchAsync(
       })
       .filter(Boolean);
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        page,
-        limit,
-        length: result.length,
-        posts: result,
-      },
-    });
+    sendResponse(
+      res,
+      200,
+      { posts: result },
+      { pagination: { page, limit, total }, results: posts.length },
+    );
   },
 );

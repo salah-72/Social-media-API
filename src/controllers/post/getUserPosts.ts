@@ -2,6 +2,7 @@ import Follow from '@/models/followModel';
 import Post from '@/models/postModel';
 import catchAsync from '@/utils/catchAsync';
 import redisClient from '@/utils/redis';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response } from 'express';
 
 export const getUserPosts = catchAsync(async (req: Request, res: Response) => {
@@ -27,16 +28,22 @@ export const getUserPosts = catchAsync(async (req: Request, res: Response) => {
     lastName: req.targetUser?.lastName,
   };
 
-  const posts = await Post.find({
+  const filter = {
     author: req.targetUser?._id,
     whoCanSee: { $in: can },
     status: 'published',
-  })
-    .select('-__v -status')
-    .sort('-publishedAt')
-    .limit(limit)
-    .skip(skip)
-    .lean();
+  };
+
+  const [posts, total] = await Promise.all([
+    Post.find(filter)
+      .select('-__v -status')
+      .sort('-publishedAt')
+      .limit(limit)
+      .skip(skip)
+      .lean(),
+
+    Post.countDocuments(filter),
+  ]);
 
   const keys = posts.map((post) => `likes:post:${post._id}`);
   const pendingCounts = keys.length ? await redisClient.mGet(keys) : [];
@@ -47,13 +54,10 @@ export const getUserPosts = catchAsync(async (req: Request, res: Response) => {
     likesCount: post.likesCount + Number(pendingCounts[i] || 0),
   }));
 
-  res.status(200).json({
-    status: 'success',
-    data: {
-      page,
-      limit,
-      length: posts.length,
-      posts: result,
-    },
-  });
+  sendResponse(
+    res,
+    200,
+    { posts: result },
+    { pagination: { page, limit, total }, results: posts.length },
+  );
 });

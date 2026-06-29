@@ -4,6 +4,7 @@ import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { getUsersFromCache } from '@/utils/getUsersFromCache';
 import redisClient from '@/utils/redis';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 
 export const postsSearch = catchAsync(
@@ -24,7 +25,7 @@ export const postsSearch = catchAsync(
 
     const followingsIds = followings.map((e) => e.following);
 
-    const posts = await Post.aggregate([
+    const pipeline = [
       {
         $search: {
           index: 'search',
@@ -46,27 +47,37 @@ export const postsSearch = catchAsync(
           ],
         },
       },
-      {
-        $addFields: {
-          score: { $meta: 'searchScore' },
+    ];
+
+    const [posts, totalResult] = await Promise.all([
+      Post.aggregate([
+        ...pipeline,
+        {
+          $addFields: {
+            score: { $meta: 'searchScore' },
+          },
         },
-      },
-      {
-        $project: {
-          author: 1,
-          content: 1,
-          status: 1,
-          whoCanSee: 1,
-          likesCount: 1,
-          commentsCount: 1,
-          publishedAt: 1,
-          score: 1,
+        {
+          $project: {
+            author: 1,
+            content: 1,
+            status: 1,
+            whoCanSee: 1,
+            likesCount: 1,
+            commentsCount: 1,
+            publishedAt: 1,
+            score: 1,
+          },
         },
-      },
-      { $sort: { score: -1 } },
-      { $skip: skip },
-      { $limit: limit },
+        { $sort: { score: -1 } },
+        { $skip: skip },
+        { $limit: limit },
+      ]),
+
+      Post.aggregate([...pipeline, { $count: 'total' }]),
     ]);
+
+    const total = totalResult[0]?.total ?? 0;
 
     const authorIds = posts.map((p) => p.author.toString());
     const authorsData = await getUsersFromCache(authorIds);
@@ -85,14 +96,11 @@ export const postsSearch = catchAsync(
       })
       .filter(Boolean);
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        page,
-        limit,
-        length: result.length,
-        posts: result,
-      },
-    });
+    sendResponse(
+      res,
+      200,
+      { posts: result },
+      { pagination: { page, limit, total }, results: posts.length },
+    );
   },
 );

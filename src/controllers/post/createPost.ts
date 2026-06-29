@@ -5,6 +5,7 @@ import { JSDOM } from 'jsdom';
 import Post from '@/models/postModel';
 import { uploadToCloudinary } from '@/utils/cloudinaryUpload';
 import { logger } from '@/lib/winston';
+import { sendResponse } from '@/utils/sendResponse';
 
 const window = new JSDOM('').window;
 const purify = DOMPurify(window);
@@ -45,9 +46,6 @@ export const createPost = catchAsync(
 
     logger.info(`user: ${author} create post`);
 
-    res.status(201).json({
-      status: 'success',
-      post,
-    });
+    sendResponse(res, 201, undefined, { message: 'Post created' });
   },
 );

@@ -2,6 +2,7 @@ import { logger } from '@/lib/winston';
 import Post from '@/models/postModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 
 export const updatePost = catchAsync(
@@ -35,9 +36,6 @@ export const updatePost = catchAsync(
 
     logger.info(`user: ${req.currentuser?._id} update post ${id}`);
 
-    res.status(200).json({
-      status: 'success',
-      post,
-    });
+    sendResponse(res, 200, undefined, { message: 'post updated' });
   },
 );

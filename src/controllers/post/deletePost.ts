@@ -32,8 +32,6 @@ export const deletePost = catchAsync(
 
     logger.info(`user: ${req.currentuser?._id} delete post ${id}`);
 
-    res.status(204).json({
-      status: 'success',
-    });
+    res.status(204).send();
   },
 );
