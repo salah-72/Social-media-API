@@ -8,6 +8,7 @@ export const getMe = catchAsync(async (req: Request, res: Response) => {
 
   sendResponse(res, 200, {
     userInfo: {
+      _id: user?._id,
       username: user?.username,
       firstName: user?.firstName,
       lastName: user?.lastName,
@@ -19,6 +20,12 @@ export const getMe = catchAsync(async (req: Request, res: Response) => {
       public: user?.public,
       education: user?.education,
       experience: user?.experience,
+      hometown: user?.hometown,
+      currentCity: user?.currentCity,
+      about: user?.about,
+      gender: user?.gender,
+      birthday: user?.birthday,
+      socialLinks: user?.socialLinks,
     },
   });
 });

@@ -35,11 +35,10 @@ export const getUserByUsername = catchAsync(
       status: 'accepted',
     });
 
-    const info = {};
-
     if (!req.targetUser?.public && !followed) {
       sendResponse(res, 200, {
         userInfo: {
+          _id: targetUser?._id,
           username: targetUser?.username,
           firstName: targetUser?.firstName,
           lastName: targetUser?.lastName,

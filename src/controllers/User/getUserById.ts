@@ -17,6 +17,7 @@ export const getUserById = catchAsync(
 
     const user = req.targetUser;
     const info = {
+      _id: user?._id,
       username: user?.username,
       firstName: user?.firstName,
       lastName: user?.lastName,
@@ -40,6 +41,12 @@ export const getUserById = catchAsync(
         email: user?.email,
         education: user?.education,
         experience: user?.experience,
+        hometown: user?.hometown,
+        currentCity: user?.currentCity,
+        about: user?.about,
+        gender: user?.gender,
+        birthday: user?.birthday,
+        socialLinks: user?.socialLinks,
       },
     });
   },
