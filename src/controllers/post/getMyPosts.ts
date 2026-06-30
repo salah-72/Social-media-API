@@ -10,7 +10,6 @@ export const getMyPosts = catchAsync(async (req: Request, res: Response) => {
   const skip = (page - 1) * limit;
 
   const authorData = {
-    _id: req.currentuser?._id,
     username: req.currentuser?.username,
     profilePhoto: req.currentuser?.profilePhoto,
     firstName: req.currentuser?.firstName,
