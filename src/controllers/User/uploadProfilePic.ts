@@ -5,6 +5,7 @@ import catchAsync from '@/utils/catchAsync';
 import { uploadToCloudinary } from '@/utils/cloudinaryUpload';
 import { Request, Response, NextFunction } from 'express';
 import redisClient from '@/utils/redis';
+import { sendResponse } from '@/utils/sendResponse';
 
 export const uploadProfilePic = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -37,9 +38,6 @@ export const uploadProfilePic = catchAsync(
       logger.warn('Redis set failed in uploadProfilePic for user');
     }
 
-    res.status(200).json({
-      status: 'success',
-      user,
-    });
+    sendResponse(res, 200, undefined, { message: 'photo updated' });
   },
 );

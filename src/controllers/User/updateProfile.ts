@@ -4,6 +4,7 @@ import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
 import redisClient from '@/utils/redis';
+import { sendResponse } from '@/utils/sendResponse';
 
 const allowedFeilds = [
   'username',
@@ -65,6 +66,7 @@ export const updateProfileInfo = catchAsync(
       logger.warn('Redis set failed in updateProfileInfo for user');
     }
 
+    sendResponse(res, 200, undefined, { message: 'profile updated' });
     res.status(200).json({
       status: 'success',
       user,

@@ -3,6 +3,7 @@ import User from '@/models/userModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { uploadToCloudinary } from '@/utils/cloudinaryUpload';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 
 export const uploadCoverPhoto = catchAsync(
@@ -21,9 +22,6 @@ export const uploadCoverPhoto = catchAsync(
 
     logger.info('user changed his cover photo', { id: req.currentuser?._id });
 
-    res.status(200).json({
-      status: 'success',
-      user,
-    });
+    sendResponse(res, 200, undefined, { message: 'photo updated' });
   },
 );
