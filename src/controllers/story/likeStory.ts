@@ -2,6 +2,7 @@ import { incrementLike, decrementLike } from '@/functions/likeCounter';
 import Like from '@/models/likeModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 
 export const likeStory = catchAsync(
@@ -13,7 +14,7 @@ export const likeStory = catchAsync(
       return next(new appError('you cannot like your story', 400));
 
     try {
-      const like = await Like.create({
+      await Like.create({
         user: req.currentuser?._id,
         story: storyId,
         type,
@@ -21,22 +22,14 @@ export const likeStory = catchAsync(
 
       await incrementLike('story', storyId);
 
-      return res.status(201).json({
-        status: 'success',
-        data: {
-          likesCount: req.story!.likesCount + 1,
-          like,
-        },
-      });
+      return sendResponse(res, 201, undefined, { message: 'story liked' });
     } catch (err: any) {
       if (err.code === 11000) {
         await Like.deleteOne({ user: req.currentuser?._id, story: storyId });
 
         await decrementLike('story', storyId);
 
-        return res.status(204).json({
-          status: 'success',
-        });
+        return res.status(204).send();
       }
       throw err;
     }

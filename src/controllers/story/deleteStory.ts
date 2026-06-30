@@ -27,8 +27,6 @@ export const deleteStory = catchAsync(
       story.deleteOne(),
     ]);
 
-    res.status(204).json({
-      status: 'success',
-    });
+    res.status(204).send();
   },
 );

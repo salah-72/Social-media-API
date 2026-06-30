@@ -2,6 +2,7 @@ import Story from '@/models/storyModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { uploadToCloudinary } from '@/utils/cloudinaryUpload';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 
 export const createStory = catchAsync(
@@ -31,11 +32,6 @@ export const createStory = catchAsync(
       whoCanSee,
     });
 
-    res.status(201).json({
-      status: 'success',
-      data: {
-        story,
-      },
-    });
+    sendResponse(res, 201, undefined, { message: 'story created' });
   },
 );
