@@ -34,13 +34,13 @@ const router = Router();
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
  *               img:
  *                 type: string
- *                 format: binary
+ *                 example: https://example.com/image.jpg
  *               content:
  *                 type: string
  *                 example: This is my new story!
@@ -54,17 +54,7 @@ const router = Router();
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 data:
- *                   type: object
- *                   properties:
- *                     storyId:
- *                       type: string
- *                       example: 1234567890abcdef
+ *               $ref: '#/components/schemas/Success'
  *       400:
  *         description: Bad request - invalid input data
  *         content:
@@ -123,7 +113,10 @@ router.post(
  *                 status:
  *                   type: string
  *                   example: success
- *                 data:
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
  *                   type: object
  *                   properties:
  *                     page:
@@ -131,30 +124,45 @@ router.post(
  *                       example: 1
  *                     limit:
  *                       type: integer
- *                       example: 5
- *                     length:
+ *                       example: 20
+ *                     total:
  *                       type: integer
  *                       example: 5
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 1
+ *                 data:
+ *                   type: object
+ *                   properties:
  *                     stories:
  *                       type: array
  *                       items:
  *                         type: object
  *                         properties:
- *                           storyId:
+ *                           _id:
  *                             type: string
  *                             example: 1234567890abcdef
- *                           authorId:
- *                             type: string
- *                             example: 0987654321fedcba
+ *                           author:
+ *                             type: object
+ *                             properties:
+ *                               username:
+ *                                 type: string
+ *                                 example: ahmed123
+ *                               profilePhoto:
+ *                                 type: string
+ *                                 example: https://example.com/image.jpg
+ *                               firstName:
+ *                                 type: string
+ *                                 example: Ahmed
+ *                               lastName:
+ *                                 type: string
+ *                                 example: Salah
  *                           content:
  *                             type: string
  *                             example: This is my story content.
  *                           imgUrl:
  *                             type: string
  *                             example: https://example.com/story-image.jpg
- *                           whoCanSee:
- *                             type: string
- *                             example: public
  *                           viewCount:
  *                             type: integer
  *                             example: 5
@@ -196,10 +204,6 @@ router.get(
  *     responses:
  *       204:
  *         description: Story deleted successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Success'
  *       404:
  *         description: Story not found
  *         content:
@@ -246,21 +250,39 @@ router.delete(
  *                     story:
  *                       type: object
  *                       properties:
- *                         authorId:
+ *                         _id:
  *                           type: string
  *                           example: 1234567890abcdef
+ *                         author:
+ *                           type: object
+ *                           properties:
+ *                             username:
+ *                               type: string
+ *                               example: ahmed123
+ *                             profilePhoto:
+ *                               type: string
+ *                               example: https://example.com/image.jpg
+ *                             firstName:
+ *                               type: string
+ *                               example: Ahmed
+ *                             lastName:
+ *                               type: string
+ *                               example: Salah
  *                         content:
  *                           type: string
  *                           example: This is my story content.
- *                         storyImg:
+ *                         imgUrl:
  *                           type: string
  *                           example: https://example.com/story-image.jpg
- *                         whoCanSee:
- *                           type: string
- *                           example: public
+ *                         viewCount:
+ *                           type: integer
+ *                           example: 5
+ *                         likesCount:
+ *                           type: integer
+ *                           example: 5
  *                         createdAt:
  *                           type: string
- *                           example: 2023-01-01T00:00:00Z
+ *                           example: 2023-01-01T00:00:00.000Z
  *       401:
  *        description: Unauthorized - user not authenticated
  *        content:
@@ -320,7 +342,10 @@ router.get(
  *                 status:
  *                   type: string
  *                   example: success
- *                 data:
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
  *                   type: object
  *                   properties:
  *                     page:
@@ -329,26 +354,39 @@ router.get(
  *                     limit:
  *                       type: integer
  *                       example: 20
- *                     length:
+ *                     total:
  *                       type: integer
  *                       example: 5
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 1
+ *                 data:
+ *                   type: object
+ *                   properties:
  *                     viewers:
  *                       type: array
  *                       items:
  *                         type: object
  *                         properties:
- *                           username:
+ *                           at:
  *                             type: string
- *                             example: Ahmed123
- *                           firstName:
- *                             type: string
- *                             example: Ahmed
- *                           lastName:
- *                             type: string
- *                             example: Salah
- *                           profilePhoto:
- *                             type: string
- *                             example: https://example.com/profile-photo.jpg
+ *                             format: date-time
+ *                             example: 2023-01-01T00:00:00.000Z
+ *                           user:
+ *                             type: object
+ *                             properties:
+ *                               username:
+ *                                 type: string
+ *                                 example: Ahmed123
+ *                               profilePhoto:
+ *                                 type: string
+ *                                 example: https://example.com/profile-photo.jpg
+ *                               firstName:
+ *                                 type: string
+ *                                 example: Ahmed
+ *                               lastName:
+ *                                 type: string
+ *                                 example: Salah
  *       404:
  *         description: Story not found
  *         content:
@@ -360,8 +398,7 @@ router.get(
   '/:storyId/viewers',
   authenticate,
   isActive,
-  validateRequest({ params: getStoryValidation }),
-  validateRequest({ query: getStoriesValidation }),
+  validateRequest({ params: getStoryValidation, query: getStoriesValidation }),
   loadBlockList,
   getViewers,
 );
@@ -451,7 +488,10 @@ router.post(
  *                 status:
  *                   type: string
  *                   example: success
- *                 data:
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
  *                   type: object
  *                   properties:
  *                     page:
@@ -460,26 +500,45 @@ router.post(
  *                     limit:
  *                       type: integer
  *                       example: 20
- *                     length:
+ *                     total:
  *                       type: integer
  *                       example: 5
- *                     likes:
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 1
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     users:
  *                       type: array
  *                       items:
  *                         type: object
  *                         properties:
- *                           username:
+ *                           _id:
  *                             type: string
- *                             example: Ahmed123
- *                           firstName:
+ *                             example: 1234567890abcdef
+ *                           user:
+ *                             type: object
+ *                             properties:
+ *                               username:
+ *                                 type: string
+ *                                 example: Ahmed123
+ *                               profilePhoto:
+ *                                 type: string
+ *                                 example: https://example.com/profile-photo.jpg
+ *                               firstName:
+ *                                 type: string
+ *                                 example: Ahmed
+ *                               lastName:
+ *                                 type: string
+ *                                 example: Salah
+ *                           type:
  *                             type: string
- *                             example: Ahmed
- *                           lastName:
+ *                             example: love
+ *                           createdAt:
  *                             type: string
- *                             example: Salah
- *                           profilePhoto:
- *                             type: string
- *                             example: https://example.com/profile-photo.jpg
+ *                             format: date-time
+ *                             example: 2023-01-01T00:00:00.000Z
  *       404:
  *         description: Story not found
  *         content:
@@ -539,8 +598,7 @@ router.patch(
   '/:storyId/like',
   authenticate,
   isActive,
-  validateRequest({ params: getStoryValidation }),
-  validateRequest({ body: reactTypeValidation }),
+  validateRequest({ params: getStoryValidation, body: reactTypeValidation }),
   isTargetStoryAvailable,
   changeStoryReact,
 );
