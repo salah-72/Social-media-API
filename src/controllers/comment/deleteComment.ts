@@ -23,8 +23,6 @@ export const deleteComment = catchAsync(
       $inc: { commentsCount: -deletedCount },
     });
 
-    res.status(204).json({
-      status: 'success',
-    });
+    res.status(204).send();
   },
 );

@@ -102,7 +102,7 @@ async function syncEntity(type: string, model: any) {
 
   if (bulkOps.length > 0) {
     await model.bulkWrite(bulkOps);
-    await redisClient.srem(syncKeys, ids);
+    await redisClient.sRem(syncKeys, ids);
     await redisClient.del(keys);
   }
 }

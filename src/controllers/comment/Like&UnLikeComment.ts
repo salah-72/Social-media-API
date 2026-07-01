@@ -4,6 +4,7 @@ import Comment from '@/models/commentModel';
 import Like from '@/models/likeModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 
 export const likeComment = catchAsync(
@@ -33,13 +34,7 @@ export const likeComment = catchAsync(
 
       await incrementLike('comment', commentId);
 
-      return res.status(201).json({
-        status: 'success',
-        data: {
-          likesCount: comment.likesCount + 1,
-          like,
-        },
-      });
+      return sendResponse(res, 201, undefined, { message: 'comment liked' });
     } catch (err: any) {
       if (err.code === 11000) {
         await Like.deleteOne({
@@ -49,9 +44,7 @@ export const likeComment = catchAsync(
 
         await decrementLike('comment', commentId);
 
-        return res.status(204).json({
-          status: 'success',
-        });
+        return res.status(204).send();
       }
       throw err;
     }

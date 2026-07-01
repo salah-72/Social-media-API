@@ -23,8 +23,6 @@ export const cancelReq = catchAsync(
 
     logger.warn(`${follower} canceled follow request ${following}`);
 
-    res.status(204).json({
-      status: 'success',
-    });
+    res.status(204).send();
   },
 );

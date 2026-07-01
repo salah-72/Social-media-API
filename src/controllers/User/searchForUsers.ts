@@ -1,29 +1,18 @@
-import Block from '@/models/blockModel';
 import User from '@/models/userModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 
 export const searchUsers = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const input = req.query.text?.toString().trim();
+    const input = req.query.query?.toString().trim();
     if (!input) return next(new appError('search query is required', 400));
 
     const content = input.split(' ');
     let search;
 
-    const blocks = await Block.find({
-      $or: [
-        { blocked: req.currentuser?._id },
-        { blocker: req.currentuser?._id },
-      ],
-    });
-
-    const BlocksIds = blocks.map((e) => {
-      if (e.blocker.toString() === req.currentuser?._id.toString())
-        return e.blocked;
-      else return e.blocker;
-    });
+    const blockIds = [...(req.blockIds ?? [])];
 
     if (content.length > 1) {
       const firstName = content[0];
@@ -93,37 +82,36 @@ export const searchUsers = catchAsync(
     const limit = Number(req.query.limit) || 15;
     const skip = (page - 1) * limit;
 
-    const users = await User.aggregate([
-      search,
-      {
-        $match: {
-          active: true,
-          emailVerified: true,
-          _id: { $nin: BlocksIds },
-        },
+    const matchStage = {
+      $match: {
+        active: true,
+        emailVerified: true,
+        _id: { $nin: blockIds },
       },
-      {
-        $project: {
-          username: 1,
-          firstName: 1,
-          lastName: 1,
-          profilePhoto: 1,
-          score: { $meta: 'searchScore' },
+    };
+
+    const [users, totalResult] = await Promise.all([
+      User.aggregate([
+        search,
+        matchStage,
+        {
+          $project: {
+            username: 1,
+            firstName: 1,
+            lastName: 1,
+            profilePhoto: 1,
+            score: { $meta: 'searchScore' },
+          },
         },
-      },
-      { $sort: { score: -1 } },
-      { $skip: skip },
-      { $limit: limit },
+        { $sort: { score: -1 } },
+        { $skip: skip },
+        { $limit: limit },
+      ]),
+      User.aggregate([search, matchStage, { $count: 'total' }]),
     ]);
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        page,
-        limit,
-        length: users.length,
-        users,
-      },
-    });
+    const total = totalResult[0]?.total ?? 0;
+
+    sendResponse(res, 200, { users }, { pagination: { page, limit, total } });
   },
 );

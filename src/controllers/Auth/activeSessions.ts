@@ -1,6 +1,7 @@
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
 import Token from '@/models/tokenModel';
+import { sendResponse } from '@/utils/sendResponse';
 
 const getActiveSessions = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -10,12 +11,8 @@ const getActiveSessions = catchAsync(
       revoked: false,
       expiresAt: { $gt: new Date() },
     }).select('-token -revoked -revokedAt -__v');
-    res.status(200).json({
-      status: 'success',
-      data: {
-        activeSessions,
-      },
-    });
+
+    sendResponse(res, 200, { activeSessions });
   },
 );
 

@@ -1,9 +1,9 @@
-import Block from '@/models/blockModel';
 import Comment from '@/models/commentModel';
 import Like from '@/models/likeModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { getUsersFromCache } from '@/utils/getUsersFromCache';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 
@@ -37,6 +37,7 @@ export const commentLikes = catchAsync(
         comment: new Types.ObjectId(commentId),
         user: { $nin: blockIds },
       })
+        .select('_id user type')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -97,14 +98,11 @@ export const commentLikes = catchAsync(
 
     // const likesCount = await Like.countDocuments({ comment: commentId });
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        page,
-        limit,
-        likesCount,
-        users,
-      },
-    });
+    sendResponse(
+      res,
+      200,
+      { users },
+      { pagination: { page, limit, total: likesCount }, results: users.length },
+    );
   },
 );

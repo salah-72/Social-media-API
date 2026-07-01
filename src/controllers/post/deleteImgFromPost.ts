@@ -30,8 +30,6 @@ export const deleteImg = catchAsync(
 
     await post.save();
 
-    res.status(204).json({
-      status: 'success',
-    });
+    res.status(204).send();
   },
 );

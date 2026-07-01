@@ -3,6 +3,7 @@ import Follow from '@/models/followModel';
 import User from '@/models/userModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 
 export const follow = catchAsync(
@@ -29,9 +30,6 @@ export const follow = catchAsync(
       logger.info(`${follower} requested to follow ${following}`);
     }
 
-    res.status(201).json({
-      status: 'success',
-      follow,
-    });
+    sendResponse(res, 201, undefined, { message: 'follow request sent' });
   },
 );

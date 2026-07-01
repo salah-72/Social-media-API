@@ -68,24 +68,30 @@ const router = Router();
  *                 data:
  *                   type: object
  *                   properties:
- *                     _id:
- *                       type: string
- *                       example: 60d0fe4f5311236168a109ca
- *                     email:
- *                       type: string
- *                       example: user@example.com
- *                     username:
- *                       type: string
- *                       example: ahmed123
- *                     firstName:
- *                       type: string
- *                       example: Ahmed
- *                     lastName:
- *                       type: string
- *                       example: Salah
- *                     emailVerified:
- *                       type: boolean
- *                       example: false
+ *                     user:
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                           example: 60d0fe4f5311236168a109ca
+ *                         email:
+ *                           type: string
+ *                           example: user@example.com
+ *                         username:
+ *                           type: string
+ *                           example: ahmed123
+ *                         firstName:
+ *                           type: string
+ *                           example: Ahmed
+ *                         lastName:
+ *                           type: string
+ *                           example: Salah
+ *                         emailVerified:
+ *                           type: boolean
+ *                           example: false
+ *                         emailVerificationToken:
+ *                          type: string
+ *                          example: 1234567890abcdef
  *       400:
  *         description: Bad request - Missing required fields
  *         content:
@@ -98,6 +104,7 @@ const router = Router();
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
+ *
  *       500:
  *         description: Internal server error
  *         content:
@@ -114,6 +121,8 @@ router.post('/signup', validateRequest({ body: registerValidation }), register);
  *     summary: Get active sessions
  *     description: Retrieve a list of active sessions for the authenticated user
  *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Active sessions retrieved successfully
@@ -132,7 +141,35 @@ router.post('/signup', validateRequest({ body: registerValidation }), register);
  *                       type: array
  *                       items:
  *                         type: object
-
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: 60d0fe4f5311236168a109ca
+ *                           sessionId:
+ *                             type: string
+ *                             example: 1234567890abcdef
+ *                           deviceIp:
+ *                             type: string
+ *                             example: 192.168.1.1
+ *                           userAgent:
+ *                             type: string
+ *                             example: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36
+ *                           expiresAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: 2023-12-31T23:59:59.000Z
+ *       401:
+ *         description: Unauthorized - User not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/sessions', authenticate, isActive, getActiveSessions);
 
@@ -143,6 +180,8 @@ router.get('/sessions', authenticate, isActive, getActiveSessions);
  *     summary: Refresh access token
  *     description: Use a valid refresh token to obtain a new access token. The refresh token can be sent in the request body or as an HTTP-only cookie.
  *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       content:
  *         application/json:
@@ -163,9 +202,15 @@ router.get('/sessions', authenticate, isActive, getActiveSessions);
  *                 status:
  *                   type: string
  *                   example: success
- *                 accessToken:
- *                   type: string
- *                   description: New JWT access token
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     tokens:
+ *                       type: object
+ *                       properties:
+ *                         accessToken:
+ *                           type: string
+ *                           description: New JWT access token
  *       400:
  *         description: Refresh token is required
  *         content:
@@ -271,30 +316,31 @@ router.get(
  *                 data:
  *                   type: object
  *                   properties:
- *                     _id:
- *                       type: string
- *                       example: 60d0fe4f5311236168a109ca
- *                     email:
- *                       type: string
- *                       example: user@example.com
- *                     username:
- *                       type: string
- *                       example: ahmed123
- *                     firstName:
- *                       type: string
- *                       example: Ahmed
- *                     lastName:
- *                       type: string
- *                       example: Salah
- *                     createdAt:
- *                       type: string
- *                       format: date-time
- *                     updatedAt:
- *                       type: string
- *                       format: date-time
- *                 accessToken:
- *                   type: string
- *                   description: JWT access token
+ *                     user:
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                           example: 60d0fe4f5311236168a109ca
+ *                         email:
+ *                           type: string
+ *                           example: user@example.com
+ *                         username:
+ *                           type: string
+ *                           example: ahmed123
+ *                         firstName:
+ *                           type: string
+ *                           example: Ahmed
+ *                         lastName:
+ *                           type: string
+ *                           example: Salah
+ *                     tokens:
+ *                       type: object
+ *                       properties:
+ *                         accessToken:
+ *                           type: string
+ *                           description: JWT access token
+ *
  *       400:
  *         description: Bad request - Missing required fields
  *         content:

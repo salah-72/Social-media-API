@@ -1,6 +1,7 @@
 import { logger } from '@/lib/winston';
 import User from '@/models/userModel';
 import catchAsync from '@/utils/catchAsync';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response } from 'express';
 
 export const activeMe = catchAsync(async (req: Request, res: Response) => {
@@ -8,7 +9,5 @@ export const activeMe = catchAsync(async (req: Request, res: Response) => {
 
   logger.info('user active his account again', { id: req.currentuser?._id });
 
-  res.status(200).json({
-    status: 'success',
-  });
+  sendResponse(res, 200, undefined, { message: 'activation done' });
 });

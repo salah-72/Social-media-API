@@ -3,6 +3,7 @@ import Follow from '@/models/followModel';
 import User from '@/models/userModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 
 export const getUserByUsername = catchAsync(
@@ -34,27 +35,25 @@ export const getUserByUsername = catchAsync(
       status: 'accepted',
     });
 
-    if (!targetUser.public && !followed) {
-      res.status(200).json({
-        status: 'success',
-        data: {
-          username: targetUser.username,
-          firstName: targetUser.firstName,
-          lastName: targetUser.lastName,
-          profilePhoto: targetUser.profilePhoto,
-          coverPhoto: targetUser.coverPhoto,
-          followersCount: targetUser.followers,
-          followingCount: targetUser.following,
+    if (!req.targetUser?.public && !followed) {
+      sendResponse(res, 200, {
+        userInfo: {
+          _id: targetUser?._id,
+          username: targetUser?.username,
+          firstName: targetUser?.firstName,
+          lastName: targetUser?.lastName,
+          profilePhoto: targetUser?.profilePhoto,
+          coverPhoto: targetUser?.coverPhoto,
+          followers: targetUser?.followers,
+          following: targetUser?.following,
+          public: targetUser?.public,
         },
       });
       return;
     }
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        userInfo: targetUser,
-      },
+    sendResponse(res, 200, {
+      userInfo: targetUser,
     });
   },
 );

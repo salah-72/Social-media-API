@@ -1,6 +1,7 @@
 import Like from '@/models/likeModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 
 export const changeReact = catchAsync(
@@ -17,11 +18,6 @@ export const changeReact = catchAsync(
     like.type = type;
     await like.save();
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        like,
-      },
-    });
+    sendResponse(res, 200, undefined, { message: 'react changed' });
   },
 );

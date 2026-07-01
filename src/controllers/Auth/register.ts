@@ -8,6 +8,7 @@ import appError from '@/utils/appError';
 import crypto from 'crypto';
 import { transporter } from '@/utils/nodemailer';
 import config from '@/config/config';
+import { sendResponse } from '@/utils/sendResponse';
 
 type userData = Pick<
   IUser,
@@ -42,15 +43,15 @@ export const register = catchAsync(
     if (!newUser)
       return next(new appError('something went wrong while signning up', 400));
 
-    res.status(201).json({
-      status: 'success',
-      data: {
+    sendResponse(res, 201, {
+      user: {
         _id: newUser._id,
         email: newUser.email,
         username: newUser.username,
         firstName: newUser.firstName,
         lastName: newUser.lastName,
         emailVerified: newUser.emailVerified,
+        emailVerificationToken: newUser.emailVerificationToken,
       },
     });
 

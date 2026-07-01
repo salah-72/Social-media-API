@@ -1,5 +1,6 @@
 import { logger } from '@/lib/winston';
 import Block from '@/models/blockModel';
+import { sendResponse } from '@/utils/sendResponse';
 import Follow from '@/models/followModel';
 import User from '@/models/userModel';
 import appError from '@/utils/appError';
@@ -58,12 +59,11 @@ export const block = catchAsync(
     });
     if (followedReq) await Follow.deleteOne({ _id: followedReq._id });
 
-    const block = await Block.create({ blocker, blocked });
+    await Block.create({ blocker, blocked });
     logger.info(`${blocker} blocked ${blocked}`);
 
-    res.status(201).json({
-      status: 'success',
-      block,
+    sendResponse(res, 201, undefined, {
+      message: 'user blocked successfully',
     });
   },
 );

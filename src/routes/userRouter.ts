@@ -192,7 +192,10 @@ router.get('/myProfile', authenticate, isActive, getMe);
  *                 status:
  *                   type: string
  *                   example: success
- *                 data:
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
  *                   type: object
  *                   properties:
  *                     page:
@@ -201,20 +204,32 @@ router.get('/myProfile', authenticate, isActive, getMe);
  *                     limit:
  *                       type: integer
  *                       example: 20
- *                     length:
+ *                     total:
  *                       type: integer
- *                       example: 100
- *                     followers:
+ *                       example: 5
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 1
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     followersData:
  *                       type: array
  *                       items:
  *                         type: object
  *                         properties:
- *                           follower:
+ *                           user:
  *                             type: object
  *                             properties:
  *                               username:
  *                                 type: string
  *                                 example: ahmed123
+ *                               firstName:
+ *                                 type: string
+ *                                 example: Ahmed
+ *                               lastName:
+ *                                 type: string
+ *                                 example: Salah
  *                               profilePhoto:
  *                                 type: string
  *                                 example: https://example.com/profile.jpg
@@ -264,7 +279,10 @@ router.get(
  *                 status:
  *                   type: string
  *                   example: success
- *                 data:
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
  *                   type: object
  *                   properties:
  *                     page:
@@ -273,20 +291,32 @@ router.get(
  *                     limit:
  *                       type: integer
  *                       example: 20
- *                     length:
+ *                     total:
  *                       type: integer
- *                       example: 100
- *                     followings:
+ *                       example: 5
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 1
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     followingsData:
  *                       type: array
  *                       items:
  *                         type: object
  *                         properties:
- *                           following:
+ *                           user:
  *                             type: object
  *                             properties:
  *                               username:
  *                                 type: string
  *                                 example: ahmed123
+ *                               firstName:
+ *                                 type: string
+ *                                 example: Ahmed
+ *                               lastName:
+ *                                 type: string
+ *                                 example: Salah
  *                               profilePhoto:
  *                                 type: string
  *                                 example: https://example.com/profile.jpg
@@ -317,10 +347,12 @@ router.get(
  *     responses:
  *      204:
  *       description: Account deactivated successfully
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Success'
+ *      401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *
  */
 router.patch('/deleteMe', authenticate, isActive, deleteMe);
@@ -356,13 +388,13 @@ router.patch('/activeMe', authenticate, activeMe);
  *    requestBody:
  *      required: true
  *      content:
- *        multipart/form-data:
+ *        application/json:
  *          schema:
  *            type: object
  *            properties:
  *              coverPhoto:
  *                type: string
- *                format: binary
+ *                example:  https://example.com/profile.jpg
  *    responses:
  *      200:
  *        description: Cover photo uploaded/updated successfully
@@ -415,7 +447,7 @@ router.patch(
  *            properties:
  *              profilePhoto:
  *                type: string
- *                format: binary
+ *                example: https://example.com/profile.jpg
  *    responses:
  *      200:
  *        description: Profile photo uploaded/updated successfully
@@ -546,7 +578,10 @@ router.patch(
  *                 status:
  *                   type: string
  *                   example: success
- *                 data:
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
  *                   type: object
  *                   properties:
  *                     page:
@@ -554,7 +589,16 @@ router.patch(
  *                       example: 1
  *                     limit:
  *                       type: integer
- *                       example: 10
+ *                       example: 20
+ *                     total:
+ *                       type: integer
+ *                       example: 5
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 1
+ *                 data:
+ *                   type: object
+ *                   properties:
  *                     users:
  *                       type: array
  *                       items:
@@ -874,7 +918,7 @@ router.get(
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Follow'
+ *               $ref: '#/components/schemas/Success'
  *       400:
  *         description: Bad request (e.g., trying to follow yourself or already following the user).
  *         content:
@@ -921,10 +965,6 @@ router.post(
  *    responses:
  *      204:
  *        description: Successfully unfollowed the user.
- *        content:
- *          application/json:
- *            schema:
- *              $ref: '#/components/schemas/Follow'
  *      400:
  *        description: Bad request (e.g., trying to unfollow yourself or not following the user).
  *        content:
@@ -973,7 +1013,7 @@ router.delete(
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Follow'
+ *               $ref: '#/components/schemas/Success'
  *       400:
  *         description: Bad request (e.g., not receiving a follow request from the user).
  *         content:
@@ -1116,7 +1156,10 @@ router.delete(
  *                 status:
  *                   type: string
  *                   example: success
- *                 data:
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
  *                   type: object
  *                   properties:
  *                     page:
@@ -1125,20 +1168,32 @@ router.delete(
  *                     limit:
  *                       type: integer
  *                       example: 20
- *                     length:
+ *                     total:
  *                       type: integer
- *                       example: 100
- *                     followers:
+ *                       example: 5
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 1
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     followersData:
  *                       type: array
  *                       items:
  *                         type: object
  *                         properties:
- *                           follower:
+ *                           user:
  *                             type: object
  *                             properties:
  *                               username:
  *                                 type: string
  *                                 example: ahmed123
+ *                               firstName:
+ *                                 type: string
+ *                                 example: Ahmed
+ *                               lastName:
+ *                                 type: string
+ *                                 example: Salah
  *                               profilePhoto:
  *                                 type: string
  *                                 example: https://example.com/profile.jpg
@@ -1209,7 +1264,10 @@ router.get(
  *                 status:
  *                   type: string
  *                   example: success
- *                 data:
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
  *                   type: object
  *                   properties:
  *                     page:
@@ -1218,20 +1276,32 @@ router.get(
  *                     limit:
  *                       type: integer
  *                       example: 20
- *                     length:
+ *                     total:
  *                       type: integer
- *                       example: 100
- *                     followings:
+ *                       example: 5
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 1
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     followingsData:
  *                       type: array
  *                       items:
  *                         type: object
  *                         properties:
- *                           following:
+ *                           user:
  *                             type: object
  *                             properties:
  *                               username:
  *                                 type: string
  *                                 example: ahmed123
+ *                               firstName:
+ *                                 type: string
+ *                                 example: Ahmed
+ *                               lastName:
+ *                                 type: string
+ *                                 example: Salah
  *                               profilePhoto:
  *                                 type: string
  *                                 example: https://example.com/profile.jpg
@@ -1302,6 +1372,24 @@ router.get(
  *                 status:
  *                   type: string
  *                   example: success
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 20
+ *                     total:
+ *                       type: integer
+ *                       example: 5
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 1
  *                 data:
  *                   type: object
  *                   properties:
@@ -1310,12 +1398,18 @@ router.get(
  *                       items:
  *                         type: object
  *                         properties:
- *                           follower:
+ *                           user:
  *                             type: object
  *                             properties:
  *                               username:
  *                                 type: string
  *                                 example: ahmed123
+ *                               firstName:
+ *                                 type: string
+ *                                 example: Ahmed
+ *                               lastName:
+ *                                 type: string
+ *                                 example: Salah
  *                               profilePhoto:
  *                                 type: string
  *                                 example: https://example.com/profile.jpg
@@ -1379,6 +1473,24 @@ router.get(
  *                 status:
  *                   type: string
  *                   example: success
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 20
+ *                     total:
+ *                       type: integer
+ *                       example: 5
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 1
  *                 data:
  *                   type: object
  *                   properties:
@@ -1387,12 +1499,18 @@ router.get(
  *                       items:
  *                         type: object
  *                         properties:
- *                           following:
+ *                           user:
  *                             type: object
  *                             properties:
  *                               username:
  *                                 type: string
  *                                 example: ahmed123
+ *                               firstName:
+ *                                 type: string
+ *                                 example: Ahmed
+ *                               lastName:
+ *                                 type: string
+ *                                 example: Salah
  *                               profilePhoto:
  *                                 type: string
  *                                 example: https://example.com/profile.jpg
@@ -1452,6 +1570,24 @@ router.get(
  *                 status:
  *                   type: string
  *                   example: success
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 20
+ *                     total:
+ *                       type: integer
+ *                       example: 5
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 1
  *                 data:
  *                   type: object
  *                   properties:
@@ -1466,6 +1602,12 @@ router.get(
  *                               username:
  *                                 type: string
  *                                 example: ahmed123
+ *                               firstName:
+ *                                 type: string
+ *                                 example: Ahmed
+ *                               lastName:
+ *                                 type: string
+ *                                 example: Salah
  *                               profilePhoto:
  *                                 type: string
  *                                 example: https://example.com/profile.jpg
@@ -1501,12 +1643,12 @@ router.get(
  *           type: string
  *           example: 1234567890abcdef12345678
  *     responses:
- *       200:
+ *       201:
  *         description: User blocked successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/success'
+ *               $ref: '#/components/schemas/Success'
  *       400:
  *         description: Bad request (e.g., trying to block yourself or already blocking the user).
  *         content:
@@ -1556,7 +1698,7 @@ router.post(
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/success'
+ *               $ref: '#/components/schemas/Success'
  *       400:
  *         description: Bad request (e.g., trying to unblock yourself or not blocking the user).
  *         content:
@@ -1618,7 +1760,10 @@ router.delete(
  *                 status:
  *                   type: string
  *                   example: success
- *                 data:
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
  *                   type: object
  *                   properties:
  *                     page:
@@ -1627,17 +1772,32 @@ router.delete(
  *                     limit:
  *                       type: integer
  *                       example: 20
- *                     length:
+ *                     total:
  *                       type: integer
  *                       example: 5
- *                     blockedUsers:
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 1
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     blockList:
  *                       type: array
  *                       items:
  *                         type: object
  *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: 507f1f77bcf86cd799439011
  *                           username:
  *                             type: string
  *                             example: salah123
+ *                           firstName:
+ *                             type: string
+ *                             example: Salah
+ *                           lastName:
+ *                             type: string
+ *                             example: El-Sayed
  *                           profilePhoto:
  *                             type: string
  *                             example: https://example.com/profile.jpg

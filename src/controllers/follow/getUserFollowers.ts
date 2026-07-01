@@ -1,10 +1,7 @@
-import { logger } from '@/lib/winston';
-import Block from '@/models/blockModel';
 import Follow from '@/models/followModel';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response } from 'express';
-import redisClient from '@/utils/redis';
-import User from '@/models/userModel';
+import { sendResponse } from '@/utils/sendResponse';
 import { getUsersFromCache } from '@/utils/getUsersFromCache';
 
 export const getUserFollowers = catchAsync(
@@ -15,14 +12,22 @@ export const getUserFollowers = catchAsync(
     const limit = Number(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
-    const followers = await Follow.find({
-      following: req.targetUser?._id,
-      status: 'accepted',
-    })
-      .select('follower -_id')
-      .skip(skip)
-      .limit(limit)
-      .lean();
+    const [followers, total] = await Promise.all([
+      Follow.find({
+        following: req.targetUser?._id,
+        status: 'accepted',
+      })
+        .select('follower -_id')
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+
+      Follow.countDocuments({
+        following: req.targetUser?._id,
+        follower: { $nin: Array.from(blockIds) },
+        status: 'accepted',
+      }),
+    ]);
 
     const filtered = followers.filter(
       (e) => !blockIds.has(e.follower.toString()),
@@ -37,14 +42,11 @@ export const getUserFollowers = catchAsync(
       })
       .filter(Boolean);
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        page,
-        limit,
-        length: followers.length,
-        followersData,
-      },
-    });
+    sendResponse(
+      res,
+      200,
+      { followersData },
+      { pagination: { page, limit, total }, results: followersData.length },
+    );
   },
 );

@@ -8,7 +8,5 @@ export const deleteMe = catchAsync(async (req: Request, res: Response) => {
 
   logger.info('user disactive his account', { id: req.currentuser?._id });
 
-  res.status(204).json({
-    status: 'success',
-  });
+  res.status(204).send();
 });

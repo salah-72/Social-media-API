@@ -8,6 +8,7 @@ import redisClient from '@/utils/redis';
 import { logger } from '@/lib/winston';
 import User from '@/models/userModel';
 import { getUsersFromCache } from '@/utils/getUsersFromCache';
+import { sendResponse } from '@/utils/sendResponse';
 
 export const getViewers = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -26,15 +27,19 @@ export const getViewers = catchAsync(
 
     const blockIds = req.blockIds || new Set();
 
-    const views = await View.find({ story: storyId })
-      .sort({ at: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
+    const [views, total] = await Promise.all([
+      View.find({ story: storyId })
+        .sort({ at: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+
+      View.countDocuments({ story: storyId }),
+    ]);
 
     const filtered = views.filter((e) => !blockIds.has(e.user.toString()));
     const userIds = filtered.map((e) => e.user.toString());
-    const usersData = await getUsersFromCache(userIds)
+    const usersData = await getUsersFromCache(userIds);
 
     const viewers = filtered
       .map((v, idx) => {
@@ -46,15 +51,11 @@ export const getViewers = catchAsync(
       })
       .filter(Boolean);
 
-    const viewsCount = await View.countDocuments({ story: storyId });
-    res.status(200).json({
-      status: 'success',
-      data: {
-        page,
-        limit,
-        viewsCount,
-        viewers,
-      },
-    });
+    sendResponse(
+      res,
+      200,
+      { viewers },
+      { pagination: { page, limit, total }, results: viewers.length },
+    );
   },
 );

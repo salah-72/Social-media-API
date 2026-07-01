@@ -6,6 +6,7 @@ import {
 import Token from '@/models/tokenModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { sendResponse } from '@/utils/sendResponse';
 import { Response, Request, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
@@ -52,10 +53,7 @@ const refreshToken = catchAsync(
       maxAge: 20 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({
-      status: 'success',
-      accessToken,
-    });
+    sendResponse(res, 200, { tokens: { accessToken } });
   },
 );
 

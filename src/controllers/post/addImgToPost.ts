@@ -2,6 +2,7 @@ import Post from '@/models/postModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { uploadToCloudinary } from '@/utils/cloudinaryUpload';
+import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 
 export const addImg = catchAsync(
@@ -27,9 +28,6 @@ export const addImg = catchAsync(
 
     await post.save();
 
-    res.status(200).json({
-      status: 'success',
-      post,
-    });
+    sendResponse(res, 200, undefined, { message: 'image added' });
   },
 );

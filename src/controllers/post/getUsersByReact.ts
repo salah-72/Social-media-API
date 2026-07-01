@@ -1,13 +1,9 @@
-import Block from '@/models/blockModel';
 import Like from '@/models/likeModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
-import { Types } from 'mongoose';
-import redisClient from '@/utils/redis';
-import { logger } from '@/lib/winston';
-import User from '@/models/userModel';
 import { getUsersFromCache } from '@/utils/getUsersFromCache';
+import { sendResponse } from '@/utils/sendResponse';
 
 export const reaction = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -31,11 +27,15 @@ export const reaction = catchAsync(
 
     const blockIds = req.blockIds;
 
-    const likes = await Like.find({ post: postId, type })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
+    const [likes, total] = await Promise.all([
+      Like.find({ post: postId, type })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+
+      Like.countDocuments({ post: postId, type }),
+    ]);
 
     const filtered = likes.filter(
       (like) => !blockIds?.has(like.user.toString()),
@@ -55,16 +55,11 @@ export const reaction = catchAsync(
       })
       .filter(Boolean);
 
-    const length = await Like.countDocuments({ post: postId, type });
-
-    res.status(200).json({
-      status: 'success',
-      data: {
-        page,
-        limit,
-        length,
-        users,
-      },
-    });
+    sendResponse(
+      res,
+      200,
+      { users },
+      { pagination: { page, limit, total }, results: users.length },
+    );
   },
 );

@@ -4,8 +4,8 @@ import Post from '@/models/postModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { mergeLikesCount } from '@/functions/mergeLikesCount';
-import redisClient from '@/utils/redis';
 import { Request, Response, NextFunction } from 'express';
+import { sendResponse } from '@/utils/sendResponse';
 
 export const getPost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -49,11 +49,6 @@ export const getPost = catchAsync(
 
     const [result] = await mergeLikesCount([post], 'post');
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        post: result,
-      },
-    });
+    sendResponse(res, 200, { post: result });
   },
 );

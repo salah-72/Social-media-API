@@ -4,6 +4,7 @@ import User from '@/models/userModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { getUsersFromCache } from '@/utils/getUsersFromCache';
+import { sendResponse } from '@/utils/sendResponse';
 import redisClient from '@/utils/redis';
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
@@ -71,15 +72,24 @@ export const commentReplies = catchAsync(
       })
       .filter(Boolean);
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        page,
-        limit,
-        comment,
-        repliesLength: result.length,
-        replies: result,
-      },
+    const total = await Comment.countDocuments({
+      post: new Types.ObjectId(postId),
+      user: { $nin: blocksIds },
+      parentComment: new Types.ObjectId(commentId),
     });
+
+    const [userData] = await getUsersFromCache([comment.user.toString()]);
+
+    const commentData = {
+      ...comment,
+      user: userData,
+    };
+
+    sendResponse(
+      res,
+      200,
+      { comment: commentData, replies: result },
+      { pagination: { page, limit, total }, results: result.length },
+    );
   },
 );

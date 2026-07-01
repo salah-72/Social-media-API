@@ -1,11 +1,8 @@
 import Like from '@/models/likeModel';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response } from 'express';
-import { Types } from 'mongoose';
-import redisClient from '@/utils/redis';
-import { logger } from '@/lib/winston';
-import User from '@/models/userModel';
 import { getUsersFromCache } from '@/utils/getUsersFromCache';
+import { sendResponse } from '@/utils/sendResponse';
 
 export const postLikes = catchAsync(async (req: Request, res: Response) => {
   const { postId } = req.params;
@@ -16,11 +13,15 @@ export const postLikes = catchAsync(async (req: Request, res: Response) => {
 
   const blockIds = req.blockIds;
 
-  const likes = await Like.find({ post: postId })
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit)
-    .lean();
+  const [likes, total] = await Promise.all([
+    Like.find({ post: postId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+
+    Like.countDocuments({ post: postId }),
+  ]);
 
   const filtered = likes.filter((like) => !blockIds?.has(like.user.toString()));
   const userIds = filtered.map((like) => like.user.toString());
@@ -38,15 +39,10 @@ export const postLikes = catchAsync(async (req: Request, res: Response) => {
     })
     .filter(Boolean);
 
-  const length = await Like.countDocuments({ post: postId });
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      page,
-      limit,
-      length,
-      users,
-    },
-  });
+  sendResponse(
+    res,
+    200,
+    { users },
+    { pagination: { page, limit, total }, results: users.length },
+  );
 });
