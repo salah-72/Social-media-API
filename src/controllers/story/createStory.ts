@@ -32,6 +32,6 @@ export const createStory = catchAsync(
       whoCanSee,
     });
 
-    sendResponse(res, 201, undefined, { message: 'story created' });
+    sendResponse(res, 201, { story });
   },
 );
