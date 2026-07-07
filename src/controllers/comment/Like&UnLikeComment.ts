@@ -16,17 +16,12 @@ export const likeComment = catchAsync(
     if (!comment || comment?.post.toString() !== postId.toString())
       return next(new appError('comment not exist', 404));
 
-    const block = await Block.exists({
-      $or: [
-        { blocker: req.currentuser?._id, blocked: comment.user },
-        { blocked: req.currentuser?._id, blocker: comment.user },
-      ],
-    });
-
-    if (block) return next(new appError('comment not exist', 404));
+    const blockIds = [...(req.blockIds ?? [])];
+    if (blockIds.some((id) => id.toString() === comment.user.toString()))
+      return next(new appError('comment not exist', 404));
 
     try {
-      const like = await Like.create({
+      await Like.create({
         user: req.currentuser?._id,
         comment: commentId,
         type,
