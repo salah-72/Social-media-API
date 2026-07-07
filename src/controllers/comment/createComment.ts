@@ -17,5 +17,5 @@ export const createComment = catchAsync(async (req: Request, res: Response) => {
 
   await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
 
-  sendResponse(res, 201, undefined, { message: 'comment created' });
+  sendResponse(res, 201, { comment });
 });

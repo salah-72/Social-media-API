@@ -46,6 +46,6 @@ export const createPost = catchAsync(
 
     logger.info(`user: ${author} create post`);
 
-    sendResponse(res, 201, undefined, { message: 'Post created' });
+    sendResponse(res, 201, { post });
   },
 );

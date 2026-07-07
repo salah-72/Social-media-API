@@ -21,6 +21,6 @@ export const updateComment = catchAsync(
 
     if (!comment) return next(new appError('comment not found', 404));
 
-    sendResponse(res, 200, undefined, { message: 'comment updated' });
+    sendResponse(res, 200, { comment });
   },
 );

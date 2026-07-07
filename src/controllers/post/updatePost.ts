@@ -36,6 +36,6 @@ export const updatePost = catchAsync(
 
     logger.info(`user: ${req.currentuser?._id} update post ${id}`);
 
-    sendResponse(res, 200, undefined, { message: 'post updated' });
+    sendResponse(res, 200, { post });
   },
 );
