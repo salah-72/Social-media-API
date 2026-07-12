@@ -20,6 +20,7 @@ const config = {
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
   CLOUDINARY_API_NAME: process.env.CLOUDINARY_API_NAME,
   BASE_URL: process.env.BASE_URL,
+  REDIS_URL: process.env.REDIS_URL,
 };
 
 export default config;
