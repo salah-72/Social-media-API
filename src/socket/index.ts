@@ -9,8 +9,6 @@ import { logger } from '@/lib/winston';
 let io: Server;
 
 export const initSocket = async (httpServer: HttpServer) => {
-  await Promise.all([redisClient.connect(), subClient.connect()]);
-
   io = new Server(httpServer, {
     cors: {
       origin: '*',
@@ -30,7 +28,6 @@ export const initSocket = async (httpServer: HttpServer) => {
         _id: string;
       };
       socket.data.userId = payload._id.toString();
-
       next();
     } catch {
       next(new Error('invalid token'));
@@ -39,14 +36,13 @@ export const initSocket = async (httpServer: HttpServer) => {
 
   io.on('connection', async (socket) => {
     const userId = socket.data.userId;
-
     logger.info(`User ${userId} connected on socket: ${socket.id}`);
 
     socket.join(`user:${userId}`);
 
     try {
       await redisClient.sAdd(`user:sockets:${userId}`, socket.id);
-    } catch (err) {
+    } catch {
       logger.warn(`Failed to track socket for user ${userId}`);
     }
 
@@ -56,7 +52,6 @@ export const initSocket = async (httpServer: HttpServer) => {
 
     socket.on('disconnect', async () => {
       logger.info(`User ${userId} disconnected from socket: ${socket.id}`);
-
       try {
         await redisClient.sRem(`user:sockets:${userId}`, socket.id);
       } catch {
