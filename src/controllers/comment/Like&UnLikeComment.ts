@@ -2,6 +2,7 @@ import { incrementLike, decrementLike } from '@/functions/likeCounter';
 import Comment from '@/models/commentModel';
 import Like from '@/models/likeModel';
 import Notification from '@/models/notificationModel';
+import { removeRealtimeNotification } from '@/socket';
 import appError from '@/utils/appError';
 import redisClient from '@/utils/redis';
 import catchAsync from '@/utils/catchAsync';
@@ -49,12 +50,20 @@ export const likeComment = catchAsync(
           type: 'comment_like',
         });
 
-        if (notification && !notification.isRead) {
-          const currentCount = await redisClient.get(
-            `user:unread_notifications:${comment.user}`,
+        if (notification) {
+          await removeRealtimeNotification(
+            comment.user.toString(),
+            notification._id.toString(),
           );
-          if (currentCount && parseInt(currentCount) > 0) {
-            await redisClient.decr(`user:unread_notifications:${comment.user}`);
+          if (!notification.isRead) {
+            const currentCount = await redisClient.get(
+              `user:unread_notifications:${comment.user}`,
+            );
+            if (currentCount && parseInt(currentCount) > 0) {
+              await redisClient.decr(
+                `user:unread_notifications:${comment.user}`,
+              );
+            }
           }
         }
 

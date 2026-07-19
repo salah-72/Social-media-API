@@ -85,3 +85,10 @@ export const sendRealtimeNotification = async (
     logger.error(`Failed to send notification to user ${recipientId}:`, err);
   }
 };
+
+export const removeRealtimeNotification = async (
+  recipientId: string,
+  notificationId: string,
+) => {
+  io.to(`user:${recipientId}`).emit('delete_notification', { notificationId });
+};

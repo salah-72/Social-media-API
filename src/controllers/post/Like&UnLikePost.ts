@@ -4,6 +4,7 @@ import Post from '@/models/postModel';
 import catchAsync from '@/utils/catchAsync';
 import Notification from '@/models/notificationModel';
 import { sendNotification } from '@/utils/sendNotification';
+import { removeRealtimeNotification } from '@/socket';
 import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 import appError from '@/utils/appError';
@@ -46,12 +47,20 @@ export const likePost = catchAsync(
           post: postId,
         });
 
-        if (notification && !notification.isRead) {
-          const currentCount = await redisClient.get(
-            `user:unread_notifications:${post.author}`,
+        if (notification) {
+          await removeRealtimeNotification(
+            post.author.toString(),
+            notification._id.toString(),
           );
-          if (currentCount && parseInt(currentCount) > 0) {
-            await redisClient.decr(`user:unread_notifications:${post.author}`);
+          if (!notification.isRead) {
+            const currentCount = await redisClient.get(
+              `user:unread_notifications:${post.author}`,
+            );
+            if (currentCount && parseInt(currentCount) > 0) {
+              await redisClient.decr(
+                `user:unread_notifications:${post.author}`,
+              );
+            }
           }
         }
 
