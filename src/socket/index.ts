@@ -21,7 +21,8 @@ export const initSocket = async (httpServer: HttpServer) => {
 
   io.use(async (socket, next) => {
     try {
-      const token = socket.handshake.auth.token;
+      const token =
+        socket.handshake.auth.token || socket.handshake.headers.token;
       if (!token) return next(new Error('no token provided'));
 
       const payload = jwt.verify(token, config.JWT_ACCESS_KEY) as {
