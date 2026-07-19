@@ -16,9 +16,6 @@ export const likePost = catchAsync(
     const type = req.body?.type || 'like';
 
     const post = await Post.findById(postId).select('author').lean();
-    if (!post) {
-      return next(new appError('Post not found', 404));
-    }
 
     try {
       await Like.create({
@@ -49,16 +46,16 @@ export const likePost = catchAsync(
 
         if (notification) {
           await removeRealtimeNotification(
-            post.author.toString(),
+            post!.author.toString(),
             notification._id.toString(),
           );
           if (!notification.isRead) {
             const currentCount = await redisClient.get(
-              `user:unread_notifications:${post.author}`,
+              `user:unread_notifications:${post!.author}`,
             );
             if (currentCount && parseInt(currentCount) > 0) {
               await redisClient.decr(
-                `user:unread_notifications:${post.author}`,
+                `user:unread_notifications:${post!.author}`,
               );
             }
           }

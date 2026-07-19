@@ -90,5 +90,5 @@ export const removeRealtimeNotification = async (
   recipientId: string,
   notificationId: string,
 ) => {
-  io.to(`user:${recipientId}`).emit('delete_notification', { notificationId });
+  io.to(`user:${recipientId}`).emit('remove_notification', { notificationId });
 };
