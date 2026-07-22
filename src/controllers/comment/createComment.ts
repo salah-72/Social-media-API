@@ -9,14 +9,13 @@ export const createComment = catchAsync(async (req: Request, res: Response) => {
   const { postId } = req.params;
   const { content } = req.body;
 
-  const comment = await Comment.create({
-    user: req.currentuser?._id,
-    post: postId,
-    parentComment: null,
-    content,
-  });
-
-  await Promise.all([
+  const [comment] = await Promise.all([
+    Comment.create({
+      user: req.currentuser?._id,
+      post: postId,
+      parentComment: null,
+      content,
+    }),
     sendNotification({
       recipient: req.post!.author,
       sender: req.currentuser!._id,
