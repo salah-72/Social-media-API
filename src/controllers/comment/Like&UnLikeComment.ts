@@ -1,14 +1,12 @@
 import { incrementLike, decrementLike } from '@/functions/likeCounter';
 import Comment from '@/models/commentModel';
 import Like from '@/models/likeModel';
-import Notification from '@/models/notificationModel';
-import { removeRealtimeNotification } from '@/socket';
 import appError from '@/utils/appError';
-import redisClient from '@/utils/redis';
 import catchAsync from '@/utils/catchAsync';
 import { sendNotification } from '@/utils/sendNotification';
 import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
+import { deleteNotification } from '@/utils/deleteNotification';
 
 export const likeComment = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -43,29 +41,12 @@ export const likeComment = catchAsync(
       return sendResponse(res, 201, undefined, { message: 'comment liked' });
     } catch (err: any) {
       if (err.code === 11000) {
-        const notification = await Notification.findOneAndDelete({
+        await deleteNotification({
           recipient: comment.user,
           sender: req.currentuser!._id,
           comment: commentId,
           type: 'comment_like',
         });
-
-        if (notification) {
-          await removeRealtimeNotification(
-            comment.user.toString(),
-            notification._id.toString(),
-          );
-          if (!notification.isRead) {
-            const currentCount = await redisClient.get(
-              `user:unread_notifications:${comment.user}`,
-            );
-            if (currentCount && parseInt(currentCount) > 0) {
-              await redisClient.decr(
-                `user:unread_notifications:${comment.user}`,
-              );
-            }
-          }
-        }
 
         await Promise.all([
           Like.deleteOne({
