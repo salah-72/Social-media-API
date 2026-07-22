@@ -23,8 +23,8 @@ export const follow = catchAsync(
     if (followingUser!.public) {
       await Promise.all([
         Follow.create({ follower, following, status: 'accepted' }),
-        User.findByIdAndUpdate(follower, { $inc: { following: 1 } }),
-        User.findByIdAndUpdate(following, { $inc: { followers: 1 } }),
+        User.updateOne({ _id: follower }, { $inc: { following: 1 } }),
+        User.updateOne({ _id: following }, { $inc: { followers: 1 } }),
         sendNotification({
           recipient: following,
           sender: follower,
