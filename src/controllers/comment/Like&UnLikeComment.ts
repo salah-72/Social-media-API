@@ -22,13 +22,12 @@ export const likeComment = catchAsync(
       return next(new appError('comment not exist', 404));
 
     try {
-      await Like.create({
-        user: req.currentuser?._id,
-        comment: commentId,
-        type,
-      });
-
       await Promise.all([
+        Like.create({
+          user: req.currentuser?._id,
+          comment: commentId,
+          type,
+        }),
         incrementLike('comment', commentId),
         sendNotification({
           recipient: comment.user,
@@ -41,14 +40,13 @@ export const likeComment = catchAsync(
       return sendResponse(res, 201, undefined, { message: 'comment liked' });
     } catch (err: any) {
       if (err.code === 11000) {
-        await deleteNotification({
-          recipient: comment.user,
-          sender: req.currentuser!._id,
-          comment: commentId,
-          type: 'comment_like',
-        });
-
         await Promise.all([
+          deleteNotification({
+            recipient: comment.user,
+            sender: req.currentuser!._id,
+            comment: commentId,
+            type: 'comment_like',
+          }),
           Like.deleteOne({
             user: req.currentuser?._id,
             comment: commentId,

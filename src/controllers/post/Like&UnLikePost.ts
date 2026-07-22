@@ -15,13 +15,12 @@ export const likePost = catchAsync(
     const post = await Post.findById(postId).select('author').lean();
 
     try {
-      await Like.create({
-        user: req.currentuser!._id,
-        post: postId,
-        type,
-      });
-
       await Promise.all([
+        Like.create({
+          user: req.currentuser!._id,
+          post: postId,
+          type,
+        }),
         incrementLike('post', postId),
         sendNotification({
           recipient: post!.author,
@@ -34,14 +33,13 @@ export const likePost = catchAsync(
       return sendResponse(res, 201, undefined, { message: 'post liked' });
     } catch (err: any) {
       if (err.code === 11000) {
-        await deleteNotification({
-          recipient: post!.author,
-          sender: req.currentuser!._id,
-          type: 'like',
-          post: postId,
-        });
-
         await Promise.all([
+          deleteNotification({
+            recipient: post!.author,
+            sender: req.currentuser!._id,
+            type: 'like',
+            post: postId,
+          }),
           Like.deleteOne({ user: req.currentuser!._id, post: postId }),
           decrementLike('post', postId),
         ]);
