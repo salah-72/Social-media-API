@@ -45,6 +45,7 @@ export const isTargetPostAvailable = catchAsync(
         return next(new appError('post not exist', 404));
     }
 
+    req.post = post;
     next();
   },
 );
