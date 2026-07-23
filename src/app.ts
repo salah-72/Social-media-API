@@ -14,6 +14,7 @@ import authRouter from '@/routes/authRouter';
 import userRouter from '@/routes/userRouter';
 import postRouter from '@/routes/postRouter';
 import storyRouter from '@/routes/storyRouter';
+import notificationRouter from '@/routes/notificationRouter';
 import errorHandler from './middlewares/errorHandler';
 import passport from 'passport';
 import './jobs/node_cron';
@@ -87,6 +88,7 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/post', postRouter);
 app.use('/api/v1/story', storyRouter);
+app.use('/api/v1/notification', notificationRouter);
 
 app.use(errorHandler);
 
