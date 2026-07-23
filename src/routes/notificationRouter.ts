@@ -1,5 +1,6 @@
 import { getNotifications } from '@/controllers/notification/getNotifications ';
 import { markAllAsRead } from '@/controllers/notification/markAllAsRead';
+import { markOneAsRead } from '@/controllers/notification/markOneAsRead';
 import { authenticate } from '@/middlewares/authenticate';
 import { isActive } from '@/middlewares/isActive';
 import { validateRequest } from '@/middlewares/validation';
@@ -17,5 +18,7 @@ router.get(
 );
 
 router.patch('/', authenticate, isActive, markAllAsRead);
+
+router.patch('/:id', authenticate, isActive, markOneAsRead);
 
 export default router;
