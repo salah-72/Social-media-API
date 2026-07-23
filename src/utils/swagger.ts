@@ -91,6 +91,10 @@ export const swaggerDefinition: SwaggerDefinition = {
       name: 'Blocks',
       description: 'Block and unblock endpoints',
     },
+    {
+      name: 'Notifications',
+      description: 'Notification management and real-time updates',
+    },
   ],
 };
 

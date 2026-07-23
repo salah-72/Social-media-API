@@ -2,6 +2,7 @@ import { logger } from '@/lib/winston';
 import Follow from '@/models/followModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { deleteNotification } from '@/utils/deleteNotification';
 import { Request, Response, NextFunction } from 'express';
 
 export const reject = catchAsync(
@@ -16,7 +17,15 @@ export const reject = catchAsync(
     });
     if (!exist) return next(new appError('request not found', 404));
 
-    await Follow.findOneAndDelete({ follower, following });
+    await Promise.all([
+      Follow.deleteOne({ follower, following }),
+
+      deleteNotification({
+        recipient: following!,
+        sender: follower!,
+        type: 'follow_request',
+      }),
+    ]);
 
     logger.info(`you reject ${follower}'s follow request`);
 

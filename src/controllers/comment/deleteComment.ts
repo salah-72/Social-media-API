@@ -2,6 +2,7 @@ import Comment from '@/models/commentModel';
 import Post from '@/models/postModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { deleteNotification } from '@/utils/deleteNotification';
 import { Request, Response, NextFunction } from 'express';
 
 export const deleteComment = catchAsync(
@@ -19,9 +20,18 @@ export const deleteComment = catchAsync(
     const replies = await Comment.deleteMany({ parentComment: commentId });
     const deletedCount = replies.deletedCount + 1;
 
-    await Post.findByIdAndUpdate(postId, {
-      $inc: { commentsCount: -deletedCount },
-    });
+    await Promise.all([
+      Post.updateOne(
+        { _id: postId },
+        { $inc: { commentsCount: -deletedCount } },
+      ),
+      deleteNotification({
+        recipient: req.post!.author,
+        sender: req.currentuser!._id,
+        type: 'comment',
+        post: postId,
+      }),
+    ]);
 
     res.status(204).send();
   },
