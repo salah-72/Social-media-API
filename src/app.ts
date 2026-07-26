@@ -5,7 +5,6 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import helmet from 'helmet';
-import { rateLimit } from 'express-rate-limit';
 import config from './config/config';
 import { logger } from './lib/winston';
 import swaggerUi from 'swagger-ui-express';
@@ -17,10 +16,13 @@ import storyRouter from '@/routes/storyRouter';
 import notificationRouter from '@/routes/notificationRouter';
 import errorHandler from './middlewares/errorHandler';
 import passport from 'passport';
+import { rateLimit } from '@/middlewares/rateLimit';
 import './jobs/node_cron';
 import '@/utils/redis';
 
 const app = express();
+
+app.set('trust proxy', true);
 
 mongoose
   .connect(config.DB_CONNECTION as string)
@@ -45,16 +47,6 @@ const corsOptions: CorsOptions = {
   },
 };
 
-const limiter = rateLimit({
-  limit: 60,
-  windowMs: 30000,
-  standardHeaders: 'draft-8',
-  legacyHeaders: false,
-  message: {
-    error: 'too many requests from same ip, try again later',
-  },
-});
-
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(passport.initialize());
@@ -62,6 +54,15 @@ app.use(urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(compression({ threshold: 1024 }));
 app.use(helmet());
+
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  message: 'Too many requests from this IP, please try again later',
+  skip: (req) => req.path.startsWith('/api-docs'),
+});
+
+app.use('/api', globalLimiter);
 
 /**
  * @swagger
