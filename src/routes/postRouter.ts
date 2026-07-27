@@ -46,9 +46,15 @@ import {
   updatePostValidation,
 } from '@/validation/postValidation';
 import { loadBlockList } from '@/middlewares/blocks';
+import { rateLimit } from '@/middlewares/rateLimit';
 
 const router = Router();
 
+const rateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  message: 'Too many actions, please try again after one minute',
+});
 /**
  * @swagger
  * /api/v1/posts/createPost:
@@ -101,6 +107,7 @@ router.post(
   '/createPost',
   authenticate,
   isActive,
+  rateLimiter,
   upload.array('images', 5),
   validateRequest({ body: createPostValidation }),
   createPost,
@@ -193,8 +200,7 @@ router.patch(
   '/updatePost/:id',
   authenticate,
   isActive,
-  validateRequest({ params: updatePostValidation }),
-  validateRequest({ body: updatePostValidation }),
+  validateRequest({ params: updatePostValidation, body: updatePostValidation }),
   updatePost,
 );
 
@@ -240,6 +246,7 @@ router.post(
   '/addImg/:postId',
   authenticate,
   isActive,
+  rateLimiter,
   validateRequest({ params: PostValidation }),
   upload.single('images'),
   addImg,
@@ -1024,8 +1031,7 @@ router.get(
   '/:postId/likedUsers',
   authenticate,
   isActive,
-  validateRequest({ params: PostValidation }),
-  validateRequest({ query: getPostsValidation }),
+  validateRequest({ params: PostValidation, query: getPostsValidation }),
   isTargetPostAvailable,
   loadBlockList,
   postLikes,
@@ -1073,8 +1079,7 @@ router.patch(
   '/:postId/react',
   authenticate,
   isActive,
-  validateRequest({ query: PostValidation }),
-  validateRequest({ body: changeTypeValidation }),
+  validateRequest({ query: PostValidation, body: changeTypeValidation }),
   isTargetPostAvailable,
   changeReact,
 );
@@ -1193,8 +1198,10 @@ router.get(
   '/:postId/react/:type',
   authenticate,
   isActive,
-  validateRequest({ params: getLIkedUsersValidation }),
-  validateRequest({ query: getPostsValidation }),
+  validateRequest({
+    params: getLIkedUsersValidation,
+    query: getPostsValidation,
+  }),
   isTargetPostAvailable,
   reaction,
 );
@@ -1339,6 +1346,7 @@ router.post(
   '/:postId/like',
   authenticate,
   isActive,
+  rateLimiter,
   validateRequest({
     params: PostValidation,
     body: changeTypeValidation,
@@ -1389,8 +1397,8 @@ router.post(
   '/:postId/comment',
   authenticate,
   isActive,
-  validateRequest({ params: PostValidation }),
-  validateRequest({ body: createCommentValidation }),
+  rateLimiter,
+  validateRequest({ params: PostValidation, body: createCommentValidation }),
   isTargetPostAvailable,
   createComment,
 );
@@ -1442,8 +1450,12 @@ router.post(
   '/:postId/comment/:commentId',
   authenticate,
   isActive,
-  validateRequest({ params: createReplyValidation }),
-  validateRequest({ body: createCommentValidation }),
+  rateLimiter,
+  validateRequest({
+    params: createReplyValidation,
+    body: createCommentValidation,
+  }),
+
   isTargetPostAvailable,
   createReply,
 );
@@ -1495,8 +1507,10 @@ router.patch(
   '/:postId/comment/:commentId',
   authenticate,
   isActive,
-  validateRequest({ params: createReplyValidation }),
-  validateRequest({ body: createCommentValidation }),
+  validateRequest({
+    params: createReplyValidation,
+    body: createCommentValidation,
+  }),
   isTargetPostAvailable,
   updateComment,
 );
@@ -1657,8 +1671,7 @@ router.delete(
 router.get(
   '/:postId/comments',
   authenticate,
-  validateRequest({ params: PostValidation }),
-  validateRequest({ query: getPostsValidation }),
+  validateRequest({ params: PostValidation, query: getPostsValidation }),
   isActive,
   isTargetPostAvailable,
   loadBlockList,
@@ -1873,8 +1886,11 @@ router.post(
   '/:postId/comment/:commentId/like',
   authenticate,
   isActive,
-  validateRequest({ params: createReplyValidation }),
-  validateRequest({ body: changeTypeValidation }),
+  rateLimiter,
+  validateRequest({
+    params: createReplyValidation,
+    body: changeTypeValidation,
+  }),
   isTargetPostAvailable,
   likeComment,
 );
@@ -1926,8 +1942,10 @@ router.patch(
   '/:postId/comment/:commentId/like',
   authenticate,
   isActive,
-  validateRequest({ params: createReplyValidation }),
-  validateRequest({ body: changeTypeValidation }),
+  validateRequest({
+    params: createReplyValidation,
+    body: changeTypeValidation,
+  }),
   isTargetPostAvailable,
   changeCommentReact,
 );
@@ -2033,8 +2051,7 @@ router.get(
   '/:postId/comment/:commentId/like',
   authenticate,
   isActive,
-  validateRequest({ params: createReplyValidation }),
-  validateRequest({ query: getPostsValidation }),
+  validateRequest({ params: createReplyValidation, query: getPostsValidation }),
   isTargetPostAvailable,
   loadBlockList,
   commentLikes,
