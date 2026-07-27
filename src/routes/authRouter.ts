@@ -11,6 +11,7 @@ import { updatePassword } from '@/controllers/Auth/updatePassword';
 import { authenticate } from '@/middlewares/authenticate';
 import { isActive } from '@/middlewares/isActive';
 import { validateRequest } from '@/middlewares/validation';
+import { rateLimit } from '@/middlewares/rateLimit';
 import {
   forgotPasswordValidation,
   loginValidation,
@@ -22,6 +23,14 @@ import { Router } from 'express';
 import passport from 'passport';
 
 const router = Router();
+
+const authRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message:
+    'Too many authentication attempts, please try again after 10 minutes',
+});
+
 /**
  * @swagger
  * /api/v1/auth/signup:
@@ -112,7 +121,12 @@ const router = Router();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/signup', validateRequest({ body: registerValidation }), register);
+router.post(
+  '/signup',
+  authRateLimiter,
+  validateRequest({ body: registerValidation }),
+  register,
+);
 
 /**
  * @swagger
@@ -224,7 +238,15 @@ router.get('/sessions', authenticate, isActive, getActiveSessions);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/refreshToken', refreshToken);
+router.post(
+  '/refreshToken',
+  rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 30,
+    message: 'Too many refresh token requests, please try again later',
+  }),
+  refreshToken,
+);
 
 /**
  * @swagger
@@ -360,7 +382,16 @@ router.get(
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/login', validateRequest({ body: loginValidation }), login);
+router.post(
+  '/login',
+  rateLimit({
+    windowMs: 2 * 60 * 1000,
+    max: 5,
+    message: 'Too many login attempts',
+  }),
+  validateRequest({ body: loginValidation }),
+  login,
+);
 
 /**
  * @swagger
@@ -435,6 +466,7 @@ router.get('/google/callback', googleAuthCallback);
  */
 router.post(
   '/forgetPassword',
+  authRateLimiter,
   validateRequest({ body: forgotPasswordValidation }),
   forgetPassword,
 );
