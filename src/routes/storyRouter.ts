@@ -11,6 +11,7 @@ import { loadBlockList } from '@/middlewares/blocks';
 import { isActive } from '@/middlewares/isActive';
 import { isTargetStoryAvailable } from '@/middlewares/isTargetStoryAvailable';
 import { upload } from '@/middlewares/multer';
+import { rateLimit } from '@/middlewares/rateLimit';
 import { validateRequest } from '@/middlewares/validation';
 import {
   getStoriesValidation,
@@ -22,6 +23,11 @@ import { Router } from 'express';
 
 const router = Router();
 
+const rateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  message: 'Too many actions, please try again after one minute',
+});
 /**
  * @swagger
  * /api/v1/stories/story:
@@ -73,6 +79,7 @@ router.post(
   '/story',
   authenticate,
   isActive,
+  rateLimit,
   upload.single('img'),
   validateRequest({ body: storyValidation }),
   createStory,
@@ -445,8 +452,8 @@ router.post(
   '/:storyId/like',
   authenticate,
   isActive,
-  validateRequest({ params: getStoryValidation }),
-  validateRequest({ body: reactTypeValidation }),
+  rateLimiter,
+  validateRequest({ params: getStoryValidation, body: reactTypeValidation }),
   isTargetStoryAvailable,
   likeStory,
 );
@@ -550,8 +557,7 @@ router.get(
   '/:storyId/likes',
   authenticate,
   isActive,
-  validateRequest({ params: getStoryValidation }),
-  validateRequest({ query: getStoriesValidation }),
+  validateRequest({ params: getStoryValidation, query: getStoriesValidation }),
   loadBlockList,
   storyLikes,
 );
