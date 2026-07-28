@@ -9,30 +9,45 @@ import cron from 'node-cron';
 import redisClient from '@/utils/redis';
 import Post from '@/models/postModel';
 
-cron.schedule('0 0 * * *', async () => {
+cron.schedule('0 * * * *', async () => {
   try {
-    const expiredStories = await Story.find({
-      createdAt: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-    }).select('_id img');
+    const batchSize = 100;
+    let hasMore = true;
+    let totalDeleted = 0;
 
-    if (!expiredStories.length) return;
-    const ids = expiredStories.map((e) => e._id);
+    while (hasMore) {
+      const expiredStories = await Story.find({
+        createdAt: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      })
+        .select('_id img.publicId')
+        .limit(batchSize)
+        .lean();
 
-    await Promise.all([
-      Story.deleteMany({ _id: { $in: ids } }),
-      Like.deleteMany({ story: { $in: ids } }),
-      View.deleteMany({ story: { $in: ids } }),
-    ]);
+      if (expiredStories.length === 0) {
+        hasMore = false;
+        break;
+      }
 
-    const publicIds: string[] = expiredStories
-      .filter((e) => e.img?.publicId)
-      .map((e) => e.img!.publicId!);
+      const ids = expiredStories.map((e) => e._id);
 
-    if (publicIds.length > 0) {
-      await cloudinary.api.delete_resources(publicIds);
+      const publicIds = expiredStories
+        .map((s) => s.img?.publicId)
+        .filter((id): id is string => Boolean(id));
+
+      if (publicIds.length > 0)
+        await cloudinary.api.delete_resources(publicIds);
+
+      await Promise.all([
+        Story.deleteMany({ _id: { $in: ids } }),
+        Like.deleteMany({ story: { $in: ids } }),
+        View.deleteMany({ story: { $in: ids } }),
+      ]);
+      totalDeleted += expiredStories.length;
+
+      if (expiredStories.length < batchSize) hasMore = false;
     }
 
-    logger.info(`${expiredStories.length} story is deleted`);
+    logger.info(`${totalDeleted} story is deleted`);
   } catch (err: any) {
     logger.error(err.message);
   }
@@ -40,9 +55,10 @@ cron.schedule('0 0 * * *', async () => {
 
 cron.schedule('0 0 * * *', async () => {
   try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const revokedTokens = await Token.deleteMany({
       revoked: true,
-      revokedAt: { $lt: new Date() },
+      revokedAt: { $lt: sevenDaysAgo },
     });
 
     logger.info(`Deleted ${revokedTokens.deletedCount} revoked tokens`);
