@@ -4,3 +4,4 @@ logs
 .env
 .git
 .gitignore
+*.log
