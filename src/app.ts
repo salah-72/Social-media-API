@@ -19,6 +19,7 @@ import passport from 'passport';
 import { rateLimit } from '@/middlewares/rateLimit';
 import './jobs/node_cron';
 import '@/utils/redis';
+import redisClient from '@/utils/redis';
 
 const app = express();
 
@@ -66,17 +67,31 @@ app.use('/api', globalLimiter);
 
 /**
  * @swagger
- * /:
+ * /health:
  *   get:
- *     summary: Root endpoint
- *     description: Simple Welcome endpoint
+ *     summary: Health endpoint
+ *     description: Check the health of the application
  *     responses:
  *       200:
- *         description: Welcome message
+ *         description: Application is healthy
+ *       500:
+ *         description: Application is down
  */
-app.get('/api/v1', (req, res) => {
-  res.send('welcome to our social media api');
+app.get('/health', async (req, res) => {
+  const isMongoConnected = mongoose.connection.readyState === 1;
+  const isRedisConnected = redisClient.isReady;
+
+  if (isMongoConnected && isRedisConnected) {
+    return res
+      .status(200)
+      .json({ status: 'UP', mongo: 'connected', redis: 'connected' });
+  }
+
+  return res
+    .status(500)
+    .json({ status: 'DOWN', mongo: isMongoConnected, redis: isRedisConnected });
 });
+
 app.use(
   '/api-docs',
   swaggerUi.serve,

@@ -68,57 +68,60 @@ cron.schedule('0 0 * * *', async () => {
 });
 
 cron.schedule('0/10 * * * *', async () => {
-  // const keys = await redisClient.keys('likes:*');
-  // if (!keys.length) return;
-
-  // const pipeline = redisClient.multi();
-  // keys.forEach((key) => pipeline.get(key));
-  // const results = await pipeline.exec();
-
-  // for (let i = 0; i < keys.length; i++) {
-  //   const [, type, id] = keys[i].split(':');
-  //   const count = Number(results[i]);
-  //   if (!count) continue;
-
-  //   if (type === 'post')
-  //     await Post.updateOne({ _id: id }, { $inc: { likesCount: count } });
-  //   else if (type === 'comment')
-  //     await Comment.updateOne({ _id: id }, { $inc: { likesCount: count } });
-  //   else if (type === 'story')
-  //     await Story.updateOne({ _id: id }, { $inc: { likesCount: count } });
-
-  //   await redisClient.del(keys[i]);
-  // }
-
   await syncEntity('post', Post);
   await syncEntity('comment', Comment);
   await syncEntity('story', Story);
 });
 
 async function syncEntity(type: string, model: any) {
-  const syncKeys = `sync:likes:${type}`;
-  const ids = await redisClient.sMembers(syncKeys);
+  const syncKey = `sync:likes:${type}`;
+  const ids = await redisClient.sMembers(syncKey);
   if (!ids.length) return;
 
-  const keys = ids.map((id) => `likes:${type}:${id}`);
-  const values = await redisClient.mGet(keys);
-
   const bulkOps: any[] = [];
-  for (let i = 0; i < ids.length; i++) {
-    const count = Number(values[i]);
-    if (count === null || count === undefined) continue;
+  const processedKeys: string[] = [];
+
+  for (const id of ids) {
+    const key = `likes:${type}:${id}`;
+    const rawValue = await redisClient.getDel(key);
+
+    if (rawValue === null) {
+      await redisClient.sRem(syncKey, id);
+      continue;
+    }
+
+    const count = parseInt(rawValue, 10);
+    if (isNaN(count) || count === 0) continue;
 
     bulkOps.push({
       updateOne: {
-        filter: { _id: ids[i] },
+        filter: { _id: id },
         update: { $inc: { likesCount: count } },
       },
     });
+
+    processedKeys.push(id);
   }
 
-  if (bulkOps.length > 0) {
+  if (!bulkOps.length) return;
+
+  try {
     await model.bulkWrite(bulkOps);
-    await redisClient.sRem(syncKeys, ids);
-    await redisClient.del(keys);
+    if (processedKeys.length > 0) {
+      await redisClient.sRem(syncKey, processedKeys);
+    }
+    logger.info(`Synced ${bulkOps.length} ${type} likes successfully`);
+  } catch (err: any) {
+    logger.error(`Error syncing ${type} likes: ${err.message}`);
+
+    const pipeline = redisClient.multi();
+    bulkOps.forEach((op) => {
+      const id = op.updateOne.filter._id;
+      const count = op.updateOne.update.$inc.likesCount;
+      pipeline.incrBy(`likes:${type}:${id}`, count);
+      pipeline.sAdd(syncKey, id);
+    });
+    await pipeline.exec();
+    logger.info(`Rolled back ${bulkOps.length} ${type} likes to Redis`);
   }
 }
