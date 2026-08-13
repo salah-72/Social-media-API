@@ -67,9 +67,5 @@ export const updateProfileInfo = catchAsync(
     }
 
     sendResponse(res, 200, undefined, { message: 'profile updated' });
-    res.status(200).json({
-      status: 'success',
-      user,
-    });
   },
 );
