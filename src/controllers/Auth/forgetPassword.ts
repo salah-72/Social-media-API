@@ -9,21 +9,27 @@ import config from '@/config/config';
 import { sendResponse } from '@/utils/sendResponse';
 
 type IForget = Pick<IUser, 'email' | 'username'>;
+
 export const forgetPassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { email, username } = req.body as IForget;
 
+    const genericMessage =
+      'If an account with that email or username exists, a password reset link has been sent';
+
     let user = await User.findOne({ email });
     user = user || (await User.findOne({ username }));
 
-    if (!user)
-      return next(new appError('entered email or username not correct', 404));
-
+    if (!user) {
+      return sendResponse(res, 200, undefined, {
+        message: genericMessage,
+      });
+    }
     if (!user.emailVerified)
       return next(new appError('please verify your account ', 401));
 
     const plainToken = crypto.randomBytes(32).toString('hex');
-    const hashedToken = await crypto
+    const hashedToken = crypto
       .createHash('sha256')
       .update(plainToken)
       .digest('hex');
@@ -44,7 +50,7 @@ export const forgetPassword = catchAsync(
     logger.info('Message sent:', info.messageId);
 
     sendResponse(res, 200, undefined, {
-      message: 'password reset link sent successfully',
+      message: genericMessage,
     });
   },
 );
