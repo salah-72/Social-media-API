@@ -32,42 +32,23 @@ export const register = catchAsync(
 
     const username = genUsername(firstName);
 
-    const newUser = await User.create({
-      email,
-      password,
-      firstName,
-      lastName,
-      username,
-    });
-
-    if (!newUser)
-      return next(new appError('something went wrong while signning up', 400));
-
-    sendResponse(res, 201, {
-      user: {
-        _id: newUser._id,
-        email: newUser.email,
-        username: newUser.username,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        emailVerified: newUser.emailVerified,
-        emailVerificationToken: newUser.emailVerificationToken,
-      },
-    });
-
-    logger.info('new user created successfully', {
-      Email: newUser.email,
-      username: newUser.username,
-    });
-
     const plainToken = crypto.randomBytes(32).toString('hex');
     const hashedToken = crypto
       .createHash('sha256')
       .update(plainToken)
       .digest('hex');
 
-    newUser.emailVerificationToken = hashedToken;
-    await newUser.save();
+    const newUser = await User.create({
+      email,
+      password,
+      firstName,
+      lastName,
+      username,
+      emailVerificationToken: hashedToken,
+    });
+
+    if (!newUser)
+      return next(new appError('something went wrong while signning up', 400));
 
     const info = await transporter.sendMail({
       from: 'salah',
@@ -79,5 +60,21 @@ export const register = catchAsync(
           <p>If you did not verfiy your account you won't be able to use the website</p>`,
     });
     logger.info('Message sent:', info.messageId);
+
+    logger.info('new user created successfully', {
+      Email: newUser.email,
+      username: newUser.username,
+    });
+
+    sendResponse(res, 201, {
+      user: {
+        _id: newUser._id,
+        email: newUser.email,
+        username: newUser.username,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        emailVerified: newUser.emailVerified,
+      },
+    });
   },
 );
