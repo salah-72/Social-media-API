@@ -1258,9 +1258,10 @@ router.get(
 
 /**
  * @swagger
- * /api/v1/posts/{postId}/like:
+ * /api/v1/post/{postId}/like:
  *   post:
- *     summary: Like or Unlike a post
+ *     summary: Like, Unlike, or Change reaction on a post
+ *     description: Dynamically handles adding a reaction, changing reaction type, or removing it if sent again with the same type.
  *     tags: [Posts]
  *     security:
  *       - bearerAuth: []
@@ -1270,25 +1271,38 @@ router.get(
  *         required: true
  *         schema:
  *           type: string
+ *         description: The ID of the post
  *     requestBody:
- *       required: true
+ *       required: false
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               react:
+ *               type:
  *                 type: string
- *                 example: like
+ *                 enum: [like, love, haha, wow, sad, angry]
+ *                 default: like
+ *                 example: love
  *     responses:
  *       200:
- *         description: Action successful
+ *         description: Reaction updated successfully
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Success'
+ *       201:
+ *         description: Post liked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       204:
+ *         description: Reaction removed (Unliked) successfully
+ *       401:
+ *         description: Unauthorized
  *       404:
- *         description: Story not found
+ *         description: Post not found
  *         content:
  *           application/json:
  *             schema:
