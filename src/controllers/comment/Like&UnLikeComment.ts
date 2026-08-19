@@ -21,7 +21,33 @@ export const likeComment = catchAsync(
     if (blockIds.some((id) => id.toString() === comment.user.toString()))
       return next(new appError('comment not exist', 404));
 
-    try {
+    const existingLike = await Like.findOne({
+      user: req.currentuser?._id,
+      comment: commentId,
+    });
+
+    if (existingLike) {
+      if (existingLike.type === type) {
+        await Promise.all([
+          Like.deleteOne({ _id: existingLike._id }),
+          decrementLike('comment', commentId),
+          deleteNotification({
+            recipient: comment.user,
+            sender: req.currentuser!._id,
+            comment: commentId,
+            type: 'comment_like',
+          }),
+        ]);
+
+        return res.status(204).send();
+      } else {
+        existingLike.type = type;
+        await existingLike.save();
+        return sendResponse(res, 200, undefined, {
+          message: 'like type updated',
+        });
+      }
+    } else {
       await Promise.all([
         Like.create({
           user: req.currentuser?._id,
@@ -38,26 +64,6 @@ export const likeComment = catchAsync(
       ]);
 
       return sendResponse(res, 201, undefined, { message: 'comment liked' });
-    } catch (err: any) {
-      if (err.code === 11000) {
-        await Promise.all([
-          deleteNotification({
-            recipient: comment.user,
-            sender: req.currentuser!._id,
-            comment: commentId,
-            type: 'comment_like',
-          }),
-          Like.deleteOne({
-            user: req.currentuser?._id,
-            comment: commentId,
-          }),
-
-          decrementLike('comment', commentId),
-        ]);
-
-        return res.status(204).send();
-      }
-      throw err;
     }
   },
 );

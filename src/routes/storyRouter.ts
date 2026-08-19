@@ -1,4 +1,3 @@
-import { changeStoryReact } from '@/controllers/story/changeStoryReact';
 import { createStory } from '@/controllers/story/createStory';
 import { deleteStory } from '@/controllers/story/deleteStory';
 import { getMyStories } from '@/controllers/story/getMyStories';
@@ -560,53 +559,6 @@ router.get(
   validateRequest({ params: getStoryValidation, query: getStoriesValidation }),
   loadBlockList,
   storyLikes,
-);
-
-/**
- * @swagger
- * /api/v1/stories/{storyId}/like:
- *   patch:
- *     summary: Change reaction on a story
- *     tags: [Stories]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: storyId
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               react:
- *                 type: string
- *                 example: love
- *     responses:
- *       200:
- *         description: Reaction updated
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Success'
- *       404:
- *         description: Story not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-router.patch(
-  '/:storyId/like',
-  authenticate,
-  isActive,
-  validateRequest({ params: getStoryValidation, body: reactTypeValidation }),
-  isTargetStoryAvailable,
-  changeStoryReact,
 );
 
 export default router;

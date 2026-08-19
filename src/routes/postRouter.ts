@@ -1,4 +1,3 @@
-import { changeCommentReact } from '@/controllers/comment/changeCommentReact';
 import { createComment } from '@/controllers/comment/createComment';
 import { createReply } from '@/controllers/comment/createReplyOnPost';
 import { deleteComment } from '@/controllers/comment/deleteComment';
@@ -1859,61 +1858,6 @@ router.post(
   }),
   isTargetPostAvailable,
   likeComment,
-);
-
-/**
- * @swagger
- * /api/v1/posts/{postId}/comment/{commentId}/like:
- *   patch:
- *     summary: Change reaction on a comment
- *     tags: [Comments]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: postId
- *         required: true
- *         schema:
- *           type: string
- *       - in: path
- *         name: commentId
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               react:
- *                 type: string
- *                 example: love
- *     responses:
- *       200:
- *         description: Reaction updated
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Success'
- *       404:
- *         description: Story not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-router.patch(
-  '/:postId/comment/:commentId/like',
-  authenticate,
-  isActive,
-  validateRequest({
-    params: createReplyValidation,
-    body: changeTypeValidation,
-  }),
-  isTargetPostAvailable,
-  changeCommentReact,
 );
 
 /**
