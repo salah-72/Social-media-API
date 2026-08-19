@@ -6,7 +6,6 @@ import { commentReplies } from '@/controllers/comment/getCommentReplies';
 import { getComments } from '@/controllers/comment/getComments';
 import { likeComment } from '@/controllers/comment/Like&UnLikeComment';
 import { updateComment } from '@/controllers/comment/updateCommentContent';
-import { changeReact } from '@/controllers/post/changePostReact';
 import { postLikes } from '@/controllers/post/getPostLikes';
 import { reaction } from '@/controllers/post/getUsersByReact';
 import { likePost } from '@/controllers/post/Like&UnLikePost';
@@ -1035,53 +1034,6 @@ router.get(
   isTargetPostAvailable,
   loadBlockList,
   postLikes,
-);
-
-/**
- * @swagger
- * /api/v1/posts/{postId}/like:
- *   patch:
- *     summary: Change reaction on a post
- *     tags: [Posts]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: postId
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               react:
- *                 type: string
- *                 example: love
- *     responses:
- *       200:
- *         description: Reaction updated
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Success'
- *       404:
- *         description: Story not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-router.patch(
-  '/:postId/react',
-  authenticate,
-  isActive,
-  validateRequest({ query: PostValidation, body: changeTypeValidation }),
-  isTargetPostAvailable,
-  changeReact,
 );
 
 /**

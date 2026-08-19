@@ -14,7 +14,33 @@ export const likePost = catchAsync(
 
     const post = await Post.findById(postId).select('author').lean();
 
-    try {
+    const existingLike = await Like.findOne({
+      user: req.currentuser!._id,
+      post: postId,
+    });
+
+    if (existingLike) {
+      if (existingLike.type === type) {
+        await Promise.all([
+          deleteNotification({
+            recipient: post!.author,
+            sender: req.currentuser!._id,
+            type: 'like',
+            post: postId,
+          }),
+          Like.deleteOne({ _id: existingLike._id }),
+          decrementLike('post', postId),
+        ]);
+
+        return res.status(204).send();
+      } else {
+        existingLike.type = type;
+        await existingLike.save();
+        return sendResponse(res, 200, undefined, {
+          message: 'like type updated',
+        });
+      }
+    } else {
       await Promise.all([
         Like.create({
           user: req.currentuser!._id,
@@ -31,22 +57,6 @@ export const likePost = catchAsync(
       ]);
 
       return sendResponse(res, 201, undefined, { message: 'post liked' });
-    } catch (err: any) {
-      if (err.code === 11000) {
-        await Promise.all([
-          deleteNotification({
-            recipient: post!.author,
-            sender: req.currentuser!._id,
-            type: 'like',
-            post: postId,
-          }),
-          Like.deleteOne({ user: req.currentuser!._id, post: postId }),
-          decrementLike('post', postId),
-        ]);
-
-        return res.status(204).send();
-      }
-      throw err;
     }
   },
 );
