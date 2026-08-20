@@ -35,9 +35,7 @@ export const rateLimit = (options: RateLimitOptions) =>
     const message =
       options.message || 'Too many requests, please try again later';
 
-    const forwarded = req.headers['x-forwarded-for'];
-    const rawIp =
-      typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : req.ip;
+    const rawIp = req.ip || 'unknown';
 
     const identifier = req.currentuser?._id
       ? `user:${req.currentuser._id}`
