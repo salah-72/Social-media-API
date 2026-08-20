@@ -6,7 +6,10 @@ import { genUsername } from '@/functions/generate_username';
 import { genPassport } from '@/functions/generatePassword';
 import { logger } from '@/lib/winston';
 import { Request, Response, NextFunction } from 'express';
-import { generateRefreshToken } from '@/functions/generateTokens';
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from '@/functions/generateTokens';
 import Token from '@/models/tokenModel';
 
 passport.use(
@@ -14,7 +17,7 @@ passport.use(
     {
       clientID: config.ClientID!,
       clientSecret: config.clientSecret!,
-      callbackURL: 'http://localhost:3000/api/v1/auth/google/callback',
+      callbackURL: `${config.BASE_URL}/api/v1/auth/google/callback`,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -55,6 +58,7 @@ export const googleAuthCallback = (
     if (err || !user)
       return res.status(401).json({ message: 'Auth failed', err });
 
+    const accessToken = generateAccessToken(user._id);
     const refreshToken = generateRefreshToken(user._id);
 
     res.cookie('refreshToken', refreshToken, {
@@ -73,9 +77,8 @@ export const googleAuthCallback = (
 
     logger.info('Refresh token created for user', {
       userId: user._id,
-      token: refreshToken,
     });
 
-    res.redirect('/api/v1/');
+    res.redirect(`${config.CLIENT_URL}/auth/success?token=${accessToken}`);
   })(req, res, next);
 };

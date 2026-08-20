@@ -9,11 +9,7 @@ import catchAsync from '@/utils/catchAsync';
 import { sendResponse } from '@/utils/sendResponse';
 import { Response, Request, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { Types } from 'mongoose';
-
-interface JwtRefreshPayload extends jwt.JwtPayload {
-  userId: Types.ObjectId;
-}
+import { ICustomJwtPayload } from '@/functions/generateTokens';
 
 const refreshToken = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -30,18 +26,19 @@ const refreshToken = catchAsync(
     const payload = jwt.verify(
       refreshToken,
       config.JWT_REFRESH_KEY,
-    ) as JwtRefreshPayload;
+    ) as ICustomJwtPayload;
 
     await Token.updateOne(
       { token: refreshToken },
       { revoked: true, revokedAt: new Date() },
     );
-    const accessToken = generateAccessToken(payload.userId);
-    const newRefreshToken = generateRefreshToken(payload.userId);
+
+    const accessToken = generateAccessToken(payload._id);
+    const newRefreshToken = generateRefreshToken(payload._id);
 
     await Token.create({
       token: newRefreshToken,
-      userId: payload.userId,
+      userId: payload._id,
       deviceIp: req.ip,
       userAgent: req.headers['user-agent'] || 'unknown',
     });

@@ -15,7 +15,33 @@ export const likeStory = catchAsync(
     if (req.story?.author.toString() === req.currentuser?._id.toString())
       return next(new appError('you cannot like your story', 400));
 
-    try {
+    const existingLike = await Like.findOne({
+      user: req.currentuser?._id,
+      story: storyId,
+    });
+
+    if (existingLike) {
+      if (existingLike.type === type) {
+        await Promise.all([
+          Like.deleteOne({ _id: existingLike._id }),
+          decrementLike('story', storyId),
+          deleteNotification({
+            recipient: req.story!.author,
+            sender: req.currentuser!._id,
+            type: 'like',
+            story: req.story!._id,
+          }),
+        ]);
+
+        return res.status(204).send();
+      } else {
+        existingLike.type = type;
+        await existingLike.save();
+        return sendResponse(res, 200, undefined, {
+          message: 'like type updated',
+        });
+      }
+    } else {
       await Promise.all([
         Like.create({
           user: req.currentuser?._id,
@@ -32,22 +58,6 @@ export const likeStory = catchAsync(
       ]);
 
       return sendResponse(res, 201, undefined, { message: 'story liked' });
-    } catch (err: any) {
-      if (err.code === 11000) {
-        await Promise.all([
-          Like.deleteOne({ user: req.currentuser?._id, story: storyId }),
-          decrementLike('story', storyId),
-          deleteNotification({
-            recipient: req.story!.author,
-            sender: req.currentuser!._id,
-            type: 'like',
-            story: req.story!._id,
-          }),
-        ]);
-
-        return res.status(204).send();
-      }
-      throw err;
     }
   },
 );

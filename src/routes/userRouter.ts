@@ -630,6 +630,7 @@ router.get(
   '/searchUsers',
   authenticate,
   isActive,
+  loadBlockList,
   validateRequest({ query: searchUsersValidation }),
   searchUsers,
 );

@@ -1,4 +1,3 @@
-import { changeStoryReact } from '@/controllers/story/changeStoryReact';
 import { createStory } from '@/controllers/story/createStory';
 import { deleteStory } from '@/controllers/story/deleteStory';
 import { getMyStories } from '@/controllers/story/getMyStories';
@@ -414,7 +413,8 @@ router.get(
  * @swagger
  * /api/v1/stories/{storyId}/like:
  *   post:
- *     summary: Like or Unlike a story
+ *     summary: Like, Unlike, or Change reaction on a story
+ *     description: Like, Unlike, or Change reaction on a story. If the user has already liked the story with the same reaction type, it will unlike the story. If the user has liked the story with a different reaction type, it will change the reaction type.
  *     tags: [Stories]
  *     security:
  *       - bearerAuth: []
@@ -425,22 +425,34 @@ router.get(
  *         schema:
  *           type: string
  *     requestBody:
- *       required: true
+ *       required: false
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               react:
+ *               type:
  *                 type: string
- *                 example: like
+ *                 enum: [like, love, haha, wow, sad, angry]
+ *                 default: like
+ *                 example: love
  *     responses:
  *       200:
- *         description: Action successful
+ *         description: Reaction updated successfully
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Success'
+ *       201:
+ *         description: Story liked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       204:
+ *         description: Reaction removed (Unliked) successfully
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: Story not found
  *         content:
@@ -560,53 +572,6 @@ router.get(
   validateRequest({ params: getStoryValidation, query: getStoriesValidation }),
   loadBlockList,
   storyLikes,
-);
-
-/**
- * @swagger
- * /api/v1/stories/{storyId}/like:
- *   patch:
- *     summary: Change reaction on a story
- *     tags: [Stories]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: storyId
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               react:
- *                 type: string
- *                 example: love
- *     responses:
- *       200:
- *         description: Reaction updated
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Success'
- *       404:
- *         description: Story not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-router.patch(
-  '/:storyId/like',
-  authenticate,
-  isActive,
-  validateRequest({ params: getStoryValidation, body: reactTypeValidation }),
-  isTargetStoryAvailable,
-  changeStoryReact,
 );
 
 export default router;

@@ -1,4 +1,3 @@
-import { changeCommentReact } from '@/controllers/comment/changeCommentReact';
 import { createComment } from '@/controllers/comment/createComment';
 import { createReply } from '@/controllers/comment/createReplyOnPost';
 import { deleteComment } from '@/controllers/comment/deleteComment';
@@ -6,7 +5,6 @@ import { commentReplies } from '@/controllers/comment/getCommentReplies';
 import { getComments } from '@/controllers/comment/getComments';
 import { likeComment } from '@/controllers/comment/Like&UnLikeComment';
 import { updateComment } from '@/controllers/comment/updateCommentContent';
-import { changeReact } from '@/controllers/post/changePostReact';
 import { postLikes } from '@/controllers/post/getPostLikes';
 import { reaction } from '@/controllers/post/getUsersByReact';
 import { likePost } from '@/controllers/post/Like&UnLikePost';
@@ -1039,53 +1037,6 @@ router.get(
 
 /**
  * @swagger
- * /api/v1/posts/{postId}/like:
- *   patch:
- *     summary: Change reaction on a post
- *     tags: [Posts]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: postId
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               react:
- *                 type: string
- *                 example: love
- *     responses:
- *       200:
- *         description: Reaction updated
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Success'
- *       404:
- *         description: Story not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-router.patch(
-  '/:postId/react',
-  authenticate,
-  isActive,
-  validateRequest({ query: PostValidation, body: changeTypeValidation }),
-  isTargetPostAvailable,
-  changeReact,
-);
-
-/**
- * @swagger
  * /api/v1/posts/{postId}/react/{type}:
  *   get:
  *     summary: Get users who liked a specific post by reaction type
@@ -1306,9 +1257,10 @@ router.get(
 
 /**
  * @swagger
- * /api/v1/posts/{postId}/like:
+ * /api/v1/post/{postId}/like:
  *   post:
- *     summary: Like or Unlike a post
+ *     summary: Like, Unlike, or Change reaction on a post
+ *     description: Dynamically handles adding a reaction, changing reaction type, or removing it if sent again with the same type.
  *     tags: [Posts]
  *     security:
  *       - bearerAuth: []
@@ -1318,25 +1270,38 @@ router.get(
  *         required: true
  *         schema:
  *           type: string
+ *         description: The ID of the post
  *     requestBody:
- *       required: true
+ *       required: false
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               react:
+ *               type:
  *                 type: string
- *                 example: like
+ *                 enum: [like, love, haha, wow, sad, angry]
+ *                 default: like
+ *                 example: love
  *     responses:
  *       200:
- *         description: Action successful
+ *         description: Reaction updated successfully
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Success'
+ *       201:
+ *         description: Post liked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       204:
+ *         description: Reaction removed (Unliked) successfully
+ *       401:
+ *         description: Unauthorized
  *       404:
- *         description: Story not found
+ *         description: Post not found
  *         content:
  *           application/json:
  *             schema:
@@ -1843,7 +1808,8 @@ router.get(
  * @swagger
  * /api/v1/posts/{postId}/comment/{commentId}/like:
  *   post:
- *     summary: Like or Unlike a comment
+ *     summary: Like, Unlike, or Change reaction on a comment
+ *     description: Dynamically handles adding a reaction, changing reaction type, or removing it if sent again with the same type.
  *     tags: [Comments]
  *     security:
  *       - bearerAuth: []
@@ -1859,24 +1825,36 @@ router.get(
  *         schema:
  *           type: string
  *     requestBody:
- *       required: true
+ *       required: false
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               react:
+ *               type:
  *                 type: string
- *                 example: like
+ *                 enum: [like, love, haha, wow, sad, angry]
+ *                 default: like
+ *                 example: love
  *     responses:
  *       200:
- *         description: Action successful
+ *         description: Reaction updated successfully
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Success'
+ *       201:
+ *         description: Comment liked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       204:
+ *         description: Reaction removed (Unliked) successfully
+ *       401:
+ *         description: Unauthorized
  *       404:
- *         description: Story not found
+ *         description: Comment not found
  *         content:
  *           application/json:
  *             schema:
@@ -1893,61 +1871,6 @@ router.post(
   }),
   isTargetPostAvailable,
   likeComment,
-);
-
-/**
- * @swagger
- * /api/v1/posts/{postId}/comment/{commentId}/like:
- *   patch:
- *     summary: Change reaction on a comment
- *     tags: [Comments]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: postId
- *         required: true
- *         schema:
- *           type: string
- *       - in: path
- *         name: commentId
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               react:
- *                 type: string
- *                 example: love
- *     responses:
- *       200:
- *         description: Reaction updated
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Success'
- *       404:
- *         description: Story not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-router.patch(
-  '/:postId/comment/:commentId/like',
-  authenticate,
-  isActive,
-  validateRequest({
-    params: createReplyValidation,
-    body: changeTypeValidation,
-  }),
-  isTargetPostAvailable,
-  changeCommentReact,
 );
 
 /**
