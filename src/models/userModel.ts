@@ -19,6 +19,7 @@ export interface IUser {
   following: number;
   active: boolean;
   public: boolean;
+  role: 'user' | 'admin';
   hometown?: string;
   currentCity?: string;
   about?: string;
@@ -37,7 +38,7 @@ export interface IUser {
   socialLinks?: {
     website?: string;
     facebook?: string;
-    instagtam?: string;
+    instagram?: string;
     linkedIn?: string;
     x?: string;
     youtube?: string;
@@ -61,7 +62,7 @@ const userSchema = new mongoose.Schema<IUser>(
       type: String,
       required: [true, 'password is required'],
       select: false,
-      minLength: [3, 'password must be greater than 7 characters'],
+      minLength: [6, 'password must be at least 6 characters'],
     },
     firstName: {
       type: String,
@@ -106,6 +107,11 @@ const userSchema = new mongoose.Schema<IUser>(
       type: Boolean,
       default: true,
     },
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user',
+    },
     about: String,
     hometown: String,
     currentCity: String,
@@ -132,7 +138,7 @@ const userSchema = new mongoose.Schema<IUser>(
       website: {
         type: String,
         validate: [validator.isURL, 'Invalid URL'],
-        maxLength: [50, 'website url musr be less than 50 char'],
+        maxLength: [50, 'website url must be less than 50 char'],
       },
       facebook: {
         type: String,
