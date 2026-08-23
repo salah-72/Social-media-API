@@ -1,4 +1,5 @@
 import cloudinary from '@/config/cloudinaryConfig';
+import { canModerate } from '@/functions/role';
 import { logger } from '@/lib/winston';
 import Like from '@/models/likeModel';
 import Post from '@/models/postModel';
@@ -13,7 +14,11 @@ export const deletePost = catchAsync(
     const deletedPost = await Post.findById(id);
     if (!deletedPost) return next(new appError('post not found', 404));
 
-    if (req.currentuser?._id.toString() !== deletedPost.author.toString())
+    const isOwner =
+      req.currentuser?._id.toString() === deletedPost.author.toString();
+    const isAdmin = canModerate(req.currentuser?.role);
+
+    if (!isOwner && !isAdmin)
       return next(
         new appError('you have no permission to delete this post', 401),
       );
@@ -30,7 +35,15 @@ export const deletePost = catchAsync(
 
     await deletedPost?.deleteOne();
 
-    logger.info(`user: ${req.currentuser?._id} delete post ${id}`);
+    // TODO: add a notification to the post author if an admin deleted their post
+
+    if (isAdmin && !isOwner) {
+      logger.info(
+        `admin: ${req.currentuser?._id} removed post ${id} belonging to ${deletedPost.author}`,
+      );
+    } else {
+      logger.info(`user: ${req.currentuser?._id} delete post ${id}`);
+    }
 
     res.status(204).send();
   },

@@ -2,20 +2,29 @@ import Comment from '@/models/commentModel';
 import Post from '@/models/postModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { logger } from '@/lib/winston';
 import { deleteNotification } from '@/utils/deleteNotification';
 import { Request, Response, NextFunction } from 'express';
+import { canModerate } from '@/functions/role';
 
 export const deleteComment = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { postId, commentId } = req.params;
 
-    const comment = await Comment.findOneAndDelete({
-      user: req.currentuser?._id,
+    const comment = await Comment.findOne({
       post: postId,
       _id: commentId,
     });
-
     if (!comment) return next(new appError('comment not found', 404));
+
+    const isOwner = comment.user.toString() === req.currentuser?._id.toString();
+    const isAdmin = canModerate(req.currentuser?.role);
+
+    if (!isOwner && !isAdmin) {
+      return next(new appError('You are not the owner of this comment', 403));
+    }
+
+    await comment.deleteOne();
 
     const replies = await Comment.deleteMany({ parentComment: commentId });
     const deletedCount = replies.deletedCount + 1;
@@ -32,6 +41,13 @@ export const deleteComment = catchAsync(
         post: postId,
       }),
     ]);
+
+    // TODO: add a notification to the comment author if an admin deleted their comment
+    if (isAdmin && !isOwner) {
+      logger.info(
+        `admin: ${req.currentuser?._id} removed comment ${commentId} belonging to ${comment.user}`,
+      );
+    }
 
     res.status(204).send();
   },

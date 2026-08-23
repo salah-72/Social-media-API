@@ -11,6 +11,7 @@ import {
   generateRefreshToken,
 } from '@/functions/generateTokens';
 import Token from '@/models/tokenModel';
+import { isFirstUser } from '@/functions/isFirstUser';
 
 passport.use(
   new GoogleStrategy(
@@ -25,6 +26,7 @@ passport.use(
 
         if (!user) {
           const username = genUsername(profile._json.given_name!);
+          const role = (await isFirstUser()) ? 'superadmin' : 'user';
 
           user = await User.create({
             email: profile._json.email,
@@ -33,11 +35,15 @@ passport.use(
             firstName: profile._json.given_name,
             lastName: profile._json.family_name,
             emailVerified: true,
+            role,
           });
 
-          logger.info('new user registered with google', {
-            email: user.email,
-          });
+          logger.info(
+            role === 'superadmin'
+              ? 'first account registered with google - granted superadmin role'
+              : 'new user registered with google',
+            { email: user.email },
+          );
         }
 
         done(null, user);

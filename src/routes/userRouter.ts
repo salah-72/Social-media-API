@@ -28,6 +28,8 @@ import { getMyFollowings } from '@/controllers/follow/getMyFollowings';
 import { blockList } from '@/controllers/block/getMyBlockList';
 import { suggestedFollowings } from '@/controllers/follow/suggestedFollowings';
 import { searchUsers } from '@/controllers/User/searchForUsers';
+import { updateUserRole } from '@/controllers/User/updateUserRole';
+import { restrictTo } from '@/middlewares/restrictTo';
 import {
   getUsersValidation,
   searchUsersValidation,
@@ -35,6 +37,7 @@ import {
   userIdValidation,
   usernameValidation,
   usersValidation,
+  updateUserRoleValidation,
 } from '@/validation/userValidation';
 import { validateRequest } from '@/middlewares/validation';
 import { loadBlockList } from '@/middlewares/blocks';
@@ -1811,6 +1814,52 @@ router.get(
   isActive,
   validateRequest({ query: usersValidation }),
   blockList,
+);
+
+/**
+ * @swagger
+ * /users/{id}/role:
+ *   patch:
+ *     summary: Change another user's role (superadmin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [role]
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [user, admin, superadmin]
+ *     responses:
+ *       200:
+ *         description: Role updated
+ *       400:
+ *         description: Invalid request (e.g. trying to change your own role)
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Caller is not a superadmin
+ *       404:
+ *         description: User not found
+ */
+router.patch(
+  '/:id/role',
+  authenticate,
+  isActive,
+  restrictTo('superadmin'),
+  validateRequest({ params: userIdValidation, body: updateUserRoleValidation }),
+  updateUserRole,
 );
 
 export default router;
