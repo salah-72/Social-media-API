@@ -75,6 +75,10 @@ export const userIdValidation = z.object({
   id: z.string().min(1, 'User ID is required'),
 });
 
+export const updateUserRoleValidation = z.object({
+  role: z.enum(['user', 'admin', 'superadmin']),
+});
+
 export const usernameValidation = z.object({
   username: z.string().min(1, 'Username is required'),
 });
