@@ -1,4 +1,5 @@
 import cloudinary from '@/config/cloudinaryConfig';
+import { canModerate } from '@/functions/role';
 import { logger } from '@/lib/winston';
 import Like from '@/models/likeModel';
 import Post from '@/models/postModel';
@@ -15,7 +16,7 @@ export const deletePost = catchAsync(
 
     const isOwner =
       req.currentuser?._id.toString() === deletedPost.author.toString();
-    const isAdmin = req.currentuser?.role === 'admin';
+    const isAdmin = canModerate(req.currentuser?.role);
 
     if (!isOwner && !isAdmin)
       return next(

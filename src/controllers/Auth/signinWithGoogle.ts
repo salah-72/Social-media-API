@@ -26,7 +26,7 @@ passport.use(
 
         if (!user) {
           const username = genUsername(profile._json.given_name!);
-          const role = (await isFirstUser()) ? 'admin' : 'user';
+          const role = (await isFirstUser()) ? 'superadmin' : 'user';
 
           user = await User.create({
             email: profile._json.email,
@@ -38,9 +38,12 @@ passport.use(
             role,
           });
 
-          logger.info('new user registered with google', {
-            email: user.email,
-          });
+          logger.info(
+            role === 'superadmin'
+              ? 'first account registered with google - granted superadmin role'
+              : 'new user registered with google',
+            { email: user.email },
+          );
         }
 
         done(null, user);

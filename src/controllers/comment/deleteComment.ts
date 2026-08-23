@@ -5,6 +5,7 @@ import catchAsync from '@/utils/catchAsync';
 import { logger } from '@/lib/winston';
 import { deleteNotification } from '@/utils/deleteNotification';
 import { Request, Response, NextFunction } from 'express';
+import { canModerate } from '@/functions/role';
 
 export const deleteComment = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -17,7 +18,7 @@ export const deleteComment = catchAsync(
     if (!comment) return next(new appError('comment not found', 404));
 
     const isOwner = comment.user.toString() === req.currentuser?._id.toString();
-    const isAdmin = req.currentuser?.role === 'admin';
+    const isAdmin = canModerate(req.currentuser?.role);
 
     if (!isOwner && !isAdmin) {
       return next(new appError('You are not the owner of this comment', 403));

@@ -33,7 +33,7 @@ export const register = catchAsync(
 
     const username = genUsername(firstName);
 
-    const role = (await isFirstUser()) ? 'admin' : 'user';
+    const role = (await isFirstUser()) ? 'superadmin' : 'user';
     const plainToken = crypto.randomBytes(32).toString('hex');
     const hashedToken = crypto
       .createHash('sha256')
@@ -53,8 +53,8 @@ export const register = catchAsync(
     if (!newUser)
       return next(new appError('something went wrong while signning up', 400));
 
-    if (role === 'admin') {
-      logger.info('first account registered - granted admin role', {
+    if (role === 'superadmin') {
+      logger.info('first account registered - granted superadmin role', {
         Email: newUser.email,
         username: newUser.username,
       });

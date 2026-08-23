@@ -19,7 +19,7 @@ export interface IUser {
   following: number;
   active: boolean;
   public: boolean;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'superadmin';
   hometown?: string;
   currentCity?: string;
   about?: string;
@@ -109,7 +109,7 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ['user', 'admin'],
+      enum: ['user', 'admin', 'superadmin'],
       default: 'user',
     },
     about: String,
