@@ -1,6 +1,7 @@
 import cloudinary from '@/config/cloudinaryConfig';
 import { canModerate } from '@/functions/role';
 import { logger } from '@/lib/winston';
+import { sendNotification } from '@/utils/sendNotification';
 import Like from '@/models/likeModel';
 import Post from '@/models/postModel';
 import appError from '@/utils/appError';
@@ -35,12 +36,25 @@ export const deletePost = catchAsync(
 
     await deletedPost?.deleteOne();
 
-    // TODO: add a notification to the post author if an admin deleted their post
-
     if (isAdmin && !isOwner) {
       logger.info(
         `admin: ${req.currentuser?._id} removed post ${id} belonging to ${deletedPost.author}`,
       );
+
+      try {
+        await sendNotification({
+          recipient: deletedPost.author,
+          sender: req.currentuser!._id,
+          type: 'post_removed',
+          post: id,
+        });
+      } catch (err) {
+        logger.error('failed to send post_removed notification', {
+          postId: id,
+          recipient: deletedPost.author,
+          err,
+        });
+      }
     } else {
       logger.info(`user: ${req.currentuser?._id} delete post ${id}`);
     }

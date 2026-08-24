@@ -4,6 +4,7 @@ import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { logger } from '@/lib/winston';
 import { deleteNotification } from '@/utils/deleteNotification';
+import { sendNotification } from '@/utils/sendNotification';
 import { Request, Response, NextFunction } from 'express';
 import { canModerate } from '@/functions/role';
 
@@ -42,11 +43,26 @@ export const deleteComment = catchAsync(
       }),
     ]);
 
-    // TODO: add a notification to the comment author if an admin deleted their comment
     if (isAdmin && !isOwner) {
       logger.info(
         `admin: ${req.currentuser?._id} removed comment ${commentId} belonging to ${comment.user}`,
       );
+
+      try {
+        await sendNotification({
+          recipient: comment.user,
+          sender: req.currentuser!._id,
+          type: 'comment_removed',
+          post: postId,
+          comment: commentId,
+        });
+      } catch (err) {
+        logger.error('failed to send comment_removed notification', {
+          commentId,
+          recipient: comment.user,
+          err,
+        });
+      }
     }
 
     res.status(204).send();

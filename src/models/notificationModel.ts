@@ -11,7 +11,9 @@ export interface INotification {
     | 'comment_reply'
     | 'follow'
     | 'follow_request'
-    | 'follow_accept';
+    | 'follow_accept'
+    | 'post_removed'
+    | 'comment_removed';
   post?: Types.ObjectId;
   comment?: Types.ObjectId;
   story?: Types.ObjectId;
@@ -41,6 +43,8 @@ const notificationSchema = new Schema<INotification>(
         'follow',
         'follow_request',
         'follow_accept',
+        'post_removed',
+        'comment_removed',
       ],
       required: true,
     },
