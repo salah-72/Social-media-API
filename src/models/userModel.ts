@@ -18,6 +18,10 @@ export interface IUser {
   followers: number;
   following: number;
   active: boolean;
+  banned: boolean;
+  bannedBy?: Types.ObjectId;
+  bannedAt?: Date;
+  banReason?: string;
   public: boolean;
   role: 'user' | 'admin' | 'superadmin';
   hometown?: string;
@@ -102,6 +106,19 @@ const userSchema = new mongoose.Schema<IUser>(
     active: {
       type: Boolean,
       default: true,
+    },
+    banned: {
+      type: Boolean,
+      default: false,
+    },
+    bannedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    bannedAt: Date,
+    banReason: {
+      type: String,
+      maxLength: [500, 'ban reason must be less than 500 char'],
     },
     public: {
       type: Boolean,
