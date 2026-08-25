@@ -43,6 +43,7 @@ import {
 import { validateRequest } from '@/middlewares/validation';
 import { loadBlockList } from '@/middlewares/blocks';
 import { banUser } from '@/controllers/User/banUser';
+import { unbanUser } from '@/controllers/User/unbanUser';
 
 const router = Router();
 
@@ -1913,4 +1914,37 @@ router.patch(
   banUser,
 );
 
+/**
+ * @swagger
+ * /users/{id}/unban:
+ *   patch:
+ *     summary: Lift a ban on a user's account (admin/superadmin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User unbanned
+ *       400:
+ *         description: User is not currently banned
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Caller doesn't have permission to unban this user
+ *       404:
+ *         description: User not found
+ */
+router.patch(
+  '/:id/unban',
+  authenticate,
+  restrictTo('superadmin', 'admin'),
+  validateRequest({ params: userIdValidation }),
+  unbanUser,
+);
 export default router;
