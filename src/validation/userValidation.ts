@@ -97,3 +97,7 @@ export const usersValidation = z.object({
     .default(10)
     .optional(),
 });
+
+export const banUserValidation = z.object({
+  reason: z.string().max(500).trim().optional(),
+});

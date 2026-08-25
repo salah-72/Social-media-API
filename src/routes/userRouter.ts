@@ -38,9 +38,11 @@ import {
   usernameValidation,
   usersValidation,
   updateUserRoleValidation,
+  banUserValidation,
 } from '@/validation/userValidation';
 import { validateRequest } from '@/middlewares/validation';
 import { loadBlockList } from '@/middlewares/blocks';
+import { banUser } from '@/controllers/User/banUser';
 
 const router = Router();
 
@@ -1860,6 +1862,55 @@ router.patch(
   restrictTo('superadmin'),
   validateRequest({ params: userIdValidation, body: updateUserRoleValidation }),
   updateUserRole,
+);
+
+/**
+ * @swagger
+ * /users/{id}/ban:
+ *   patch:
+ *     summary: Ban a user's account (admin/superadmin only)
+ *     description: >
+ *       Admins can only ban plain users. Only a superadmin can ban
+ *       another admin or superadmin - see canModerateUser in
+ *       functions/roles.ts.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               reason:
+ *                 type: string
+ *                 maxLength: 500
+ *     responses:
+ *       200:
+ *         description: User banned
+ *       400:
+ *         description: Invalid request (e.g. banning yourself, already banned)
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Caller doesn't have permission to ban this user
+ *       404:
+ *         description: User not found
+ */
+router.patch(
+  '/:id/ban',
+  authenticate,
+  isActive,
+  restrictTo('superadmin', 'admin'),
+  validateRequest({ params: userIdValidation, body: banUserValidation }),
+  banUser,
 );
 
 export default router;
