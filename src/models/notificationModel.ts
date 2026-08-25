@@ -13,7 +13,9 @@ export interface INotification {
     | 'follow_request'
     | 'follow_accept'
     | 'post_removed'
-    | 'comment_removed';
+    | 'comment_removed'
+    | 'account_banned'
+    | 'account_unbanned';
   post?: Types.ObjectId;
   comment?: Types.ObjectId;
   story?: Types.ObjectId;
@@ -45,6 +47,8 @@ const notificationSchema = new Schema<INotification>(
         'follow_accept',
         'post_removed',
         'comment_removed',
+        'account_banned',
+        'account_unbanned',
       ],
       required: true,
     },
