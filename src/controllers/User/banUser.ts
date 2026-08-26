@@ -7,6 +7,7 @@ import Token from '@/models/tokenModel';
 import { logger } from '@/lib/winston';
 import { sendNotification } from '@/utils/sendNotification';
 import { sendResponse } from '@/utils/sendResponse';
+import { invalidateUserCache } from '@/utils/getUsersFromCache';
 
 export const banUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -38,6 +39,7 @@ export const banUser = catchAsync(
     user.bannedAt = new Date();
     if (reason) user.banReason = reason;
     await user.save();
+    await invalidateUserCache(user._id);
 
     await Token.updateMany(
       { userId: user._id, revoked: false },

@@ -4,6 +4,7 @@ import catchAsync from '@/utils/catchAsync';
 import { sendResponse } from '@/utils/sendResponse';
 import appError from '@/utils/appError';
 import { Request, Response, NextFunction } from 'express';
+import { invalidateUserCache } from '@/utils/getUsersFromCache';
 
 export const activeMe = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -15,6 +16,7 @@ export const activeMe = catchAsync(
         ),
       );
     await User.updateOne({ _id: req.currentuser?._id }, { active: true });
+    if (req.currentuser?._id) await invalidateUserCache(req.currentuser._id);
 
     logger.info('user active his account again', { id: req.currentuser?._id });
 

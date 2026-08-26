@@ -1,6 +1,15 @@
 import { logger } from '@/lib/winston';
 import User from '@/models/userModel';
 import redisClient from '@/utils/redis';
+import { Types } from 'mongoose';
+
+export const invalidateUserCache = async (userId: string | Types.ObjectId) => {
+  try {
+    await redisClient.del(`user:${userId}`);
+  } catch {
+    logger.warn('Redis del failed in invalidateUserCache');
+  }
+};
 
 export const getUsersFromCache = async (userIds: string[]) => {
   const cacheKeys = userIds.map((id) => `user:${id}`);

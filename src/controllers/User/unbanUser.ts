@@ -5,6 +5,7 @@ import catchAsync from '@/utils/catchAsync';
 import { sendResponse } from '@/utils/sendResponse';
 import { sendNotification } from '@/utils/sendNotification';
 import { canModerateUser } from '@/functions/role';
+import { invalidateUserCache } from '@/utils/getUsersFromCache';
 import { Request, Response, NextFunction } from 'express';
 
 export const unbanUser = catchAsync(
@@ -28,6 +29,7 @@ export const unbanUser = catchAsync(
     target.bannedAt = undefined;
     target.banReason = undefined;
     await target.save();
+    await invalidateUserCache(target._id);
 
     logger.info('user unbanned', {
       targetUser: target._id,
