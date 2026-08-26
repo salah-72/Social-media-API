@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 
 export const isActive = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.currentuser?.active)
+    if (!req.currentuser?.active || req.currentuser?.banned)
       return next(new appError('your account is deleted or banned', 404));
 
     next();

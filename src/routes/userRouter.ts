@@ -1943,6 +1943,7 @@ router.patch(
 router.patch(
   '/:id/unban',
   authenticate,
+  isActive,
   restrictTo('superadmin', 'admin'),
   validateRequest({ params: userIdValidation }),
   unbanUser,
