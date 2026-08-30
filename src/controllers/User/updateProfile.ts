@@ -3,7 +3,7 @@ import User from '@/models/userModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
-import redisClient from '@/utils/redis';
+import { invalidateUserCache } from '@/utils/getUsersFromCache';
 import { sendResponse } from '@/utils/sendResponse';
 
 const allowedFeilds = [
@@ -49,22 +49,11 @@ export const updateProfileInfo = catchAsync(
       runValidators: true,
     });
 
+    if (!user) return next(new appError('user not found', 404));
+
     logger.info('user updated his profile info', { id: req.currentuser?._id });
 
-    try {
-      await redisClient.set(
-        `user:${user!._id}`,
-        JSON.stringify({
-          username: user!.username,
-          profilePhoto: user!.profilePhoto,
-          firstName: user!.firstName,
-          lastName: user!.lastName,
-        }),
-        { EX: 24 * 60 * 60 },
-      );
-    } catch {
-      logger.warn('Redis set failed in updateProfileInfo for user');
-    }
+    await invalidateUserCache(user._id);
 
     sendResponse(res, 200, undefined, { message: 'profile updated' });
   },

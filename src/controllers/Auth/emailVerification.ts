@@ -3,6 +3,7 @@ import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import User from '@/models/userModel';
+import { invalidateUserCache } from '@/utils/getUsersFromCache';
 import { logger } from '@/lib/winston';
 import { sendResponse } from '@/utils/sendResponse';
 
@@ -26,6 +27,8 @@ export const emailVerification = catchAsync(
     user.emailVerified = true;
 
     await user.save({ validateBeforeSave: false });
+
+    await invalidateUserCache(user._id);
 
     sendResponse(res, 200);
 

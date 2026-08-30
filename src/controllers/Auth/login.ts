@@ -64,10 +64,17 @@ export const login = catchAsync(
       await redisClient.set(
         `user:${user._id}`,
         JSON.stringify({
+          _id: user._id,
           username: user.username,
           profilePhoto: user.profilePhoto,
           firstName: user.firstName,
           lastName: user.lastName,
+          email: user.email,
+          emailVerified: user.emailVerified,
+          active: user.active,
+          banned: user.banned,
+          role: user.role,
+          public: user.public,
         }),
         { EX: 24 * 60 * 60 },
       );

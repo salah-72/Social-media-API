@@ -4,7 +4,7 @@ import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { uploadToCloudinary } from '@/utils/cloudinaryUpload';
 import { Request, Response, NextFunction } from 'express';
-import redisClient from '@/utils/redis';
+import { invalidateUserCache } from '@/utils/getUsersFromCache';
 import { sendResponse } from '@/utils/sendResponse';
 
 export const uploadProfilePic = catchAsync(
@@ -21,22 +21,11 @@ export const uploadProfilePic = catchAsync(
       { new: true },
     );
 
+    if (!user) return next(new appError('user not found', 404));
+
     logger.info('user changed his profile photo', { id: req.currentuser?._id });
 
-    try {
-      await redisClient.set(
-        `user:${user!._id}`,
-        JSON.stringify({
-          username: user!.username,
-          profilePhoto: user!.profilePhoto,
-          firstName: user!.firstName,
-          lastName: user!.lastName,
-        }),
-        { EX: 24 * 60 * 60 },
-      );
-    } catch {
-      logger.warn('Redis set failed in uploadProfilePic for user');
-    }
+    await invalidateUserCache(user._id);
 
     sendResponse(res, 200, undefined, { message: 'photo updated' });
   },
