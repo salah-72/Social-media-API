@@ -1,12 +1,11 @@
 import { logger } from '@/lib/winston';
 import User from '@/models/userModel';
 import Token from '@/models/tokenModel';
-import BlackList from '@/models/blackListTokensModel';
 import config from '@/config/config';
 import { invalidateUserCache } from '@/utils/getUsersFromCache';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
+import { blacklistToken } from '@/utils/tokenBlacklist';
 
 export const deleteMe = catchAsync(async (req: Request, res: Response) => {
   const userId = req.currentuser?._id;
@@ -20,13 +19,7 @@ export const deleteMe = catchAsync(async (req: Request, res: Response) => {
     { revoked: true, revokedAt: new Date() },
   );
 
-  if (accessToken) {
-    const decoded = jwt.decode(accessToken) as { exp: number };
-    const expiryDate = decoded?.exp
-      ? new Date(decoded.exp * 1000)
-      : new Date(Date.now() + 15 * 60 * 1000);
-    await BlackList.create({ token: accessToken, expiredAt: expiryDate });
-  }
+  if (accessToken) await blacklistToken(accessToken);
 
   res.clearCookie('refreshToken', {
     httpOnly: true,
