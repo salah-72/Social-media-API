@@ -6,6 +6,7 @@ import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import BlackList from '@/models/blackListTokensModel';
+import { getAuthUser } from '@/utils/getUsersFromCache';
 
 interface JwtRefreshPayload extends jwt.JwtPayload {
   userId: Types.ObjectId;
@@ -31,7 +32,7 @@ export const authenticate = catchAsync(
       config.JWT_ACCESS_KEY,
     ) as JwtRefreshPayload;
 
-    const user = await User.findById(payload._id);
+    const user = await getAuthUser(payload._id.toString());
 
     if (!user)
       return next(
