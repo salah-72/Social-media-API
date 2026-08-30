@@ -19,7 +19,7 @@ export type AuthUser = Pick<
 >;
 
 const CACHED_FIELDS =
-  'username profilePhoto firstName lastName email emailVerified active banned role public';
+  '_id username profilePhoto firstName lastName email emailVerified active banned role public';
 
 export const invalidateUserCache = async (userId: string | Types.ObjectId) => {
   try {
