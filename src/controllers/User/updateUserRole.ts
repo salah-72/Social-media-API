@@ -3,6 +3,7 @@ import User from '@/models/userModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { sendResponse } from '@/utils/sendResponse';
+import { invalidateUserCache } from '@/utils/getUsersFromCache';
 import { Request, Response, NextFunction } from 'express';
 
 export const updateUserRole = catchAsync(
@@ -26,6 +27,8 @@ export const updateUserRole = catchAsync(
 
     user.role = role;
     await user.save();
+
+    await invalidateUserCache(user._id);
 
     logger.info('user role changed', {
       targetUser: user._id,
