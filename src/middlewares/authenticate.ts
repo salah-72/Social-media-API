@@ -1,12 +1,11 @@
 import config from '@/config/config';
-import User from '@/models/userModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 import jwt from 'jsonwebtoken';
-import BlackList from '@/models/blackListTokensModel';
 import { getAuthUser } from '@/utils/getUsersFromCache';
+import { isTokenBlacklisted } from '@/utils/tokenBlacklist';
 
 interface JwtRefreshPayload extends jwt.JwtPayload {
   userId: Types.ObjectId;
@@ -20,7 +19,7 @@ export const authenticate = catchAsync(
 
     const token = auth.split(' ')[1];
 
-    const isBlacklisted = await BlackList.exists({ token });
+    const isBlacklisted = await isTokenBlacklisted(token);
 
     if (isBlacklisted)
       return next(
