@@ -36,16 +36,17 @@ mongoose
 
 const corsOptions: CorsOptions = {
   origin(origin, callback) {
-    if (config.NODE_ENV === 'development' || !origin) {
-      callback(null, true);
-    } else {
-      callback(
-        new Error(`CORS error: ${origin} is not allowed by CORS`),
-        false,
-      );
-      logger.warn(`CORS error: ${origin} is not allowed by CORS`);
+    if (!origin) return callback(null, true);
+    if (config.NODE_ENV === 'development') return callback(null, true);
+
+    if (origin === config.CLIENT_URL) {
+      return callback(null, true);
     }
+
+    logger.warn(`CORS error: ${origin} is not allowed by CORS`);
+    callback(new Error(`CORS error: ${origin} is not allowed by CORS`), false);
   },
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
