@@ -4,6 +4,7 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import jwt from 'jsonwebtoken';
 import config from '@/config/config';
 import redisClient, { subClient } from '@/utils/redis';
+import { getAuthUser } from '@/utils/getUsersFromCache';
 import { logger } from '@/lib/winston';
 
 let io: Server;
@@ -28,6 +29,12 @@ export const initSocket = async (httpServer: HttpServer) => {
       const payload = jwt.verify(token, config.JWT_ACCESS_KEY) as {
         _id: string;
       };
+
+      const user = await getAuthUser(payload._id.toString());
+      if (!user || !user.active || user.banned || !user.emailVerified) {
+        return next(new Error('account not allowed to connect'));
+      }
+
       socket.data.userId = payload._id.toString();
       next();
     } catch {
