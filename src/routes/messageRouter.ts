@@ -1,8 +1,9 @@
 import Router from 'express';
 import { sendMessage } from '@/controllers/message/sendMessage';
+import { deleteMessage } from '@/controllers/message/deleteMessage';
 import {
   sendMessageValidation,
-  userIdParamValidation,
+  IdParamValidation,
   getConversationsValidation,
 } from '@/validation/messageValidation';
 import { validateRequest } from '@/middlewares/validation';
@@ -173,9 +174,51 @@ router.post(
   isTargetUserAvailable,
   upload.single('image'),
   validateRequest({
-    params: userIdParamValidation,
+    params: IdParamValidation,
     body: sendMessageValidation,
   }),
   sendMessage,
+);
+
+/**
+ * @swagger
+ * /api/v1/messages/{messageId}:
+ *   delete:
+ *     summary: Delete a message
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: messageId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       204:
+ *         description: message deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       400:
+ *         description: Invalid message id
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Message not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.delete(
+  '/:id',
+  authenticate,
+  isActive,
+  validateRequest({ params: IdParamValidation }),
+  deleteMessage,
 );
 export default router;
