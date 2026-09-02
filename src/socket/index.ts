@@ -99,3 +99,19 @@ export const removeRealtimeNotification = async (
 ) => {
   io.to(`user:${recipientId}`).emit('remove_notification', { notificationId });
 };
+
+export const sendRealtimeMessage = async (
+  recipientId: string,
+  data: object,
+) => {
+  if (!io) return;
+  io.to(`user:${recipientId}`).emit('new_message', data);
+};
+
+export const sendRealtimeReadReceipt = async (
+  recipientId: string,
+  data: object,
+) => {
+  if (!io) return;
+  io.to(`user:${recipientId}`).emit('message_read', data);
+};
