@@ -13,6 +13,7 @@ import authRouter from '@/routes/authRouter';
 import userRouter from '@/routes/userRouter';
 import postRouter from '@/routes/postRouter';
 import storyRouter from '@/routes/storyRouter';
+import messageRouter from '@/routes/messageRouter';
 import notificationRouter from '@/routes/notificationRouter';
 import errorHandler from './middlewares/errorHandler';
 import passport from 'passport';
@@ -106,6 +107,7 @@ app.use('/api/v1/user', userRouter);
 app.use('/api/v1/post', postRouter);
 app.use('/api/v1/story', storyRouter);
 app.use('/api/v1/notification', notificationRouter);
+app.use('/api/v1/messages', messageRouter);
 
 app.use(errorHandler);
 
