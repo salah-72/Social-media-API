@@ -1,7 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import Message from '@/models/messageModel';
+import Conversation from '@/models/conversationModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
+import { deleteRealtimeMessage } from '@/socket';
+import { logger } from '@/lib/winston';
 
 export const deleteMessage = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -19,7 +22,32 @@ export const deleteMessage = catchAsync(
       );
     }
 
+    const conversation = await Conversation.findById(message.conversation);
+    if (!conversation) {
+      return next(new appError('Conversation not found', 404));
+    }
+
     await message.deleteOne();
+
+    if (conversation.lastMessageAt?.getTime() === message.createdAt.getTime()) {
+      conversation.lastMessage = 'Message deleted';
+      await conversation.save();
+    }
+
+    const recipientId = conversation.participants.find(
+      (p) => p.toString() !== userId.toString(),
+    );
+    if (recipientId) {
+      try {
+        await deleteRealtimeMessage(
+          recipientId.toString(),
+          message._id.toString(),
+          conversation._id.toString(),
+        );
+      } catch (err) {
+        logger.error('Failed to send realtime message deletion:', err);
+      }
+    }
 
     res.status(204).send();
   },

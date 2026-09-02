@@ -108,6 +108,17 @@ export const sendRealtimeMessage = async (
   io.to(`user:${recipientId}`).emit('new_message', data);
 };
 
+export const deleteRealtimeMessage = async (
+  recipientId: string,
+  messageId: string,
+  conversationId: string,
+) => {
+  io.to(`user:${recipientId}`).emit('delete_message', {
+    messageId,
+    conversationId,
+  });
+};
+
 export const sendRealtimeReadReceipt = async (
   recipientId: string,
   data: object,
