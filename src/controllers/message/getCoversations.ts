@@ -9,7 +9,7 @@ export const getConversations = catchAsync(
   async (req: Request, res: Response) => {
     const userId = req.currentuser!._id;
     const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 10;
+    const limit = Number(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
     const [conversations, total] = await Promise.all([

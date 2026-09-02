@@ -12,3 +12,8 @@ export const sendMessageValidation = z.object({
     .max(2000, 'Message content cannot exceed 2000 characters')
     .optional(),
 });
+
+export const getConversationsValidation = z.object({
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(20).optional(),
+});
