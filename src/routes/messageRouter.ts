@@ -14,6 +14,7 @@ import { upload } from '@/middlewares/multer';
 import { rateLimit } from '@/middlewares/rateLimit';
 import { getConversations } from '@/controllers/message/getCoversations';
 import { getMessages } from '@/controllers/message/getMessages';
+import { markConversationRead } from '@/controllers/message/markConversationRead';
 
 const router = Router();
 
@@ -329,5 +330,47 @@ router.delete(
   isActive,
   validateRequest({ params: IdParamValidation }),
   deleteMessage,
+);
+
+/**
+ * @swagger
+ * /api/v1/messages/{id}/read:
+ *   patch:
+ *     summary: Mark every message the other participant sent as read
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Marked as read
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       403:
+ *         description: Not a participant in this conversation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Conversation not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.patch(
+  '/:id/read',
+  authenticate,
+  isActive,
+  validateRequest({ params: IdParamValidation }),
+  markConversationRead,
 );
 export default router;
