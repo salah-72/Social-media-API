@@ -13,6 +13,7 @@ import { isTargetUserAvailable } from '@/middlewares/isTargetUserAvailable';
 import { upload } from '@/middlewares/multer';
 import { rateLimit } from '@/middlewares/rateLimit';
 import { getConversations } from '@/controllers/message/getCoversations';
+import { getMessages } from '@/controllers/message/getMessages';
 
 const router = Router();
 
@@ -122,6 +123,114 @@ router.get(
   isActive,
   validateRequest({ query: getConversationsValidation }),
   getConversations,
+);
+
+/**
+ * @swagger
+ * /api/v1/messages/{id}:
+ *   get:
+ *     summary: Get messages in a conversation, newest to oldest
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 30
+ *     responses:
+ *       200:
+ *         description: Paginated messages
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 20
+ *                     total:
+ *                       type: integer
+ *                       example: 5
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 1
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     messages:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: 64a7b8f8e4b0c2a1d8f9c1a2
+ *                           conversation:
+ *                             type: string
+ *                             example: 64a7b8f8e4b0c2a1d8f9c1a2
+ *                           sender:
+ *                             type: string
+ *                             example: 64a7b8f8e4b0c2a1d8f9c1a2
+ *                           content:
+ *                             type: string
+ *                             example: Hello, how are you?
+ *                           image:
+ *                             type: string
+ *                             example: https://example.com/image.jpg
+ *                           readAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: 2023-07-01T12:34:56.789Z
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: 2023-07-01T12:34:56.789Z
+ *       403:
+ *         description: Not a participant in this conversation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Conversation not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.get(
+  '/:id',
+  authenticate,
+  isActive,
+  validateRequest({
+    params: IdParamValidation,
+    query: getConversationsValidation,
+  }),
+  getMessages,
 );
 
 /**
