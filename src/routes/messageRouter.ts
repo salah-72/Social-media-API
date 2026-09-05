@@ -5,6 +5,7 @@ import {
   sendMessageValidation,
   IdParamValidation,
   getConversationsValidation,
+  searchMessagesValidation,
 } from '@/validation/messageValidation';
 import { validateRequest } from '@/middlewares/validation';
 import { authenticate } from '@/middlewares/authenticate';
@@ -15,6 +16,7 @@ import { rateLimit } from '@/middlewares/rateLimit';
 import { getConversations } from '@/controllers/message/getCoversations';
 import { getMessages } from '@/controllers/message/getMessages';
 import { markConversationRead } from '@/controllers/message/markConversationRead';
+import { searchMessages } from '@/controllers/message/searchMessages';
 
 const router = Router();
 
@@ -124,6 +126,110 @@ router.get(
   isActive,
   validateRequest({ query: getConversationsValidation }),
   getConversations,
+);
+
+/**
+ * @swagger
+ * /api/v1/messages/search:
+ *   get:
+ *     summary: Search your own message history by keyword
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *     responses:
+ *       200:
+ *         description: Matching messages, most recent first
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 20
+ *                     total:
+ *                       type: integer
+ *                       example: 5
+ *                     noOfPages:
+ *                       type: integer
+ *                       example: 1
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     messages:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: 64a7b8f8e4b0c2a1d8f9c1a2
+ *                           conversation:
+ *                             type: string
+ *                             example: 64a7b8f8e4b0c2a1d8f9c1a2
+ *                           sender:
+ *                             type: object
+ *                             properties:
+ *                               username:
+ *                                 type: string
+ *                                 example: ahmed123
+ *                               profilePhoto:
+ *                                 type: string
+ *                                 example: https://example.com/image.jpg
+ *                               firstName:
+ *                                 type: string
+ *                                 example: Ahmed
+ *                               lastName:
+ *                                 type: string
+ *                                 example: Salah
+ *                           content:
+ *                             type: string
+ *                             example: Hello, how are you?
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: 2023-07-01T12:34:56.789Z
+ *       401:
+ *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.get(
+  '/search',
+  authenticate,
+  isActive,
+  validateRequest({ query: searchMessagesValidation }),
+  searchMessages,
 );
 
 /**
