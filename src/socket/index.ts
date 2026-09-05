@@ -58,6 +58,38 @@ export const initSocket = async (httpServer: HttpServer) => {
       logger.error(`Socket error for user ${userId}:`, err);
     });
 
+    socket.on(
+      'typing',
+      ({
+        conversationId,
+        recipientId,
+      }: {
+        conversationId: string;
+        recipientId: string;
+      }) => {
+        io.to(`user:${recipientId}`).emit('typing', {
+          conversationId,
+          userId,
+        });
+      },
+    );
+
+    socket.on(
+      'stop_typing',
+      ({
+        conversationId,
+        recipientId,
+      }: {
+        conversationId: string;
+        recipientId: string;
+      }) => {
+        io.to(`user:${recipientId}`).emit('stop_typing', {
+          conversationId,
+          userId,
+        });
+      },
+    );
+
     socket.on('disconnect', async () => {
       logger.info(`User ${userId} disconnected from socket: ${socket.id}`);
       try {
