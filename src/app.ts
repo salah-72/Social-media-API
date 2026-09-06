@@ -13,6 +13,7 @@ import authRouter from '@/routes/authRouter';
 import userRouter from '@/routes/userRouter';
 import postRouter from '@/routes/postRouter';
 import storyRouter from '@/routes/storyRouter';
+import messageRouter from '@/routes/messageRouter';
 import notificationRouter from '@/routes/notificationRouter';
 import errorHandler from './middlewares/errorHandler';
 import passport from 'passport';
@@ -36,16 +37,17 @@ mongoose
 
 const corsOptions: CorsOptions = {
   origin(origin, callback) {
-    if (config.NODE_ENV === 'development' || !origin) {
-      callback(null, true);
-    } else {
-      callback(
-        new Error(`CORS error: ${origin} is not allowed by CORS`),
-        false,
-      );
-      logger.warn(`CORS error: ${origin} is not allowed by CORS`);
+    if (!origin) return callback(null, true);
+    if (config.NODE_ENV === 'development') return callback(null, true);
+
+    if (origin === config.CLIENT_URL) {
+      return callback(null, true);
     }
+
+    logger.warn(`CORS error: ${origin} is not allowed by CORS`);
+    callback(new Error(`CORS error: ${origin} is not allowed by CORS`), false);
   },
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
@@ -105,6 +107,7 @@ app.use('/api/v1/user', userRouter);
 app.use('/api/v1/post', postRouter);
 app.use('/api/v1/story', storyRouter);
 app.use('/api/v1/notification', notificationRouter);
+app.use('/api/v1/messages', messageRouter);
 
 app.use(errorHandler);
 

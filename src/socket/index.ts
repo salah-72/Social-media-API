@@ -4,6 +4,7 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import jwt from 'jsonwebtoken';
 import config from '@/config/config';
 import redisClient, { subClient } from '@/utils/redis';
+import { getAuthUser } from '@/utils/getUsersFromCache';
 import { logger } from '@/lib/winston';
 
 let io: Server;
@@ -28,6 +29,12 @@ export const initSocket = async (httpServer: HttpServer) => {
       const payload = jwt.verify(token, config.JWT_ACCESS_KEY) as {
         _id: string;
       };
+
+      const user = await getAuthUser(payload._id.toString());
+      if (!user || !user.active || user.banned || !user.emailVerified) {
+        return next(new Error('account not allowed to connect'));
+      }
+
       socket.data.userId = payload._id.toString();
       next();
     } catch {
@@ -50,6 +57,38 @@ export const initSocket = async (httpServer: HttpServer) => {
     socket.on('error', (err) => {
       logger.error(`Socket error for user ${userId}:`, err);
     });
+
+    socket.on(
+      'typing',
+      ({
+        conversationId,
+        recipientId,
+      }: {
+        conversationId: string;
+        recipientId: string;
+      }) => {
+        io.to(`user:${recipientId}`).emit('typing', {
+          conversationId,
+          userId,
+        });
+      },
+    );
+
+    socket.on(
+      'stop_typing',
+      ({
+        conversationId,
+        recipientId,
+      }: {
+        conversationId: string;
+        recipientId: string;
+      }) => {
+        io.to(`user:${recipientId}`).emit('stop_typing', {
+          conversationId,
+          userId,
+        });
+      },
+    );
 
     socket.on('disconnect', async () => {
       logger.info(`User ${userId} disconnected from socket: ${socket.id}`);
@@ -91,4 +130,31 @@ export const removeRealtimeNotification = async (
   notificationId: string,
 ) => {
   io.to(`user:${recipientId}`).emit('remove_notification', { notificationId });
+};
+
+export const sendRealtimeMessage = async (
+  recipientId: string,
+  data: object,
+) => {
+  if (!io) return;
+  io.to(`user:${recipientId}`).emit('new_message', data);
+};
+
+export const deleteRealtimeMessage = async (
+  recipientId: string,
+  messageId: string,
+  conversationId: string,
+) => {
+  io.to(`user:${recipientId}`).emit('delete_message', {
+    messageId,
+    conversationId,
+  });
+};
+
+export const sendRealtimeReadReceipt = async (
+  recipientId: string,
+  data: object,
+) => {
+  if (!io) return;
+  io.to(`user:${recipientId}`).emit('message_read', data);
 };
