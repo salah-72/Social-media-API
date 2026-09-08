@@ -39,3 +39,7 @@ export const createGroupValidation = z.object({
     .array(z.string().min(1))
     .min(2, 'a group needs at least 2 other members'),
 });
+
+export const addGroupMemberValidation = z.object({
+  memberId: z.string().min(1),
+});
