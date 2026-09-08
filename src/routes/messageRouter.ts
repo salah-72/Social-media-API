@@ -21,6 +21,7 @@ import { markConversationRead } from '@/controllers/message/markConversationRead
 import { searchMessages } from '@/controllers/message/searchMessages';
 import { createGroup } from '@/controllers/message/createGroup';
 import { addGroupMember } from '@/controllers/message/addGroupMember';
+import { getGroupInfo } from '@/controllers/message/getGroupInfo';
 
 const router = Router();
 
@@ -171,49 +172,6 @@ router.post(
   isActive,
   validateRequest({ body: createGroupValidation }),
   createGroup,
-);
-
-/**
- * @swagger
- * /api/v1/messages/groups/{conversationId}/members:
- *   post:
- *     summary: Add a member to a group (admin only)
- *     tags: [Messages]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: conversationId
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [userId]
- *             properties:
- *               userId:
- *                 type: string
- *     responses:
- *       200:
- *         description: Member added
- *       403:
- *         description: Not a group admin, or the member is blocked
- *       404:
- *         description: Group or user not found
- */
-router.post(
-  '/groups/:id/members',
-  authenticate,
-  isActive,
-  validateRequest({
-    params: IdParamValidation,
-    body: addGroupMemberValidation,
-  }),
-  addGroupMember,
 );
 
 /**
@@ -426,6 +384,57 @@ router.get(
     query: getConversationsValidation,
   }),
   getMessages,
+);
+
+router.get(
+  '/groups/:id/info',
+  authenticate,
+  isActive,
+  validateRequest({ params: IdParamValidation }),
+  getGroupInfo,
+);
+
+/**
+ * @swagger
+ * /api/v1/messages/groups/{conversationId}/members:
+ *   post:
+ *     summary: Add a member to a group (admin only)
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: conversationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [userId]
+ *             properties:
+ *               userId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Member added
+ *       403:
+ *         description: Not a group admin, or the member is blocked
+ *       404:
+ *         description: Group or user not found
+ */
+router.post(
+  '/groups/:id/members',
+  authenticate,
+  isActive,
+  validateRequest({
+    params: IdParamValidation,
+    body: addGroupMemberValidation,
+  }),
+  addGroupMember,
 );
 
 /**
