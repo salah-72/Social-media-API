@@ -6,6 +6,7 @@ import {
   IdParamValidation,
   getConversationsValidation,
   searchMessagesValidation,
+  createGroupValidation,
 } from '@/validation/messageValidation';
 import { validateRequest } from '@/middlewares/validation';
 import { authenticate } from '@/middlewares/authenticate';
@@ -17,6 +18,7 @@ import { getConversations } from '@/controllers/message/getCoversations';
 import { getMessages } from '@/controllers/message/getMessages';
 import { markConversationRead } from '@/controllers/message/markConversationRead';
 import { searchMessages } from '@/controllers/message/searchMessages';
+import { createGroup } from '@/controllers/message/createGroup';
 
 const router = Router();
 
@@ -126,6 +128,47 @@ router.get(
   isActive,
   validateRequest({ query: getConversationsValidation }),
   getConversations,
+);
+
+/**
+ * @swagger
+ * /api/v1/messages/groups:
+ *   post:
+ *     summary: Create a group conversation (creator becomes the first admin)
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, memberIds]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               memberIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Everyone else in the group - at least 2 (a group needs 3+ total)
+ *     responses:
+ *       201:
+ *         description: Group created
+ *       400:
+ *         description: Fewer than 2 other members
+ *       403:
+ *         description: A member is blocked
+ *       404:
+ *         description: A member was not found, inactive, or unverified
+ */
+router.post(
+  '/groups',
+  authenticate,
+  isActive,
+  validateRequest({ body: createGroupValidation }),
+  createGroup,
 );
 
 /**

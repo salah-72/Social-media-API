@@ -27,3 +27,15 @@ export const searchMessagesValidation = z.object({
   page: z.coerce.number().int().min(1).default(1).optional(),
   limit: z.coerce.number().int().min(1).max(50).default(20).optional(),
 });
+
+export const createGroupValidation = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Group name is required')
+    .max(200, 'Group name must be at most 200 characters'),
+
+  memberIds: z
+    .array(z.string().min(1))
+    .min(2, 'a group needs at least 2 other members'),
+});
