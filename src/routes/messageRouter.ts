@@ -9,6 +9,7 @@ import {
   createGroupValidation,
   addGroupMemberValidation,
   updateGroupInfoValidation,
+  removeGroupMemberValidation,
 } from '@/validation/messageValidation';
 import { validateRequest } from '@/middlewares/validation';
 import { authenticate } from '@/middlewares/authenticate';
@@ -24,6 +25,7 @@ import { createGroup } from '@/controllers/message/createGroup';
 import { addGroupMember } from '@/controllers/message/addGroupMember';
 import { getGroupInfo } from '@/controllers/message/getGroupInfo';
 import { updateGroupInfo } from '@/controllers/message/updateGroupInfo';
+import { removeGroupMember } from '@/controllers/message/removeGroupMember';
 
 const router = Router();
 
@@ -481,6 +483,42 @@ router.post(
     body: addGroupMemberValidation,
   }),
   addGroupMember,
+);
+
+/**
+ * @swagger
+ * /api/v1/messages/groups/{conversationId}/members/{userId}:
+ *   delete:
+ *     summary: Remove a member from a group, or leave it yourself
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: conversationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Pass your own id to leave the group
+ *     responses:
+ *       204:
+ *         description: Removed
+ *       403:
+ *         description: Only a group admin can remove other members
+ *       404:
+ *         description: Group not found, or user is not a member
+ */
+router.delete(
+  '/groups/:id/members/:memberId',
+  authenticate,
+  isActive,
+  validateRequest({ params: removeGroupMemberValidation }),
+  removeGroupMember,
 );
 
 /**

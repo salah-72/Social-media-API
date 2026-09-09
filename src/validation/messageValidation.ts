@@ -52,3 +52,8 @@ export const updateGroupInfoValidation = z.object({
 export const addGroupMemberValidation = z.object({
   memberId: z.string().min(1),
 });
+
+export const removeGroupMemberValidation = z.object({
+  id: z.string().min(1, 'ID is required'),
+  memberId: z.string().min(1),
+});
