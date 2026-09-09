@@ -8,6 +8,7 @@ import {
   searchMessagesValidation,
   createGroupValidation,
   addGroupMemberValidation,
+  updateGroupInfoValidation,
 } from '@/validation/messageValidation';
 import { validateRequest } from '@/middlewares/validation';
 import { authenticate } from '@/middlewares/authenticate';
@@ -22,6 +23,7 @@ import { searchMessages } from '@/controllers/message/searchMessages';
 import { createGroup } from '@/controllers/message/createGroup';
 import { addGroupMember } from '@/controllers/message/addGroupMember';
 import { getGroupInfo } from '@/controllers/message/getGroupInfo';
+import { updateGroupInfo } from '@/controllers/message/updateGroupInfo';
 
 const router = Router();
 
@@ -394,6 +396,50 @@ router.get(
   getGroupInfo,
 );
 
+/**
+ * @swagger
+ * /api/v1/messages/groups/{id}:
+ *   patch:
+ *     summary: Update a group's name and/or photo (admin only)
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Updated
+ *       403:
+ *         description: Not a group admin
+ *       404:
+ *         description: Group not found
+ */
+router.patch(
+  '/groups/:id/info',
+  authenticate,
+  isActive,
+  upload.single('image'),
+  validateRequest({
+    params: IdParamValidation,
+    body: updateGroupInfoValidation,
+  }),
+  updateGroupInfo,
+);
 /**
  * @swagger
  * /api/v1/messages/groups/{conversationId}/members:

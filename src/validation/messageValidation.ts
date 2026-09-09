@@ -40,6 +40,15 @@ export const createGroupValidation = z.object({
     .min(2, 'a group needs at least 2 other members'),
 });
 
+export const updateGroupInfoValidation = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Group name is required')
+    .max(200, 'Group name must be at most 200 characters')
+    .optional(),
+});
+
 export const addGroupMemberValidation = z.object({
   memberId: z.string().min(1),
 });
