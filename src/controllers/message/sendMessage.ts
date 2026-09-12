@@ -3,15 +3,12 @@ import { Request, Response, NextFunction } from 'express';
 import { uploadToCloudinary } from '@/utils/cloudinaryUpload';
 import { generatePairKey } from '@/functions/generatePairKey';
 import Conversation from '@/models/conversationModel';
-import Message from '@/models/messageModel';
 import { Types } from 'mongoose';
-import { sendRealtimeMessage } from '@/socket/index';
-import { logger } from '@/lib/winston';
 import { sendResponse } from '@/utils/sendResponse';
 import { createMessage } from '@/functions/createMessage';
 
 export const sendMessage = catchAsync(
-  async (req: Request, res: Response, next: Function) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const recipientId = req.params.id;
     const senderId = req.currentuser!._id;
     const { content } = req.body as { content?: string };

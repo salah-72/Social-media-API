@@ -26,6 +26,7 @@ import { addGroupMember } from '@/controllers/message/addGroupMember';
 import { getGroupInfo } from '@/controllers/message/getGroupInfo';
 import { updateGroupInfo } from '@/controllers/message/updateGroupInfo';
 import { removeGroupMember } from '@/controllers/message/removeGroupMember';
+import { sendGroupMessage } from '@/controllers/message/sendGroupMessage';
 
 const router = Router();
 
@@ -396,6 +397,19 @@ router.get(
   isActive,
   validateRequest({ params: IdParamValidation }),
   getGroupInfo,
+);
+
+router.post(
+  '/groups/:id',
+  authenticate,
+  isActive,
+  sendMessageLimiter,
+  upload.single('image'),
+  validateRequest({
+    params: IdParamValidation,
+    body: sendMessageValidation,
+  }),
+  sendGroupMessage,
 );
 
 /**
