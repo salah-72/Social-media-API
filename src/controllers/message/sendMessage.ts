@@ -8,6 +8,7 @@ import { Types } from 'mongoose';
 import { sendRealtimeMessage } from '@/socket/index';
 import { logger } from '@/lib/winston';
 import { sendResponse } from '@/utils/sendResponse';
+import { createMessage } from '@/functions/createMessage';
 
 export const sendMessage = catchAsync(
   async (req: Request, res: Response, next: Function) => {
@@ -45,32 +46,12 @@ export const sendMessage = catchAsync(
       });
     }
 
-    const message = await Message.create({
-      conversation: conversation._id,
-      sender: senderId,
+    const message = await createMessage({
+      conversation,
+      senderId,
       content,
       image,
     });
-
-    conversation.lastMessage = content ?? '📷 Photo';
-    conversation.lastMessageAt = message.createdAt;
-    conversation.lastMessageSender = senderId;
-    await conversation.save();
-
-    try {
-      await sendRealtimeMessage(recipientId, {
-        conversationId: conversation._id,
-        message: {
-          _id: message._id,
-          sender: senderId,
-          content: message.content,
-          image: message.image,
-          createdAt: message.createdAt,
-        },
-      });
-    } catch (err) {
-      logger.warn('Failed to push realtime message', { err });
-    }
 
     sendResponse(res, 201, {
       message,
