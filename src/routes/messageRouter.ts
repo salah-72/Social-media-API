@@ -741,6 +741,7 @@ router.patch(
   }),
   updateGroupInfo,
 );
+
 /**
  * @swagger
  * /api/v1/messages/groups/{conversationId}/members:
@@ -765,13 +766,89 @@ router.patch(
  *             properties:
  *               userId:
  *                 type: string
+ *                 example: 6a3fc377e32ae2aedf336950
  *     responses:
  *       200:
  *         description: Member added
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     conversation:
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                           example: 6aa02310ed892f5a39ea4ba0
+ *                         isGroup:
+ *                           type: boolean
+ *                           example: true
+ *                         groupName:
+ *                           type: string
+ *                           example: safwa
+ *                         groupPhoto:
+ *                           type: object
+ *                           properties:
+ *                             url:
+ *                               type: string
+ *                               example: https://res.cloudinary.com/dfemcxcob/image/upload/v1788944379/img/yz2unmwcniotjicutzae.jpg
+ *                             publicId:
+ *                               type: string
+ *                               example: img/yz2unmwcniotjicutzae
+ *                         participants:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                           example:
+ *                             - 69ef462cc0c7b023c9fa5607
+ *                             - 69ee36aec636be6333be1bd0
+ *                             - 69ef452bbfc5e646a3cf291f
+ *                             - 6a3fc377e32ae2aedf336950
+ *                         groupAdmins:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                           example:
+ *                             - 69ef462cc0c7b023c9fa5607
+ *                         createdBy:
+ *                           type: string
+ *                           example: 69ef462cc0c7b023c9fa5607
+ *                         createdAt:
+ *                           type: string
+ *                           format: date-time
+ *                           example: 2026-09-08T15:00:32.679Z
+ *                         __v:
+ *                           type: integer
+ *                           example: 3
+ *                         lastMessage:
+ *                           type: string
+ *                           example: ss
+ *                         lastMessageAt:
+ *                           type: string
+ *                           format: date-time
+ *                           example: 2026-09-13T10:54:45.707Z
+ *                         lastMessageSender:
+ *                           type: string
+ *                           example: 69ef462cc0c7b023c9fa5607
  *       403:
  *         description: Not a group admin, or the member is blocked
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       404:
  *         description: Group or user not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post(
   '/groups/:id/members',
@@ -806,11 +883,19 @@ router.post(
  *         description: Pass your own id to leave the group
  *     responses:
  *       204:
- *         description: Removed
+ *         description: Removed successfully
  *       403:
  *         description: Only a group admin can remove other members
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       404:
  *         description: Group not found, or user is not a member
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.delete(
   '/groups/:id/members/:memberId',
@@ -849,6 +934,42 @@ router.delete(
  *     responses:
  *       201:
  *         description: Message sent
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: object
+ *                       properties:
+ *                         conversation:
+ *                           type: string
+ *                           example: 6a9811723f7278adab4d1d8b
+ *                         sender:
+ *                           type: string
+ *                           example: 69ef462cc0c7b023c9fa5607
+ *                         content:
+ *                           type: string
+ *                           example: hi
+ *                         _id:
+ *                           type: string
+ *                           example: 6aa68a872c429dc1769e1642
+ *                         createdAt:
+ *                           type: string
+ *                           format: date-time
+ *                           example: 2026-09-13T11:35:35.059Z
+ *                         __v:
+ *                           type: integer
+ *                           example: 0
+ *                     conversationId:
+ *                       type: string
+ *                       example: 6a9811723f7278adab4d1d8b
  *       400:
  *         description: Missing content/image, or trying to message yourself
  *         content:
@@ -893,10 +1014,6 @@ router.post(
  *     responses:
  *       204:
  *         description: message deleted successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Success'
  *       400:
  *         description: Invalid message id
  *         content:
