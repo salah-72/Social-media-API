@@ -29,6 +29,7 @@ import { updateGroupInfo } from '@/controllers/message/updateGroupInfo';
 import { removeGroupMember } from '@/controllers/message/removeGroupMember';
 import { sendGroupMessage } from '@/controllers/message/sendGroupMessage';
 import { promoteToAdmin } from '@/controllers/message/promoteToAdmin';
+import { demoteAdmin } from '@/controllers/message/demoteAdmin';
 
 const router = Router();
 
@@ -958,6 +959,55 @@ router.post(
   isActive,
   validateRequest({ params: promoteAdminValidation }),
   promoteToAdmin,
+);
+
+/**
+ * @swagger
+ * /api/v1/messages/groups/{conversationId}/admins/{targetId}:
+ *   delete:
+ *     summary: Demote a group admin back to a regular member (admin only)
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: conversationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: targetId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Demoted
+ *       400:
+ *         description: User is not an admin, or is the last remaining admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Only a group admin can demote another admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Group not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.delete(
+  '/groups/:conversationId/admins/:targetId',
+  authenticate,
+  isActive,
+  validateRequest({ params: promoteAdminValidation }),
+  demoteAdmin,
 );
 
 /**
