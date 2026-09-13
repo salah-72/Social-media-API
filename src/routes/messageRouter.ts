@@ -10,6 +10,7 @@ import {
   addGroupMemberValidation,
   updateGroupInfoValidation,
   removeGroupMemberValidation,
+  promoteAdminValidation,
 } from '@/validation/messageValidation';
 import { validateRequest } from '@/middlewares/validation';
 import { authenticate } from '@/middlewares/authenticate';
@@ -27,6 +28,7 @@ import { getGroupInfo } from '@/controllers/message/getGroupInfo';
 import { updateGroupInfo } from '@/controllers/message/updateGroupInfo';
 import { removeGroupMember } from '@/controllers/message/removeGroupMember';
 import { sendGroupMessage } from '@/controllers/message/sendGroupMessage';
+import { promoteToAdmin } from '@/controllers/message/promoteToAdmin';
 
 const router = Router();
 
@@ -903,6 +905,59 @@ router.delete(
   isActive,
   validateRequest({ params: removeGroupMemberValidation }),
   removeGroupMember,
+);
+
+/**
+ * @swagger
+ * /api/v1/messages/groups/{conversationId}/admins/{targetId}:
+ *   post:
+ *     summary: Promote a group member to admin (admin only)
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: conversationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Promoted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       400:
+ *         description: Already an admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Only a group admin can promote members
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Group not found, or user is not a member
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post(
+  '/groups/:conversationId/admins/:targetId',
+  authenticate,
+  isActive,
+  validateRequest({ params: promoteAdminValidation }),
+  promoteToAdmin,
 );
 
 /**

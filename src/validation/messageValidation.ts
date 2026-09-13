@@ -57,3 +57,8 @@ export const removeGroupMemberValidation = z.object({
   id: z.string().min(1, 'ID is required'),
   memberId: z.string().min(1),
 });
+
+export const promoteAdminValidation = z.object({
+  conversationId: z.string().min(1, 'ID is required'),
+  targetId: z.string().min(1),
+});
