@@ -99,17 +99,17 @@ const sendMessageLimiter = rateLimit({
  *                             type: object
  *                             properties:
  *                               username:
- *                               type: string
- *                               example: ahmed123
- *                             profilePhoto:
- *                               type: string
- *                               example: https://example.com/image.jpg
- *                             firstName:
- *                               type: string
- *                               example: Ahmed
- *                             lastName:
- *                               type: string
- *                               example: Salah
+ *                                 type: string
+ *                                 example: ahmed123
+ *                               profilePhoto:
+ *                                 type: string
+ *                                 example: https://example.com/image.jpg
+ *                               firstName:
+ *                                 type: string
+ *                                 example: Ahmed
+ *                               lastName:
+ *                                 type: string
+ *                                 example: Salah
  *                           lastMessage:
  *                             type: string
  *                             example: Hello, how are you?
@@ -164,12 +164,61 @@ router.get(
  *     responses:
  *       201:
  *         description: Group created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     conversations:
+ *                       type: object
+ *                       properties:
+ *                         participants:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                             example: 69ef462cc0c7b023c9fa5607
+ *                         isGroup:
+ *                           type: boolean
+ *                         groupName:
+ *                           type: string
+ *                         groupAdmins:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                             example: 69ef462cc0c7b023c9fa5607
+ *                         createdBy:
+ *                           type: string
+ *                           example: 69ef462cc0c7b023c9fa5607
+ *                         _id:
+ *                           type: string
+ *                           example: 6aa6708774519669edc61c3c
+ *                         createdAt:
+ *                           type: string
+ *                           example: 2026-09-13T09:44:39.520Z
  *       400:
  *         description: Fewer than 2 other members
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       403:
  *         description: A member is blocked
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       404:
  *         description: A member was not found, inactive, or unverified
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post(
   '/groups',
@@ -391,6 +440,94 @@ router.get(
   getMessages,
 );
 
+/**
+ * @swagger
+ * /api/v1/messages/groups/{id}/info:
+ *   get:
+ *     summary: Get a group's details and member list
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Group details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     conversation:
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                           example: 6aa02310ed892f5a39ea4ba0
+ *                         groupName:
+ *                           type: string
+ *                           example: safwa
+ *                         groupPhoto:
+ *                           type: object
+ *                           properties:
+ *                             url:
+ *                               type: string
+ *                               example: https://res.cloudinary.com/dfemcxcob/image/upload/v1788944379/img/yz2unmwcniotjicutzae.jpg
+ *                             publicId:
+ *                               type: string
+ *                               example: img/yz2unmwcniotjicutzae
+ *                         createdBy:
+ *                           type: string
+ *                           example: 69ef462cc0c7b023c9fa5607
+ *                         createdAt:
+ *                           type: string
+ *                           example: 2026-09-08T15:00:32.679Z
+ *                         members:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               _id:
+ *                                 type: string
+ *                                 example: 69ef462cc0c7b023c9fa5607
+ *                               isAdmin:
+ *                                 type: boolean
+ *                                 example: true
+ *                               username:
+ *                                 type: string
+ *                                 example: ahmed123
+ *                               profilePhoto:
+ *                                 type: string
+ *                                 example: https://example.com/image.jpg
+ *                               firstName:
+ *                                 type: string
+ *                                 example: Ahmed
+ *                               lastName:
+ *                                 type: string
+ *                                 example: Salah
+ *       403:
+ *         description: Not a member of this group
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Group not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get(
   '/groups/:id/info',
   authenticate,
@@ -399,6 +536,80 @@ router.get(
   getGroupInfo,
 );
 
+/**
+ * @swagger
+ * /api/v1/messages/groups/{id}:
+ *   post:
+ *     summary: Send a message to a group
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 example: hi
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: Message sent
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: object
+ *                       properties:
+ *                         conversation:
+ *                           type: string
+ *                           example: 69ef462cc0c7b023c9fa5607
+ *                         sender:
+ *                           type: string
+ *                           example: 69ef462cc0c7b023c9fa5607
+ *                         content:
+ *                           type: string
+ *                           example: hi
+ *                         _id:
+ *                           type: string
+ *                           example: 69ef462cc0c7b023c9fa5607
+ *                         createdAt:
+ *                           type: string
+ *                           example: 2026-09-08T15:00:32.679Z
+ *                     coversationId:
+ *                       type: string
+ *                       example: 69ef462cc0c7b023c9fa5607
+ *       403:
+ *         description: Not a member of this group
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Group not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.post(
   '/groups/:id',
   authenticate,
@@ -440,10 +651,84 @@ router.post(
  *     responses:
  *       200:
  *         description: Updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     conversation:
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                           example: 6aa02310ed892f5a39ea4ba0
+ *                         isGroup:
+ *                           type: boolean
+ *                           example: true
+ *                         groupName:
+ *                           type: string
+ *                           example: safwa
+ *                         groupPhoto:
+ *                           type: object
+ *                           properties:
+ *                             url:
+ *                               type: string
+ *                               example: https://res.cloudinary.com/dfemcxcob/image/upload/v1788944379/img/yz2unmwcniotjicutzae.jpg
+ *                             publicId:
+ *                               type: string
+ *                               example: img/yz2unmwcniotjicutzae
+ *                         participants:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                           example:
+ *                             - 69ef462cc0c7b023c9fa5607
+ *                             - 69ee36aec636be6333be1bd0
+ *                             - 69ef452bbfc5e646a3cf291f
+ *                         groupAdmins:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                           example:
+ *                             - 69ef462cc0c7b023c9fa5607
+ *                         createdBy:
+ *                           type: string
+ *                           example: 69ef462cc0c7b023c9fa5607
+ *                         createdAt:
+ *                           type: string
+ *                           format: date-time
+ *                           example: 2026-09-08T15:00:32.679Z
+ *                         __v:
+ *                           type: integer
+ *                           example: 2
+ *                         lastMessage:
+ *                           type: string
+ *                           example: ss
+ *                         lastMessageAt:
+ *                           type: string
+ *                           format: date-time
+ *                           example: 2026-09-13T10:54:45.707Z
+ *                         lastMessageSender:
+ *                           type: string
+ *                           example: 69ef462cc0c7b023c9fa5607
  *       403:
  *         description: Not a group admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       404:
  *         description: Group not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.patch(
   '/groups/:id/info',
