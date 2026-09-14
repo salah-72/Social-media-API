@@ -24,12 +24,14 @@ export const getConversations = catchAsync(
     if (!conversations.length)
       return sendResponse(res, 200, { conversations: [] });
 
-    const otherUserIds = conversations.map((c) =>
+    const conversationIds = conversations.map((c) => c._id);
+    const oneOnOne = conversations.filter((c) => !c.isGroup);
+
+    const otherUserIds = oneOnOne.map((c) =>
       c.participants
         .find((p) => p.toString() !== userId.toString())!
         .toString(),
     );
-    const conversationIds = conversations.map((c) => c._id);
 
     const [otherUsers, unreadCounts] = await Promise.all([
       getUsersFromCache(otherUserIds),
@@ -50,18 +52,37 @@ export const getConversations = catchAsync(
       ]),
     ]);
 
+    const otherUserMap = new Map(
+      oneOnOne.map((c, i) => [c._id.toString(), otherUsers[i]]),
+    );
     const unreadMap = new Map(
       unreadCounts.map((u) => [u._id.toString(), u.count]),
     );
 
-    const result = conversations.map((c, i) => ({
-      _id: c._id,
-      otherUser: otherUsers[i],
-      lastMessage: c.lastMessage,
-      lastMessageAt: c.lastMessageAt,
-      lastMessageSender: c.lastMessageSender,
-      unreadCount: unreadMap.get(c._id.toString()) || 0,
-    }));
+    const result = conversations.map((c, i) => {
+      const base = {
+        _id: c._id,
+        isGroup: c.isGroup,
+        lastMessage: c.lastMessage,
+        lastMessageAt: c.lastMessageAt,
+        lastMessageSender: c.lastMessageSender,
+        unreadCount: unreadMap.get(c._id.toString()) ?? 0,
+      };
+
+      if (c.isGroup) {
+        return {
+          ...base,
+          groupName: c.groupName,
+          groupPhoto: c.groupPhoto,
+          participantCount: c.participants.length,
+        };
+      }
+
+      return {
+        ...base,
+        otherUser: otherUserMap.get(c._id.toString()),
+      };
+    });
 
     sendResponse(
       res,
