@@ -6,6 +6,7 @@ import config from '@/config/config';
 import redisClient, { subClient } from '@/utils/redis';
 import { getAuthUser } from '@/utils/getUsersFromCache';
 import { logger } from '@/lib/winston';
+import { setLastSeen } from '@/utils/presence';
 
 let io: Server;
 
@@ -94,6 +95,9 @@ export const initSocket = async (httpServer: HttpServer) => {
       logger.info(`User ${userId} disconnected from socket: ${socket.id}`);
       try {
         await redisClient.sRem(`user:sockets:${userId}`, socket.id);
+
+        const remaining = await redisClient.sCard(`user:sockets:${userId}`);
+        if (remaining === 0) await setLastSeen(userId);
       } catch {
         logger.warn(`Failed to remove socket for user ${userId}`);
       }
