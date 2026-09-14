@@ -41,7 +41,7 @@ const sendMessageLimiter = rateLimit({
 
 /**
  * @swagger
- * /api/v1/messages:
+ * /api/v1/messages/conversations:
  *   get:
  *     summary: List the current user's conversations, most recent first
  *     tags: [Messages]
@@ -60,7 +60,7 @@ const sendMessageLimiter = rateLimit({
  *           default: 20
  *     responses:
  *       200:
- *         description: List of conversations with last message preview and unread count
+ *         description: A list of conversations retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -71,7 +71,7 @@ const sendMessageLimiter = rateLimit({
  *                   example: success
  *                 results:
  *                   type: integer
- *                   example: 5
+ *                   example: 4
  *                 pagination:
  *                   type: object
  *                   properties:
@@ -83,7 +83,7 @@ const sendMessageLimiter = rateLimit({
  *                       example: 20
  *                     total:
  *                       type: integer
- *                       example: 5
+ *                       example: 4
  *                     noOfPages:
  *                       type: integer
  *                       example: 1
@@ -97,44 +97,66 @@ const sendMessageLimiter = rateLimit({
  *                         properties:
  *                           _id:
  *                             type: string
- *                             example: 64a7b8f8e4b0c2a1d8f9c1a2
- *                           otherUser:
- *                             type: object
- *                             properties:
- *                               username:
- *                                 type: string
- *                                 example: ahmed123
- *                               profilePhoto:
- *                                 type: string
- *                                 example: https://example.com/image.jpg
- *                               firstName:
- *                                 type: string
- *                                 example: Ahmed
- *                               lastName:
- *                                 type: string
- *                                 example: Salah
+ *                             example: 6a9811723f7278adab4d1d8b
+ *                           isGroup:
+ *                             type: boolean
+ *                             example: false
  *                           lastMessage:
  *                             type: string
- *                             example: Hello, how are you?
+ *                             example: hi
  *                           lastMessageAt:
  *                             type: string
  *                             format: date-time
- *                             example: 2023-07-01T12:34:56.789Z
+ *                             example: 2026-09-13T11:35:35.059Z
  *                           lastMessageSender:
  *                             type: string
- *                             example: 64a7b8f8e4b0c2a1d8f9c1a2
+ *                             example: 69ef462cc0c7b023c9fa5607
  *                           unreadCount:
  *                             type: integer
- *                             example: 2
+ *                             example: 0
+ *                           otherUser:
+ *                             type: object
+ *                             description: Returned only if isGroup is false
+ *                             properties:
+ *                               username:
+ *                                 type: string
+ *                                 example: ahmed_opjj41c6po
+ *                               profilePhoto:
+ *                                 type: string
+ *                                 example: ""
+ *                               firstName:
+ *                                 type: string
+ *                                 example: ahmed
+ *                               lastName:
+ *                                 type: string
+ *                                 example: salah
+ *                           groupName:
+ *                             type: string
+ *                             description: Returned only if isGroup is true
+ *                             example: safwa
+ *                           groupPhoto:
+ *                             type: object
+ *                             description: Returned only if isGroup is true
+ *                             properties:
+ *                               url:
+ *                                 type: string
+ *                                 example: https://res.cloudinary.com/dfemcxcob/image/upload/v1788944379/img/yz2unmwcniotjicutzae.jpg
+ *                               publicId:
+ *                                 type: string
+ *                                 example: img/yz2unmwcniotjicutzae
+ *                           participantCount:
+ *                             type: integer
+ *                             description: Returned only if isGroup is true
+ *                             example: 3
  *       401:
- *         description: Unauthorized - user not authenticated
+ *         description: Unauthorized
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
 router.get(
-  '/',
+  '/conversations',
   authenticate,
   isActive,
   validateRequest({ query: getConversationsValidation }),
@@ -337,7 +359,7 @@ router.get(
 
 /**
  * @swagger
- * /api/v1/messages/{id}:
+ * /api/v1/messages/conversations/{id}:
  *   get:
  *     summary: Get messages in a conversation, newest to oldest
  *     tags: [Messages]
@@ -433,7 +455,7 @@ router.get(
  *               $ref: '#/components/schemas/Error'
  */
 router.get(
-  '/:id',
+  '/conversations/:id',
   authenticate,
   isActive,
   validateRequest({
