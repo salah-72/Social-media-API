@@ -4,7 +4,7 @@ import Conversation from '../../models/conversationModel';
 import Message from '../../models/messageModel';
 import { getUsersFromCache } from '@/utils/getUsersFromCache';
 import { sendResponse } from '@/utils/sendResponse';
-import { getOnlineStatus } from '@/utils/presence';
+import { getOnlineStatuses } from '@/utils/presence';
 
 export const getConversations = catchAsync(
   async (req: Request, res: Response) => {
@@ -36,7 +36,7 @@ export const getConversations = catchAsync(
 
     const [otherUsers, onlineStatuses, unreadCounts] = await Promise.all([
       getUsersFromCache(otherUserIds),
-      getOnlineStatus(otherUserIds),
+      getOnlineStatuses(otherUserIds),
       Message.aggregate([
         {
           $match: {
@@ -87,7 +87,7 @@ export const getConversations = catchAsync(
       return {
         ...base,
         otherUser: otherUserMap.get(c._id.toString()),
-        isOnline: onlineStatuses.get(otherUserId) ?? false
+        isOnline: onlineStatuses.get(otherUserId) ?? false,
       };
     });
 

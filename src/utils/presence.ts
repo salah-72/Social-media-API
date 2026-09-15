@@ -11,7 +11,7 @@ export const isUserOnline = async (userId: string): Promise<boolean> => {
   }
 };
 
-export const getOnlineStatus = async (
+export const getOnlineStatuses = async (
   userIds: string[],
 ): Promise<Map<string, boolean>> => {
   const statusMap = new Map<string, boolean>();
