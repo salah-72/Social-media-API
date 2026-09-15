@@ -11,6 +11,26 @@ export const isUserOnline = async (userId: string): Promise<boolean> => {
   }
 };
 
+export const getOnlineStatus = async (
+  userIds: string[],
+): Promise<Map<string, boolean>> => {
+  const statusMap = new Map<string, boolean>();
+  if (!userIds.length) return statusMap;
+
+  try {
+    const pipline = await redisClient.multi();
+    userIds.forEach((id) => pipline.sCard(`user:sockets:${id}`));
+    const counts = (await pipline.exec()) as unknown as number[];
+
+    userIds.forEach((id, i) => statusMap.set(id, (counts[i] ?? 0) > 0));
+  } catch (err) {
+    logger.warn('Redis pipeline failed in getOnlineStatuses', { err });
+    userIds.forEach((id) => statusMap.set(id, false));
+  }
+
+  return statusMap;
+};
+
 export const setLastSeen = async (userId: string): Promise<void> => {
   try {
     await redisClient.set(`lastSeen:${userId}`, Date.now().toString());
