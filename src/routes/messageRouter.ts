@@ -130,6 +130,9 @@ const sendMessageLimiter = rateLimit({
  *                               lastName:
  *                                 type: string
  *                                 example: salah
+ *                           isOnline:
+ *                             type: boolean
+ *                             example: false
  *                           groupName:
  *                             type: string
  *                             description: Returned only if isGroup is true
