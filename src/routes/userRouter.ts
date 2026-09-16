@@ -44,6 +44,8 @@ import { validateRequest } from '@/middlewares/validation';
 import { loadBlockList } from '@/middlewares/blocks';
 import { banUser } from '@/controllers/User/banUser';
 import { unbanUser } from '@/controllers/User/unbanUser';
+import { getOnlineStatus } from '@/controllers/User/getOnlineStatus';
+import { getOnlineFollowing } from '@/controllers/follow/getOnlineFollowing';
 
 const router = Router();
 
@@ -340,6 +342,57 @@ router.get(
   validateRequest({ query: getUsersValidation }),
   getMyFollowings,
 );
+
+/**
+ * @swagger
+ * /api/v1/users/followings/online:
+ *   get:
+ *     summary: List which of the people you follow are currently online
+ *     tags: [Follow]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Online followings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     onlineFollowings:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           username:
+ *                             type: string
+ *                             example: ahmed123
+ *                           firstName:
+ *                             type: string
+ *                             example: Ahmed
+ *                           lastName:
+ *                             type: string
+ *                             example: Salah
+ *                           profilePhoto:
+ *                             type: string
+ *                             example: https://example.com/profile.jpg
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.get('/followings/online', authenticate, isActive, getOnlineFollowing);
 
 /**
  * @swagger
@@ -771,6 +824,54 @@ router.get(
   validateRequest({ params: userIdValidation }),
   isTargetUserAvailable,
   getUserById,
+);
+
+/**
+ * @swagger
+ * /api/v1/users/{id}/online-status:
+ *   get:
+ *     summary: Check whether a user is currently online, and their last-seen time if not
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Online status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   isOnline:
+ *                     type: boolean
+ *                     example: true
+ *                   lastseen:
+ *                     type: string
+ *                     example: 2026-09-14T13:17:50.168Z
+ *       404:
+ *         description: User not found, inactive, or blocked
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.get(
+  '/:id/online-status',
+  authenticate,
+  isActive,
+  validateRequest({ params: userIdValidation }),
+  isTargetUserAvailable,
+  getOnlineStatus,
 );
 
 /**
