@@ -19,7 +19,7 @@ cron.schedule('0 * * * *', async () => {
       const expiredStories = await Story.find({
         createdAt: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
       })
-        .select('_id img.publicId')
+        .select('_id img.publicId video.publicId')
         .limit(batchSize)
         .lean();
 
@@ -30,12 +30,24 @@ cron.schedule('0 * * * *', async () => {
 
       const ids = expiredStories.map((e) => e._id);
 
-      const publicIds = expiredStories
+      const imagePublicIds = expiredStories
         .map((s) => s.img?.publicId)
         .filter((id): id is string => Boolean(id));
 
-      if (publicIds.length > 0)
-        await cloudinary.api.delete_resources(publicIds);
+      const videoPublicIds = expiredStories
+        .map((s) => s.video?.publicId)
+        .filter((id): id is string => Boolean(id));
+
+      await Promise.all([
+        imagePublicIds.length > 0
+          ? cloudinary.api.delete_resources(imagePublicIds)
+          : null,
+        videoPublicIds.length > 0
+          ? cloudinary.api.delete_resources(videoPublicIds, {
+              resource_type: 'video',
+            })
+          : null,
+      ]);
 
       await Promise.all([
         Story.deleteMany({ _id: { $in: ids } }),

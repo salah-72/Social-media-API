@@ -26,9 +26,21 @@ export const deletePost = catchAsync(
 
     if (deletedPost.images && deletedPost.images.length > 0) {
       await Promise.all(
-        deletedPost.images.map((img) => {
-          cloudinary.uploader.destroy(img.publicId);
-        }),
+        deletedPost.images.map((img) =>
+          cloudinary.uploader.destroy(img.publicId, {
+            resource_type: 'image',
+          }),
+        ),
+      );
+    }
+
+    if (deletedPost.videos && deletedPost.videos.length > 0) {
+      await Promise.all(
+        deletedPost.videos.map((video) =>
+          cloudinary.uploader.destroy(video.publicId, {
+            resource_type: 'video',
+          }),
+        ),
       );
     }
 

@@ -1,10 +1,4 @@
-import appError from '@/utils/appError';
-import {
-  CallbackWithoutResultAndOptionalError,
-  model,
-  Schema,
-  Types,
-} from 'mongoose';
+import { model, Schema, Types } from 'mongoose';
 
 export interface IStory {
   _id: Types.ObjectId;
@@ -13,6 +7,11 @@ export interface IStory {
   img?: {
     url: string;
     publicId: string;
+  };
+  video?: {
+    url: string;
+    publicId: string;
+    duration: number;
   };
   whoCanSee: 'me' | 'followers' | 'public';
   viewsCount: number;
@@ -35,6 +34,11 @@ const storySchema = new Schema<IStory>(
     img: {
       url: String,
       publicId: String,
+    },
+    video: {
+      url: String,
+      publicId: String,
+      duration: Number,
     },
     whoCanSee: {
       type: String,

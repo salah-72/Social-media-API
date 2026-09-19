@@ -9,7 +9,7 @@ import { authenticate } from '@/middlewares/authenticate';
 import { loadBlockList } from '@/middlewares/blocks';
 import { isActive } from '@/middlewares/isActive';
 import { isTargetStoryAvailable } from '@/middlewares/isTargetStoryAvailable';
-import { upload } from '@/middlewares/multer';
+import { uploadMedia } from '@/middlewares/multer';
 import { rateLimit } from '@/middlewares/rateLimit';
 import { validateRequest } from '@/middlewares/validation';
 import {
@@ -79,7 +79,7 @@ router.post(
   authenticate,
   isActive,
   rateLimit,
-  upload.single('img'),
+  uploadMedia.single('img'),
   validateRequest({ body: storyValidation }),
   createStory,
 );

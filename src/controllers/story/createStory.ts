@@ -11,16 +11,31 @@ export const createStory = catchAsync(
     let { content, whoCanSee } = req.body;
 
     let img: { url: string; publicId: string } | undefined;
+    let video: { url: string; publicId: string; duration?: number } | undefined;
+
     if (req.file) {
-      const upload = await uploadToCloudinary(req.file.buffer, 'images');
-      img = {
-        url: upload.secure_url,
-        publicId: upload.public_id,
-      };
+      const isVideo = req.file.mimetype.startsWith('video');
+      const result = await uploadToCloudinary(
+        req.file.buffer,
+        isVideo ? 'videos' : 'images',
+        isVideo ? 'video' : 'image',
+      );
+
+      if (isVideo) {
+        video = {
+          url: result.secure_url,
+          publicId: result.public_id,
+          duration: result.duration,
+        };
+      } else {
+        img = { url: result.secure_url, publicId: result.public_id };
+      }
     }
 
-    if (!content && !img)
-      return next(new appError('story must contain content or img', 400));
+    if (!content && !img && !video)
+      return next(
+        new appError('story must contain content, an image, or a video', 400),
+      );
 
     if (!req.currentuser?.public && (whoCanSee === 'public' || !whoCanSee))
       whoCanSee = 'followers';
@@ -29,6 +44,7 @@ export const createStory = catchAsync(
       author,
       content,
       img,
+      video,
       whoCanSee,
     });
 

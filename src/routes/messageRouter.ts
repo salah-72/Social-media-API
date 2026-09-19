@@ -16,7 +16,7 @@ import { validateRequest } from '@/middlewares/validation';
 import { authenticate } from '@/middlewares/authenticate';
 import { isActive } from '@/middlewares/isActive';
 import { isTargetUserAvailable } from '@/middlewares/isTargetUserAvailable';
-import { upload } from '@/middlewares/multer';
+import { upload, uploadMedia } from '@/middlewares/multer';
 import { rateLimit } from '@/middlewares/rateLimit';
 import { getConversations } from '@/controllers/message/getCoversations';
 import { getMessages } from '@/controllers/message/getMessages';
@@ -643,7 +643,7 @@ router.post(
   authenticate,
   isActive,
   sendMessageLimiter,
-  upload.single('image'),
+  uploadMedia.single('image'),
   validateRequest({
     params: IdParamValidation,
     body: sendMessageValidation,
@@ -1119,7 +1119,7 @@ router.post(
   isActive,
   sendMessageLimiter,
   isTargetUserAvailable,
-  upload.single('image'),
+  uploadMedia.single('image'),
   validateRequest({
     params: IdParamValidation,
     body: sendMessageValidation,

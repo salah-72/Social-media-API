@@ -1,36 +1,32 @@
 import appError from '@/utils/appError';
 import multer from 'multer';
-import path from 'path';
 
 const multerStorage = multer.memoryStorage();
-
-const allowedMimeTypes = [
-  'image/jpeg',
-  'image/png',
-  'image/jpg',
-  'image/webp',
-  'image/gif',
-];
-const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
 
 export const upload = multer({
   storage: multerStorage,
   fileFilter(req, file, callback) {
-    const ext = path.extname(file.originalname).toLowerCase();
+    if (file.mimetype.startsWith('image')) callback(null, true);
+    else callback(new appError('only images allowed', 400));
+  },
+  limits: { fileSize: 2 * 1024 * 1024 },
+});
 
+const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm'];
+
+export const uploadMedia = multer({
+  storage: multerStorage,
+  fileFilter(req, file, callback) {
     if (
-      allowedMimeTypes.includes(file.mimetype) &&
-      allowedExtensions.includes(ext)
+      file.mimetype.startsWith('image') ||
+      ALLOWED_VIDEO_TYPES.includes(file.mimetype)
     ) {
       callback(null, true);
     } else {
       callback(
-        new appError(
-          'Invalid file type. Only standard images are allowed.',
-          400,
-        ),
+        new appError('only images or mp4/mov/webm videos are allowed', 400),
       );
     }
   },
-  limits: { fileSize: 2 * 1024 * 1024 },
+  limits: { fileSize: 50 * 1024 * 1024 },
 });

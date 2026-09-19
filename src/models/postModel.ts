@@ -9,6 +9,12 @@ export interface IPost {
     publicId: string;
     _id?: Types.ObjectId;
   }[];
+  videos?: {
+    url: string;
+    publicId: string;
+    duration?: number;
+    _id?: Types.ObjectId;
+  }[];
   status: 'draft' | 'published';
   whoCanSee: 'me' | 'followers' | 'public';
   likesCount: number;
@@ -40,6 +46,19 @@ const postSchema = new Schema<IPost>(
           type: String,
           required: true,
         },
+      },
+    ],
+    videos: [
+      {
+        url: {
+          type: String,
+          required: true,
+        },
+        publicId: {
+          type: String,
+          required: true,
+        },
+        duration: Number,
       },
     ],
     status: {
