@@ -17,14 +17,27 @@ export const addImg = catchAsync(
         new appError('you have no permission to add image to this post', 401),
       );
 
-    if (!req.file) return next(new appError('no image to add', 400));
+    if (!req.file) return next(new appError('no file to add', 400));
 
-    const img = await uploadToCloudinary(req.file.buffer, 'images');
+    const isVideo = req.file.mimetype.startsWith('video');
+    const result = await uploadToCloudinary(
+      req.file.buffer,
+      isVideo ? 'videos' : 'images',
+      isVideo ? 'video' : 'image',
+    );
 
-    post.images?.push({
-      url: img.secure_url,
-      publicId: img.public_id,
-    });
+    if (isVideo) {
+      post.videos?.push({
+        url: result.secure_url,
+        publicId: result.public_id,
+        duration: result.duration,
+      });
+    } else {
+      post.images?.push({
+        url: result.secure_url,
+        publicId: result.public_id,
+      });
+    }
 
     await post.save();
 

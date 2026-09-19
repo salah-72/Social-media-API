@@ -22,24 +22,38 @@ export const createPost = catchAsync(
 
     const files = req.files as Express.Multer.File[] | undefined;
     let images: { url: string; publicId: string }[] = [];
+    let videos: { url: string; publicId: string; duration?: number }[] = [];
 
     if (files) {
-      const uploads = files.map((img) => {
-        return uploadToCloudinary(img.buffer, 'images');
+      const uploads = files.map(async (file) => {
+        const isVideo = file.mimetype.startsWith('video');
+        const result = await uploadToCloudinary(
+          file.buffer,
+          isVideo ? 'videos' : 'images',
+          isVideo ? 'video' : 'image',
+        );
+        return { ...result, isVideo };
       });
 
       const res = await Promise.all(uploads);
 
-      images = res.map((e) => ({
-        url: e.secure_url,
-        publicId: e.public_id,
-      }));
+      images = res
+        .filter((r) => !r.isVideo)
+        .map((r) => ({ url: r.secure_url, publicId: r.public_id }));
+      videos = res
+        .filter((r) => r.isVideo)
+        .map((r) => ({
+          url: r.secure_url,
+          publicId: r.public_id,
+          duration: r.duration,
+        }));
     }
 
     const post = await Post.create({
       content: cleanContent,
       author,
       images,
+      videos,
       status,
       whoCanSee,
     });
