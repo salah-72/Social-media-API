@@ -26,12 +26,25 @@ export const sendGroupMessage = catchAsync(
       return next(new appError('a message needs either text or an image', 400));
 
     let image: { url: string; publicId: string } | undefined;
+    let video: { url: string; publicId: string; duration?: number } | undefined;
+
     if (req.file) {
-      const { secure_url, public_id } = await uploadToCloudinary(
+      const isVideo = req.file.mimetype.startsWith('video');
+      const result = await uploadToCloudinary(
         req.file.buffer,
         'messages',
+        isVideo ? 'video' : 'image',
       );
-      image = { url: secure_url, publicId: public_id };
+
+      if (isVideo) {
+        video = {
+          url: result.secure_url,
+          publicId: result.public_id,
+          duration: result.duration,
+        };
+      } else {
+        image = { url: result.secure_url, publicId: result.public_id };
+      }
     }
 
     const message = await createMessage({
@@ -39,6 +52,7 @@ export const sendGroupMessage = catchAsync(
       senderId,
       content,
       image,
+      video,
     });
 
     sendResponse(res, 201, {

@@ -9,6 +9,11 @@ export interface IMessage {
     url: string;
     publicId: string;
   };
+  video?: {
+    url: string;
+    publicId: string;
+    duration?: number;
+  };
   readAt?: Date;
   createdAt: Date;
 }
@@ -34,6 +39,11 @@ const messageSchema = new Schema<IMessage>({
     url: String,
     publicId: String,
   },
+  video: {
+    url: String,
+    publicId: String,
+    duration: Number,
+  },
   readAt: Date,
   createdAt: {
     type: Date,
@@ -43,8 +53,8 @@ const messageSchema = new Schema<IMessage>({
 });
 
 messageSchema.pre('validate', function () {
-  if (!this.content && !this.image?.url)
-    throw new Error('A message needs either content or an image');
+  if (!this.content && !this.image?.url && !this.video?.url)
+    throw new Error('a message needs content, an image, or a video');
 });
 
 const Message = model<IMessage>('Message', messageSchema);

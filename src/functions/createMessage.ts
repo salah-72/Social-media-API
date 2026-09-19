@@ -8,6 +8,7 @@ interface CreateMessageParams {
   senderId: Types.ObjectId | string;
   content?: string;
   image?: { url: string; publicId: string };
+  video?: { url: string; publicId: string; duration?: number };
 }
 
 export const createMessage = async ({
@@ -15,15 +16,17 @@ export const createMessage = async ({
   senderId,
   content,
   image,
+  video,
 }: CreateMessageParams) => {
   const message = await Message.create({
     conversation: conversation._id,
     sender: senderId,
     content,
     image,
+    video,
   });
 
-  conversation.lastMessage = content ?? '📷 Photo';
+  conversation.lastMessage = content ?? (video ? '🎥 Video' : '📷 Photo');
   conversation.lastMessageAt = message.createdAt;
   conversation.lastMessageSender = new Types.ObjectId(senderId);
   await conversation.save();
@@ -39,6 +42,7 @@ export const createMessage = async ({
       sender: senderId,
       content: message.content,
       image: message.image,
+      video: message.video,
       createdAt: message.createdAt,
     },
   };
