@@ -27,3 +27,10 @@ export const uploadToCloudinary = (
       .end(buffer);
   });
 };
+
+export const getVideoThumbnailUrl = (publicId: string): string =>
+  cloudinary.url(publicId, {
+    resource_type: 'video',
+    format: 'jpg',
+    transformation: [{ start_offset: '0', width: 500, crop: 'limit' }],
+  });
