@@ -1,7 +1,10 @@
 import Post from '@/models/postModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
-import { uploadToCloudinary } from '@/utils/cloudinaryUpload';
+import {
+  getVideoThumbnailUrl,
+  uploadToCloudinary,
+} from '@/utils/cloudinaryUpload';
 import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 
@@ -31,6 +34,7 @@ export const addImg = catchAsync(
         url: result.secure_url,
         publicId: result.public_id,
         duration: result.duration,
+        thumbnailUrl: getVideoThumbnailUrl(result.public_id),
       });
     } else {
       post.images?.push({

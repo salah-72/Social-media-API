@@ -12,6 +12,7 @@ export interface IStory {
     url: string;
     publicId: string;
     duration: number;
+    thumbnailUrl?: string;
   };
   whoCanSee: 'me' | 'followers' | 'public';
   viewsCount: number;
@@ -39,6 +40,7 @@ const storySchema = new Schema<IStory>(
       url: String,
       publicId: String,
       duration: Number,
+      thumbnailUrl: String,
     },
     whoCanSee: {
       type: String,

@@ -13,6 +13,7 @@ export interface IMessage {
     url: string;
     publicId: string;
     duration?: number;
+    thumbnailUrl?: string;
   };
   readAt?: Date;
   createdAt: Date;
@@ -43,6 +44,7 @@ const messageSchema = new Schema<IMessage>({
     url: String,
     publicId: String,
     duration: Number,
+    thumbnailUrl: String,
   },
   readAt: Date,
   createdAt: {
