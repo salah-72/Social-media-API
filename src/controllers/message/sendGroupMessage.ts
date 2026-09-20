@@ -2,7 +2,10 @@ import { createMessage } from '@/functions/createMessage';
 import Conversation from '@/models/conversationModel';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
-import { uploadToCloudinary } from '@/utils/cloudinaryUpload';
+import {
+  getVideoThumbnailUrl,
+  uploadToCloudinary,
+} from '@/utils/cloudinaryUpload';
 import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response, NextFunction } from 'express';
 
@@ -26,7 +29,14 @@ export const sendGroupMessage = catchAsync(
       return next(new appError('a message needs either text or an image', 400));
 
     let image: { url: string; publicId: string } | undefined;
-    let video: { url: string; publicId: string; duration?: number } | undefined;
+    let video:
+      | {
+          url: string;
+          publicId: string;
+          duration?: number;
+          thumbnailUrl?: string;
+        }
+      | undefined;
 
     if (req.file) {
       const isVideo = req.file.mimetype.startsWith('video');
@@ -41,6 +51,7 @@ export const sendGroupMessage = catchAsync(
           url: result.secure_url,
           publicId: result.public_id,
           duration: result.duration,
+          thumbnailUrl: getVideoThumbnailUrl(result.public_id),
         };
       } else {
         image = { url: result.secure_url, publicId: result.public_id };
