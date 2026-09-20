@@ -3,7 +3,10 @@ import { Request, Response, NextFunction } from 'express';
 import DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 import Post from '@/models/postModel';
-import { uploadToCloudinary } from '@/utils/cloudinaryUpload';
+import {
+  getVideoThumbnailUrl,
+  uploadToCloudinary,
+} from '@/utils/cloudinaryUpload';
 import { logger } from '@/lib/winston';
 import { sendResponse } from '@/utils/sendResponse';
 
@@ -22,7 +25,12 @@ export const createPost = catchAsync(
 
     const files = req.files as Express.Multer.File[] | undefined;
     let images: { url: string; publicId: string }[] = [];
-    let videos: { url: string; publicId: string; duration?: number }[] = [];
+    let videos: {
+      url: string;
+      publicId: string;
+      duration?: number;
+      thumbnailUrl: string;
+    }[] = [];
 
     if (files) {
       const uploads = files.map(async (file) => {
@@ -46,6 +54,7 @@ export const createPost = catchAsync(
           url: r.secure_url,
           publicId: r.public_id,
           duration: r.duration,
+          thumbnailUrl: getVideoThumbnailUrl(r.public_id),
         }));
     }
 

@@ -13,6 +13,7 @@ export interface IPost {
     url: string;
     publicId: string;
     duration?: number;
+    thumbnailUrl?: string;
     _id?: Types.ObjectId;
   }[];
   status: 'draft' | 'published';
@@ -59,6 +60,7 @@ const postSchema = new Schema<IPost>(
           required: true,
         },
         duration: Number,
+        thumbnailUrl: String,
       },
     ],
     status: {
