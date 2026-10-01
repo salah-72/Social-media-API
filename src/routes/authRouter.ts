@@ -518,6 +518,7 @@ router.post(
  */
 router.post(
   '/reset/:token',
+  authRateLimiter,
   validateRequest({ params: tokenValidation }),
   resetPassword,
 );

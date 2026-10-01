@@ -2,14 +2,10 @@ import config from '@/config/config';
 import appError from '@/utils/appError';
 import catchAsync from '@/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
-import { Types } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import { getAuthUser } from '@/utils/getUsersFromCache';
 import { isTokenBlacklisted } from '@/utils/tokenBlacklist';
-
-interface JwtRefreshPayload extends jwt.JwtPayload {
-  userId: Types.ObjectId;
-}
+import { ICustomJwtPayload } from '@/functions/generateTokens';
 
 export const authenticate = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -29,7 +25,7 @@ export const authenticate = catchAsync(
     const payload = jwt.verify(
       token,
       config.JWT_ACCESS_KEY,
-    ) as JwtRefreshPayload;
+    ) as ICustomJwtPayload;
 
     const user = await getAuthUser(payload._id.toString());
 

@@ -19,9 +19,17 @@ const refreshToken = catchAsync(
       return next(new appError('refresh token is required', 400));
     }
 
-    const exist = await Token.exists({ token: refreshToken });
-    if (!exist)
+    const tokenDoc = await Token.findOne({ token: refreshToken });
+    if (!tokenDoc)
       return next(new appError('invalid token, please log in again', 401));
+
+    if (tokenDoc.revoked) {
+      await Token.updateMany(
+        { userId: tokenDoc.userId, revoked: false },
+        { revoked: true, revokedAt: new Date() },
+      );
+      return next(new appError('invalid token, please log in again', 401));
+    }
 
     const payload = jwt.verify(
       refreshToken,
