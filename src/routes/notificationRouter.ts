@@ -1,4 +1,4 @@
-import { getNotifications } from '@/controllers/notification/getNotifications ';
+import { getNotifications } from '@/controllers/notification/getNotifications';
 import { markAllAsRead } from '@/controllers/notification/markAllAsRead';
 import { markOneAsRead } from '@/controllers/notification/markOneAsRead';
 import { authenticate } from '@/middlewares/authenticate';

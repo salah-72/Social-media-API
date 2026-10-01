@@ -26,7 +26,6 @@ export const markOneAsRead = catchAsync(
       const unreadKey = `user:unread_notifications:${userId}`;
       const current = await redisClient.get(unreadKey);
 
-      console.log(current);
       if (current && Number(current) > 0) {
         await redisClient.decr(unreadKey);
       }
