@@ -17,6 +17,10 @@ import { authenticate } from '@/middlewares/authenticate';
 import { isActive } from '@/middlewares/isActive';
 import { isTargetUserAvailable } from '@/middlewares/isTargetUserAvailable';
 import { upload, uploadMedia } from '@/middlewares/multer';
+import {
+  verifyMediaContent,
+  verifyImageContent,
+} from '@/middlewares/verifyFileContent';
 import { rateLimit } from '@/middlewares/rateLimit';
 import { getConversations } from '@/controllers/message/getCoversations';
 import { getMessages } from '@/controllers/message/getMessages';
@@ -644,6 +648,7 @@ router.post(
   isActive,
   sendMessageLimiter,
   uploadMedia.single('image'),
+  verifyMediaContent,
   validateRequest({
     params: IdParamValidation,
     body: sendMessageValidation,
@@ -763,6 +768,7 @@ router.patch(
   authenticate,
   isActive,
   upload.single('image'),
+  verifyImageContent,
   validateRequest({
     params: IdParamValidation,
     body: updateGroupInfoValidation,
@@ -1120,6 +1126,7 @@ router.post(
   sendMessageLimiter,
   isTargetUserAvailable,
   uploadMedia.single('image'),
+  verifyMediaContent,
   validateRequest({
     params: IdParamValidation,
     body: sendMessageValidation,

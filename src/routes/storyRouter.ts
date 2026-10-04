@@ -10,6 +10,7 @@ import { loadBlockList } from '@/middlewares/blocks';
 import { isActive } from '@/middlewares/isActive';
 import { isTargetStoryAvailable } from '@/middlewares/isTargetStoryAvailable';
 import { uploadMedia } from '@/middlewares/multer';
+import { verifyMediaContent } from '@/middlewares/verifyFileContent';
 import { rateLimit } from '@/middlewares/rateLimit';
 import { validateRequest } from '@/middlewares/validation';
 import {
@@ -80,6 +81,7 @@ router.post(
   isActive,
   rateLimit,
   uploadMedia.single('img'),
+  verifyMediaContent,
   validateRequest({ body: storyValidation }),
   createStory,
 );

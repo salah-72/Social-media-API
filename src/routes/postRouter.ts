@@ -24,7 +24,8 @@ import { isActive } from '@/middlewares/isActive';
 import { isFollower } from '@/middlewares/isFollower';
 import { isTargetPostAvailable } from '@/middlewares/isTargetPostAvailable';
 import { isTargetUserAvailable } from '@/middlewares/isTargetUserAvailable';
-import { upload, uploadMedia } from '@/middlewares/multer';
+import { uploadMedia } from '@/middlewares/multer';
+import { verifyMediaContent } from '@/middlewares/verifyFileContent';
 import { Router } from 'express';
 import { commentLikes } from '@/controllers/comment/getLikedUsers';
 import { usersByReaction } from '@/controllers/comment/getUsersByReaction';
@@ -107,6 +108,7 @@ router.post(
   isActive,
   rateLimiter,
   uploadMedia.array('images', 5),
+  verifyMediaContent,
   validateRequest({ body: createPostValidation }),
   createPost,
 );
@@ -247,6 +249,7 @@ router.post(
   rateLimiter,
   validateRequest({ params: PostValidation }),
   uploadMedia.single('images'),
+  verifyMediaContent,
   addImg,
 );
 
