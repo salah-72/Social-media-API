@@ -6,6 +6,7 @@ import { isActive } from '@/middlewares/isActive';
 import { Router } from 'express';
 import { uploadCoverPhoto } from '@/controllers/User/uploadCoverPhoto';
 import { upload } from '@/middlewares/multer';
+import { verifyImageContent } from '@/middlewares/verifyFileContent';
 import { uploadProfilePic } from '@/controllers/User/uploadProfilePic';
 import { updateProfileInfo } from '@/controllers/User/updateProfile';
 import { follow } from '@/controllers/follow/follow';
@@ -485,6 +486,7 @@ router.patch(
   authenticate,
   isActive,
   upload.single('coverPhoto'),
+  verifyImageContent,
   uploadCoverPhoto,
 );
 
@@ -538,6 +540,7 @@ router.patch(
   authenticate,
   isActive,
   upload.single('profilePhoto'),
+  verifyImageContent,
   uploadProfilePic,
 );
 
