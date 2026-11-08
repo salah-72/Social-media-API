@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import Follow from '@/models/followModel';
 import Post from '@/models/postModel';
 import catchAsync from '@/utils/catchAsync';
@@ -17,21 +18,17 @@ export const timeLinePosts = catchAsync(async (req: Request, res: Response) => {
     status: 'accepted',
   }).select('following -_id');
   const followingIds = followings.map((e) => e.following);
-  const blockIds = [...(req.blockIds ?? [])];
+  const blockIds = [...(req.blockIds ?? [])].map((b) => new Types.ObjectId(b));
 
-  const myLimit = Math.floor(limit * 0.2);
-  const followingLimit = Math.ceil(limit * 0.6);
-  const othersLimit = limit - myLimit - followingLimit;
-
-  const mySkip = Math.floor(skip * 0.2);
-  const followingSkip = Math.ceil(skip * 0.6);
-  const othersSkip = skip - mySkip - followingSkip;
-
-  const myFilter = { status: 'published', author: id };
-  const followingFilter = {
-    author: { $in: followingIds },
+  const networkFilter = {
     status: 'published',
-    whoCanSee: { $in: ['public', 'followers'] },
+    $or: [
+      { author: id! },
+      {
+        author: { $in: followingIds },
+        whoCanSee: { $in: ['public', 'followers'] },
+      },
+    ],
   };
   const othersFilter = {
     author: { $nin: [...blockIds, ...followingIds, id!] },
@@ -39,40 +36,24 @@ export const timeLinePosts = catchAsync(async (req: Request, res: Response) => {
     whoCanSee: 'public',
   };
 
-  const [
-    myPosts,
-    followingsPosts,
-    othersPosts,
-    myTotal,
-    followingTotal,
-    othersTotal,
-  ] = await Promise.all([
-    Post.find(myFilter)
-      .select('-__v')
-      .sort('-publishedAt')
-      .limit(myLimit)
-      .skip(mySkip)
-      .lean(),
-    Post.find(followingFilter)
-      .select('-__v')
-      .sort('-publishedAt')
-      .limit(followingLimit)
-      .skip(followingSkip)
-      .lean(),
-    Post.find(othersFilter)
-      .select('-__v')
-      .sort('-publishedAt')
-      .limit(othersLimit)
-      .skip(othersSkip)
-      .lean(),
-    Post.countDocuments(myFilter),
-    Post.countDocuments(followingFilter),
+  const [allPosts, networkTotal, othersTotal] = await Promise.all([
+    Post.aggregate([
+      { $match: networkFilter },
+      { $addFields: { feedRank: 0 } },
+      {
+        $unionWith: {
+          coll: Post.collection.name,
+          pipeline: [{ $match: othersFilter }, { $addFields: { feedRank: 1 } }],
+        },
+      },
+      { $sort: { feedRank: 1, publishedAt: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+      { $project: { __v: 0, feedRank: 0 } },
+    ]),
+    Post.countDocuments(networkFilter),
     Post.countDocuments(othersFilter),
   ]);
-
-  const allPosts = [...myPosts, ...followingsPosts, ...othersPosts].sort(
-    (a, b) => b.publishedAt!.getTime() - a.publishedAt!.getTime(),
-  );
 
   const authorIds = allPosts.map((p) => p.author.toString());
   const authors = await getUsersFromCache(authorIds);
@@ -91,7 +72,7 @@ export const timeLinePosts = catchAsync(async (req: Request, res: Response) => {
     })
     .filter(Boolean);
 
-  const total = myTotal + followingTotal + othersTotal;
+  const total = networkTotal + othersTotal;
 
   sendResponse(
     res,
