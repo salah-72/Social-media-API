@@ -1,27 +1,22 @@
 import Block from '@/models/blockModel';
 import catchAsync from '@/utils/catchAsync';
-import { getUsersFromCache } from '@/utils/getUsersFromCache';
 import { sendResponse } from '@/utils/sendResponse';
 import { Request, Response } from 'express';
+import { fetchPaginatedUserList } from '@/utils/paginatedUserList';
 
 export const blockList = catchAsync(async (req: Request, res: Response) => {
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
 
-  const [blocks, total] = await Promise.all([
-    Block.find({ blocker: req.currentuser?._id })
-      .select('blocked -_id')
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-    Block.countDocuments({ blocker: req.currentuser?._id }),
-  ]);
-
-  const userIds = blocks.map((b) => b.blocked.toString());
-  const usersData = await getUsersFromCache(userIds);
-
-  const blockList = usersData.filter(Boolean);
+  const { items: blockList, total } = await fetchPaginatedUserList({
+    model: Block,
+    filter: { blocker: req.currentuser?._id },
+    userField: 'blocked',
+    select: 'blocked -_id',
+    page,
+    limit,
+    mapItem: (_doc, user) => user,
+  });
 
   sendResponse(
     res,
